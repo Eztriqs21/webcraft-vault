@@ -1,0 +1,160 @@
+@import "tailwindcss";
+
+@theme {
+  --color-vault-bg: #030303;
+  --color-vault-surface: #0a0a0a;
+  --color-vault-border: #1a1a1a;
+  --color-vault-text: #9ca3af;
+  --color-vault-text-bright: #f3f4f6;
+
+  --color-accent-hero: #6366f1;
+  --color-accent-theater: #f43f5e;
+  --color-accent-typography: #10b981;
+  --color-accent-orrery: #a855f7;
+  --color-accent-patterns: #06b6d4;
+  --color-accent-tools: #fbbf24;
+
+  --color-indigo: #6366f1;
+  --color-purple: #a855f7;
+  --color-rose: #f43f5e;
+  --color-emerald: #10b981;
+  --color-cyan: #06b6d4;
+  --color-amber: #fbbf24;
+
+  --font-display: "Clash Display", "Satoshi", system-ui, sans-serif;
+  --font-body: "Inter", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  --default-font-family: var(--font-body);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  background: #030303;
+  color: #9ca3af;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
+}
+
+body.custom-cursor-active {
+  cursor: none !important;
+}
+body.custom-cursor-active * {
+  cursor: none !important;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #030303;
+}
+::-webkit-scrollbar-thumb {
+  background: #1a1a1a;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #2a2a2a;
+}
+
+::selection {
+  background: rgba(99, 102, 241, 0.3);
+  color: #f3f4f6;
+}
+
+.film-grain {
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  pointer-events: none;
+  opacity: 0.025;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+  background-size: 128px 128px;
+  animation: grain 0.5s steps(6) infinite;
+}
+
+@keyframes grain {
+  0%, 100% { transform: translate(0, 0); }
+  10% { transform: translate(-5%, -10%); }
+  20% { transform: translate(-15%, 5%); }
+  30% { transform: translate(7%, -25%); }
+  40% { transform: translate(-5%, 25%); }
+  50% { transform: translate(-15%, 10%); }
+  60% { transform: translate(15%, 0%); }
+  70% { transform: translate(0%, 15%); }
+  80% { transform: translate(3%, 35%); }
+  90% { transform: translate(-10%, 10%); }
+}
+
+.scanlines {
+  position: fixed;
+  inset: 0;
+  z-index: 9997;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.03) 2px,
+    rgba(0, 0, 0, 0.03) 4px
+  );
+}
+
+/* ── Reduced motion ── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .film-grain,
+  .scanlines {
+    animation: none !important;
+  }
+
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* ── Snap scroll for mobile carousel ── */
+.snap-x {
+  scroll-snap-type: x mandatory;
+}
+.snap-center {
+  scroll-snap-align: center;
+}
+
+/* ── Touch device: hide custom cursor ── */
+@media (pointer: coarse) {
+  body.custom-cursor-active {
+    cursor: auto !important;
+  }
+  body.custom-cursor-active * {
+    cursor: auto !important;
+  }
+}
+
+/* ── Focus visible for keyboard navigation ── */
+:focus-visible {
+  outline: 2px solid #6366f1;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
