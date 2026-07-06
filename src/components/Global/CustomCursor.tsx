@@ -7,7 +7,8 @@ export function CustomCursor() {
   const trailRef = useRef<HTMLCanvasElement>(null)
   const mouse = useRef({ x: 0, y: 0 })
   const ringPos = useRef({ x: 0, y: 0 })
-  const trail = useRef<Array<{ x: number; y: number; life: number }>>( [])
+  const magneticTarget = useRef<{ x: number; y: number } | null>(null)
+  const trail = useRef<Array<{ x: number; y: number; life: number }>>([])
   const prefersReducedMotion = useReducedMotion()
   const accentColor = useRef('#6366f1')
 
@@ -42,10 +43,31 @@ export function CustomCursor() {
       }
     }
 
+    const handleMouseOver = (e: MouseEvent) => {
+      const target = e.target as HTMLElement
+      const cursorEl = target.closest('[data-cursor]')
+      if (cursorEl) {
+        const rect = cursorEl.getBoundingClientRect()
+        magneticTarget.current = {
+          x: rect.left + rect.width / 2,
+          y: rect.top + rect.height / 2,
+        }
+      }
+    }
+
+    const handleMouseOut = (e: MouseEvent) => {
+      const target = e.target as HTMLElement
+      if (target.closest('[data-cursor]')) {
+        magneticTarget.current = null
+      }
+    }
+
     window.addEventListener('mousemove', handleMouseMove)
     document.addEventListener('mouseenter', handleMouseEnter)
     document.addEventListener('mouseleave', handleMouseLeave)
     window.addEventListener('section-accent-change', handleAccentChange)
+    document.addEventListener('mouseover', handleMouseOver)
+    document.addEventListener('mouseout', handleMouseOut)
 
     const canvas = trailRef.current
     const ctx = canvas?.getContext('2d')
@@ -68,11 +90,13 @@ export function CustomCursor() {
         })
       }
 
-      ringPos.current.x = lerp(ringPos.current.x, mouse.current.x, 0.15)
-      ringPos.current.y = lerp(ringPos.current.y, mouse.current.y, 0.15)
+      const lerpFactor = magneticTarget.current ? 0.3 : 0.15
+      ringPos.current.x = lerp(ringPos.current.x, mouse.current.x, lerpFactor)
+      ringPos.current.y = lerp(ringPos.current.y, mouse.current.y, lerpFactor)
 
       if (ringRef.current) {
-        ringRef.current.style.transform = `translate(${ringPos.current.x - 30}px, ${ringPos.current.y - 30}px)`
+        const scale = magneticTarget.current ? 1.5 : 1
+        ringRef.current.style.transform = `translate(${ringPos.current.x - 30}px, ${ringPos.current.y - 30}px) scale(${scale})`
         ringRef.current.style.boxShadow = `0 0 20px rgba(${hexToRgb(accentColor.current)},0.3), inset 0 0 20px rgba(${hexToRgb(accentColor.current)},0.1)`
         ringRef.current.style.borderColor = accentColor.current
       }
@@ -92,6 +116,8 @@ export function CustomCursor() {
       document.removeEventListener('mouseenter', handleMouseEnter)
       document.removeEventListener('mouseleave', handleMouseLeave)
       window.removeEventListener('section-accent-change', handleAccentChange)
+      document.removeEventListener('mouseover', handleMouseOver)
+      document.removeEventListener('mouseout', handleMouseOut)
       cancelAnimationFrame(raf)
     }
   }, [prefersReducedMotion, lerp])
@@ -107,11 +133,10 @@ export function CustomCursor() {
       />
       <div
         ref={ringRef}
-        className="fixed top-0 left-0 w-[60px] h-[60px] rounded-full pointer-events-none"
+        className="fixed top-0 left-0 w-[60px] h-[60px] rounded-full pointer-events-none transition-transform duration-100"
         style={{
           border: '1.5px solid #6366f1',
           opacity: 0,
-          transition: 'opacity 0.3s',
           zIndex: 10000,
         }}
       />

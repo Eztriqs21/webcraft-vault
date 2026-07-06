@@ -1,5 +1,4 @@
-import { useState, useRef } from 'react'
-import { motion } from 'framer-motion'
+import { useState } from 'react'
 
 const SHAPES = Array.from({ length: 32 }, (_, i) => ({
   id: i,
@@ -15,60 +14,61 @@ const SHAPES = Array.from({ length: 32 }, (_, i) => ({
   ][i],
   type: ['circle', 'blob', 'wave', 'diamond', 'ring', 'cross'][i % 6],
   color: ['#6366f1', '#f43f5e', '#10b981', '#a855f7', '#06b6d4', '#fbbf24'][i % 6],
-  speed: 30 + Math.random() * 30,
-  delay: -(i * 1.5),
 }))
 
 export function PreviewRiver() {
   const [hoveredId, setHoveredId] = useState<number | null>(null)
-  const containerRef = useRef<HTMLDivElement>(null)
 
   return (
-    <div className="w-full overflow-hidden py-8" ref={containerRef}>
-      <div className="relative h-16">
-        <motion.div
-          className="flex items-center gap-6 absolute"
-          animate={{
-            x: hoveredId === null ? [0, -1600] : undefined,
-          }}
-          transition={{
-            x: {
-              duration: 60,
-              repeat: Infinity,
-              ease: 'linear',
-            },
-          }}
+    <div className="w-full overflow-hidden py-8">
+      <div
+        className="relative h-16"
+        onMouseEnter={() => {}}
+        onMouseLeave={() => setHoveredId(null)}
+      >
+        <div
+          className="flex items-center gap-6"
           style={{
-            animationPlayState: hoveredId === null ? 'running' : 'paused',
+            width: 'fit-content',
+            animation: hoveredId === null ? 'river-scroll 60s linear infinite' : 'none',
           }}
         >
-          {[...SHAPES, ...SHAPES].map((shape) => (
-            <motion.div
-              key={`${shape.id}-${Math.random()}`}
-              className="flex-shrink-0 cursor-pointer"
+          {[...SHAPES, ...SHAPES].map((shape, i) => (
+            <div
+              key={`${shape.id}-${i}`}
+              className="flex-shrink-0 cursor-pointer transition-transform duration-200"
+              style={{
+                transform: hoveredId === shape.id ? 'scale(2.5)' : 'scale(1)',
+              }}
               onMouseEnter={() => setHoveredId(shape.id)}
               onMouseLeave={() => setHoveredId(null)}
-              animate={{
-                scale: hoveredId === shape.id ? 2.5 : 1,
-              }}
-              transition={{ type: 'spring', stiffness: 300, damping: 25 }}
               data-cursor="pointer"
             >
               <ShapePreview shape={shape} isHovered={hoveredId === shape.id} />
-            </motion.div>
+            </div>
           ))}
-        </motion.div>
+        </div>
       </div>
 
       {hoveredId !== null && (
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center mt-4 text-sm text-[#999] font-mono"
-        >
+        <div className="text-center mt-4 text-sm text-[#999] font-mono animate-fade-in">
           {SHAPES[hoveredId]?.name}
-        </motion.div>
+        </div>
       )}
+
+      <style>{`
+        @keyframes river-scroll {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+        @keyframes fade-in {
+          from { opacity: 0; transform: translateY(-10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+          animation: fade-in 0.3s ease-out;
+        }
+      `}</style>
     </div>
   )
 }

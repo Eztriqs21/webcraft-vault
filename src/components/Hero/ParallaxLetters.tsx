@@ -39,7 +39,7 @@ export function ParallaxLetters() {
   let wordIndex = 0
 
   return (
-    <div ref={containerRef} className="relative select-none">
+    <div ref={containerRef} className="relative select-none" style={{ perspective: 600 }}>
       <h1 className="font-display text-[5vw] md:text-[4vw] lg:text-[3.5vw] font-bold leading-tight tracking-tight text-center">
         {HEADLINE.split('').map((char, i) => {
           if (char === ' ') {
@@ -48,6 +48,7 @@ export function ParallaxLetters() {
           }
 
           const offset = offsets[i]
+          const absDepth = Math.abs(offset.depth)
           return (
             <motion.span
               key={i}
@@ -55,8 +56,9 @@ export function ParallaxLetters() {
               style={{
                 transform: prefersReducedMotion
                   ? 'none'
-                  : `translate3d(${offset.offsetX}px, ${offset.offsetY}px, ${offset.depth}px)`,
-                textShadow: `0 ${Math.abs(offset.depth) * 0.05}px ${Math.abs(offset.depth) * 0.1}px rgba(99,102,241,${Math.abs(offset.depth) * 0.002})`,
+                  : `translate3d(${offset.offsetX}px, ${offset.offsetY}px, ${offset.depth}px) rotateX(${offset.offsetY * 0.1}deg) rotateY(${offset.offsetX * 0.1}deg)`,
+                textShadow: `0 ${absDepth * 0.1}px ${absDepth * 0.2}px rgba(99,102,241,${absDepth * 0.003}), 0 ${absDepth * 0.05}px ${absDepth * 0.1}px rgba(99,102,241,${absDepth * 0.005})`,
+                willChange: 'transform',
                 transition: 'transform 0.1s ease-out, text-shadow 0.1s ease-out',
               }}
               initial={{ opacity: 0, y: 20 }}

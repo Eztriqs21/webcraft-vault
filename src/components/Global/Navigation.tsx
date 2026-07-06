@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { SECTION_MOODS } from '../../data/sections'
 
 const NAV_ITEMS = [
   { id: 'hero', label: 'Vault', icon: '◆' },
@@ -15,6 +16,9 @@ export function Navigation() {
   const [isVisible, setIsVisible] = useState(false)
   const [activeSection, setActiveSection] = useState('hero')
   const [hoveredItem, setHoveredItem] = useState<string | null>(null)
+
+  const activeAccent = SECTION_MOODS[activeSection as keyof typeof SECTION_MOODS]?.accent || '#6366f1'
+  const activeAccentRgb = SECTION_MOODS[activeSection as keyof typeof SECTION_MOODS]?.accentRgb || '99,102,241'
 
   useEffect(() => {
     const handleScroll = () => {
@@ -78,8 +82,8 @@ export function Navigation() {
                       layoutId="nav-active-bg"
                       className="absolute inset-0 rounded-full"
                       style={{
-                        background: 'rgba(99, 102, 241, 0.15)',
-                        boxShadow: '0 0 20px rgba(99, 102, 241, 0.2)',
+                        background: `rgba(${activeAccentRgb}, 0.15)`,
+                        boxShadow: `0 0 20px rgba(${activeAccentRgb}, 0.2)`,
                       }}
                       transition={{ type: 'spring', stiffness: 300, damping: 30 }}
                     />
