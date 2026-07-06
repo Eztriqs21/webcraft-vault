@@ -16,16 +16,27 @@ export function TypographySection() {
   }, [activeIndex, activePairing.heading, activePairing.body])
 
   useEffect(() => {
+    const ratios = new Map<Element, number>()
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            const idx = parseInt(entry.target.getAttribute('data-index') || '0')
-            setActiveIndex(idx)
+          ratios.set(entry.target, entry.intersectionRatio)
+        })
+
+        let maxRatio = 0
+        let maxIdx = 0
+        ratios.forEach((ratio, el) => {
+          if (ratio > maxRatio) {
+            maxRatio = ratio
+            maxIdx = parseInt((el as HTMLElement).getAttribute('data-index') || '0')
           }
         })
+        if (maxRatio > 0) {
+          setActiveIndex(maxIdx)
+        }
       },
-      { root: listRef.current, threshold: 0.6 }
+      { root: listRef.current, threshold: [0, 0.25, 0.5, 0.75, 1.0] }
     )
 
     const items = listRef.current?.querySelectorAll('[data-index]')
@@ -69,7 +80,7 @@ export function TypographySection() {
 
         {/* Mobile: sticky preview + scrollable list */}
         {/* Desktop: side-by-side split */}
-        <div className="flex flex-col gap-8 min-h-[70vh]">
+        <div className="flex flex-col md:flex-row gap-8 min-h-[70vh]">
           {/* Mobile: sticky top preview */}
           <div className="md:hidden sticky top-0 z-10 bg-vault-bg/80 backdrop-blur-xl -mx-4 px-4 py-4 border-b border-[rgba(255,255,255,0.06)]">
             <AnimatePresence mode="wait">

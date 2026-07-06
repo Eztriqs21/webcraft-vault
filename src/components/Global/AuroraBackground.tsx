@@ -14,6 +14,7 @@ export function AuroraBackground() {
 
     let raf: number
     let time = 0
+    let lastFrame = 0
 
     const handleMouseMove = (e: MouseEvent) => {
       mouse.current.x = e.clientX / window.innerWidth
@@ -22,34 +23,46 @@ export function AuroraBackground() {
 
     window.addEventListener('mousemove', handleMouseMove)
 
+    const dpr = Math.min(window.devicePixelRatio, 1.5)
     const resize = () => {
-      canvas.width = window.innerWidth
-      canvas.height = window.innerHeight
+      canvas.width = window.innerWidth * dpr
+      canvas.height = window.innerHeight * dpr
+      canvas.style.width = window.innerWidth + 'px'
+      canvas.style.height = window.innerHeight + 'px'
+      ctx.scale(dpr, dpr)
     }
     resize()
     window.addEventListener('resize', resize)
 
-    const draw = () => {
+    const draw = (now: number) => {
+      if (now - lastFrame < 33) {
+        raf = requestAnimationFrame(draw)
+        return
+      }
+      lastFrame = now
+
       time += 0.003
-      ctx.clearRect(0, 0, canvas.width, canvas.height)
+      const w = window.innerWidth
+      const h = window.innerHeight
+      ctx.clearRect(0, 0, w, h)
 
       const gradients = [
         {
-          x: canvas.width * (0.3 + Math.sin(time * 0.7) * 0.15 + (mouse.current.x - 0.5) * 0.1),
-          y: canvas.height * (0.3 + Math.cos(time * 0.5) * 0.15 + (mouse.current.y - 0.5) * 0.1),
-          r: canvas.width * 0.4,
+          x: w * (0.3 + Math.sin(time * 0.7) * 0.15 + (mouse.current.x - 0.5) * 0.1),
+          y: h * (0.3 + Math.cos(time * 0.5) * 0.15 + (mouse.current.y - 0.5) * 0.1),
+          r: w * 0.4,
           color: [99, 102, 241],
         },
         {
-          x: canvas.width * (0.7 + Math.cos(time * 0.6) * 0.15 + (mouse.current.x - 0.5) * 0.08),
-          y: canvas.height * (0.7 + Math.sin(time * 0.8) * 0.15 + (mouse.current.y - 0.5) * 0.08),
-          r: canvas.width * 0.35,
+          x: w * (0.7 + Math.cos(time * 0.6) * 0.15 + (mouse.current.x - 0.5) * 0.08),
+          y: h * (0.7 + Math.sin(time * 0.8) * 0.15 + (mouse.current.y - 0.5) * 0.08),
+          r: w * 0.35,
           color: [168, 85, 247],
         },
         {
-          x: canvas.width * (0.5 + Math.sin(time * 0.4) * 0.1 + (mouse.current.x - 0.5) * 0.05),
-          y: canvas.height * (0.5 + Math.cos(time * 0.9) * 0.1 + (mouse.current.y - 0.5) * 0.05),
-          r: canvas.width * 0.3,
+          x: w * (0.5 + Math.sin(time * 0.4) * 0.1 + (mouse.current.x - 0.5) * 0.05),
+          y: h * (0.5 + Math.cos(time * 0.9) * 0.1 + (mouse.current.y - 0.5) * 0.05),
+          r: w * 0.3,
           color: [16, 185, 129],
         },
       ]
@@ -60,7 +73,7 @@ export function AuroraBackground() {
         gradient.addColorStop(0.5, `rgba(${g.color.join(',')}, 0.03)`)
         gradient.addColorStop(1, 'rgba(3,3,3,0)')
         ctx.fillStyle = gradient
-        ctx.fillRect(0, 0, canvas.width, canvas.height)
+        ctx.fillRect(0, 0, w, h)
       })
 
       raf = requestAnimationFrame(draw)
@@ -69,14 +82,16 @@ export function AuroraBackground() {
     if (!prefersReducedMotion) {
       raf = requestAnimationFrame(draw)
     } else {
+      const w = window.innerWidth
+      const h = window.innerHeight
       const gradient = ctx.createRadialGradient(
-        canvas.width * 0.5, canvas.height * 0.5, 0,
-        canvas.width * 0.5, canvas.height * 0.5, canvas.width * 0.4
+        w * 0.5, h * 0.5, 0,
+        w * 0.5, h * 0.5, w * 0.4
       )
       gradient.addColorStop(0, 'rgba(99, 102, 241, 0.06)')
       gradient.addColorStop(1, 'rgba(3,3,3,0)')
       ctx.fillStyle = gradient
-      ctx.fillRect(0, 0, canvas.width, canvas.height)
+      ctx.fillRect(0, 0, w, h)
     }
 
     return () => {

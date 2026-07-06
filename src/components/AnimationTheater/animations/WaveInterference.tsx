@@ -11,53 +11,57 @@ export function WaveInterference() {
     const ctx = canvas.getContext('2d')
     if (!ctx) return
 
-    const resize = () => {
-      const rect = canvas.parentElement?.getBoundingClientRect()
-      if (rect) {
-        canvas.width = rect.width * 0.8
-        canvas.height = rect.height * 0.8
-      }
-    }
-    resize()
-    window.addEventListener('resize', resize)
+    const INTERNAL_W = 160
+    const INTERNAL_H = 140
+    canvas.width = INTERNAL_W
+    canvas.height = INTERNAL_H
+    canvas.style.width = '320px'
+    canvas.style.height = '280px'
+    canvas.style.imageRendering = 'pixelated'
 
     const onMouseMove = (e: MouseEvent) => {
       const rect = canvas.getBoundingClientRect()
-      mouseRef.current.x = e.clientX - rect.left
-      mouseRef.current.y = e.clientY - rect.top
+      mouseRef.current.x = ((e.clientX - rect.left) / rect.width) * INTERNAL_W
+      mouseRef.current.y = ((e.clientY - rect.top) / rect.height) * INTERNAL_H
     }
 
     canvas.addEventListener('mousemove', onMouseMove)
 
     let time = 0
+    let lastFrame = 0
 
-    const animate = () => {
-      if (!ctx || !canvas) return
-      const w = canvas.width
-      const h = canvas.height
+    const animate = (now: number) => {
+      if (now - lastFrame < 50) {
+        animRef.current = requestAnimationFrame(animate)
+        return
+      }
+      lastFrame = now
 
-      const imageData = ctx.createImageData(w, h)
+      if (!ctx) return
+
+      const imageData = ctx.createImageData(INTERNAL_W, INTERNAL_H)
       const data = imageData.data
 
-      const sources = [
-        { x: w * 0.3, y: h * 0.4, freq: 0.05 },
-        { x: w * 0.7, y: h * 0.6, freq: 0.07 },
-        { x: mouseRef.current.x || w * 0.5, y: mouseRef.current.y || h * 0.5, freq: 0.04 },
-      ]
+      const mx = mouseRef.current.x || INTERNAL_W * 0.5
+      const my = mouseRef.current.y || INTERNAL_H * 0.5
 
-      for (let py = 0; py < h; py++) {
-        for (let px = 0; px < w; px++) {
+      for (let py = 0; py < INTERNAL_H; py++) {
+        for (let px = 0; px < INTERNAL_W; px++) {
           let value = 0
 
-          for (const source of sources) {
-            const dist = Math.hypot(px - source.x, py - source.y)
-            value += Math.sin(dist * source.freq - time * 2)
-          }
+          const d1 = Math.hypot(px - INTERNAL_W * 0.3, py - INTERNAL_H * 0.4)
+          value += Math.sin(d1 * 0.08 - time * 2)
 
-          value = value / sources.length
+          const d2 = Math.hypot(px - INTERNAL_W * 0.7, py - INTERNAL_H * 0.6)
+          value += Math.sin(d2 * 0.1 - time * 1.5)
+
+          const d3 = Math.hypot(px - mx, py - my)
+          value += Math.sin(d3 * 0.06 - time * 2.5)
+
+          value = value / 3
           const normalized = (value + 1) / 2
 
-          const idx = (py * w + px) * 4
+          const idx = (py * INTERNAL_W + px) * 4
           data[idx] = normalized * 99
           data[idx + 1] = normalized * 102
           data[idx + 2] = normalized * 241
@@ -67,14 +71,13 @@ export function WaveInterference() {
 
       ctx.putImageData(imageData, 0, 0)
 
-      time += 0.03
+      time += 0.04
       animRef.current = requestAnimationFrame(animate)
     }
 
-    animate()
+    animRef.current = requestAnimationFrame(animate)
 
     return () => {
-      window.removeEventListener('resize', resize)
       canvas.removeEventListener('mousemove', onMouseMove)
       cancelAnimationFrame(animRef.current)
     }
@@ -82,7 +85,7 @@ export function WaveInterference() {
 
   return (
     <div className="w-full h-full flex items-center justify-center">
-      <canvas ref={canvasRef} className="max-w-[320px] max-h-[280px] cursor-crosshair" />
+      <canvas ref={canvasRef} className="cursor-crosshair" />
     </div>
   )
 }

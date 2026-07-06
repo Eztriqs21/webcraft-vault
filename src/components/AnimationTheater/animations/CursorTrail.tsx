@@ -12,57 +12,78 @@ export function CursorTrail() {
     const ctx = canvas.getContext('2d')
     if (!ctx) return
 
-    const resize = () => {
-      const rect = canvas.parentElement?.getBoundingClientRect()
-      if (rect) {
-        canvas.width = rect.width * 0.8
-        canvas.height = rect.height * 0.8
-      }
-    }
-    resize()
-    window.addEventListener('resize', resize)
+    const W = 320
+    const H = 280
+    canvas.width = W
+    canvas.height = H
 
     const onMouseMove = (e: MouseEvent) => {
       const rect = canvas.getBoundingClientRect()
       mouseRef.current.x = e.clientX - rect.left
       mouseRef.current.y = e.clientY - rect.top
       trailRef.current.push({ x: mouseRef.current.x, y: mouseRef.current.y, age: 0 })
-      if (trailRef.current.length > 50) trailRef.current.shift()
+      if (trailRef.current.length > 60) trailRef.current.shift()
     }
 
     canvas.addEventListener('mousemove', onMouseMove)
 
     const animate = () => {
-      if (!ctx || !canvas) return
-      ctx.clearRect(0, 0, canvas.width, canvas.height)
+      if (!ctx) return
+      ctx.clearRect(0, 0, W, H)
 
       const trail = trailRef.current
       for (let i = trail.length - 1; i >= 0; i--) {
         const point = trail[i]
         point.age++
-        if (point.age > 50) {
+        if (point.age > 60) {
           trail.splice(i, 1)
           continue
         }
+      }
 
-        const progress = point.age / 50
-        const size = (1 - progress) * 12
-        const alpha = 1 - progress
-        const hue = (i * 8) % 360
+      if (trail.length > 2) {
+        ctx.beginPath()
+        ctx.moveTo(trail[0].x, trail[0].y)
+        for (let i = 1; i < trail.length - 1; i++) {
+          const xc = (trail[i].x + trail[i + 1].x) / 2
+          const yc = (trail[i].y + trail[i + 1].y) / 2
+          ctx.quadraticCurveTo(trail[i].x, trail[i].y, xc, yc)
+        }
+        const last = trail[trail.length - 1]
+        ctx.lineTo(last.x, last.y)
+
+        const gradient = ctx.createLinearGradient(
+          trail[0].x, trail[0].y,
+          last.x, last.y
+        )
+        gradient.addColorStop(0, 'rgba(99, 102, 241, 0)')
+        gradient.addColorStop(1, 'rgba(99, 102, 241, 0.6)')
+        ctx.strokeStyle = gradient
+        ctx.lineWidth = 3
+        ctx.lineCap = 'round'
+        ctx.lineJoin = 'round'
+        ctx.stroke()
+      }
+
+      for (let i = 0; i < trail.length; i++) {
+        const point = trail[i]
+        const progress = point.age / 60
+        const size = (1 - progress) * 6
+        const alpha = (1 - progress) * 0.8
+        const hue = (i * 12) % 360
 
         ctx.beginPath()
         ctx.arc(point.x, point.y, size, 0, Math.PI * 2)
-        ctx.fillStyle = `hsla(${hue}, 80%, 60%, ${alpha})`
+        ctx.fillStyle = `hsla(${hue}, 80%, 65%, ${alpha})`
         ctx.fill()
       }
 
       animRef.current = requestAnimationFrame(animate)
     }
 
-    animate()
+    animRef.current = requestAnimationFrame(animate)
 
     return () => {
-      window.removeEventListener('resize', resize)
       canvas.removeEventListener('mousemove', onMouseMove)
       cancelAnimationFrame(animRef.current)
     }
@@ -70,7 +91,7 @@ export function CursorTrail() {
 
   return (
     <div className="w-full h-full flex items-center justify-center">
-      <canvas ref={canvasRef} className="max-w-[280px] max-h-[280px] cursor-crosshair" />
+      <canvas ref={canvasRef} className="cursor-crosshair rounded-lg" />
     </div>
   )
 }

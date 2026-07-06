@@ -10,6 +10,9 @@ interface ConfettiPiece {
   w: number
   h: number
   color: string
+  shape: 'rect' | 'circle' | 'triangle'
+  z: number
+  vz: number
 }
 
 export function ConfettiBurst() {
@@ -19,19 +22,23 @@ export function ConfettiBurst() {
 
   const spawn = useCallback((cx: number, cy: number) => {
     const colors = ['#6366f1', '#f43f5e', '#10b981', '#a855f7', '#fbbf24', '#06b6d4']
-    for (let i = 0; i < 80; i++) {
+    const shapes: ConfettiPiece['shape'][] = ['rect', 'circle', 'triangle']
+    for (let i = 0; i < 100; i++) {
       const angle = Math.random() * Math.PI * 2
-      const speed = 2 + Math.random() * 6
+      const speed = 3 + Math.random() * 8
       confettiRef.current.push({
         x: cx,
         y: cy,
         vx: Math.cos(angle) * speed,
-        vy: Math.sin(angle) * speed - 3,
+        vy: Math.sin(angle) * speed - 4,
         rotation: Math.random() * 360,
-        rotSpeed: (Math.random() - 0.5) * 15,
-        w: 4 + Math.random() * 4,
-        h: 8 + Math.random() * 8,
+        rotSpeed: (Math.random() - 0.5) * 20,
+        w: 4 + Math.random() * 6,
+        h: 6 + Math.random() * 10,
         color: colors[Math.floor(Math.random() * colors.length)],
+        shape: shapes[Math.floor(Math.random() * shapes.length)],
+        z: Math.random() * 100,
+        vz: (Math.random() - 0.5) * 2,
       })
     }
   }, [])
@@ -42,15 +49,10 @@ export function ConfettiBurst() {
     const ctx = canvas.getContext('2d')
     if (!ctx) return
 
-    const resize = () => {
-      const rect = canvas.parentElement?.getBoundingClientRect()
-      if (rect) {
-        canvas.width = rect.width * 0.8
-        canvas.height = rect.height * 0.8
-      }
-    }
-    resize()
-    window.addEventListener('resize', resize)
+    const W = 320
+    const H = 280
+    canvas.width = W
+    canvas.height = H
 
     const onClick = (e: MouseEvent) => {
       const rect = canvas.getBoundingClientRect()
@@ -60,10 +62,10 @@ export function ConfettiBurst() {
     canvas.addEventListener('click', onClick)
 
     const animate = () => {
-      if (!ctx || !canvas) return
-      ctx.clearRect(0, 0, canvas.width, canvas.height)
+      if (!ctx) return
+      ctx.clearRect(0, 0, W, H)
 
-      const gravity = 0.15
+      const gravity = 0.18
       const pieces = confettiRef.current
 
       for (let i = pieces.length - 1; i >= 0; i--) {
@@ -72,16 +74,38 @@ export function ConfettiBurst() {
         p.x += p.vx
         p.y += p.vy
         p.vx *= 0.99
+        p.vy *= 0.99
         p.rotation += p.rotSpeed
+        p.z += p.vz
+
+        const perspective = 1 + p.z * 0.005
+        const scaleX = Math.cos((p.rotation * Math.PI) / 180) * perspective
 
         ctx.save()
         ctx.translate(p.x, p.y)
         ctx.rotate((p.rotation * Math.PI) / 180)
+        ctx.scale(scaleX, 1)
         ctx.fillStyle = p.color
-        ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h)
+        ctx.globalAlpha = Math.max(0, 1 - p.y / H)
+
+        if (p.shape === 'rect') {
+          ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h)
+        } else if (p.shape === 'circle') {
+          ctx.beginPath()
+          ctx.arc(0, 0, p.w / 2, 0, Math.PI * 2)
+          ctx.fill()
+        } else {
+          ctx.beginPath()
+          ctx.moveTo(0, -p.h / 2)
+          ctx.lineTo(p.w / 2, p.h / 2)
+          ctx.lineTo(-p.w / 2, p.h / 2)
+          ctx.closePath()
+          ctx.fill()
+        }
+
         ctx.restore()
 
-        if (p.y > canvas.height + 20) {
+        if (p.y > H + 30) {
           pieces.splice(i, 1)
         }
       }
@@ -89,10 +113,9 @@ export function ConfettiBurst() {
       animRef.current = requestAnimationFrame(animate)
     }
 
-    animate()
+    animRef.current = requestAnimationFrame(animate)
 
     return () => {
-      window.removeEventListener('resize', resize)
       canvas.removeEventListener('click', onClick)
       cancelAnimationFrame(animRef.current)
     }
@@ -100,7 +123,7 @@ export function ConfettiBurst() {
 
   return (
     <div className="w-full h-full flex items-center justify-center">
-      <canvas ref={canvasRef} className="max-w-[280px] max-h-[280px] cursor-pointer" />
+      <canvas ref={canvasRef} className="cursor-pointer rounded-lg" />
     </div>
   )
 }

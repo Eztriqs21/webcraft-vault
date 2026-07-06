@@ -25,45 +25,48 @@ export default function App() {
   return (
     <SmoothScroll>
       <MetaTags />
-      <CustomCursor />
-      <AuroraBackground />
-      <FilmGrain />
 
       {!isLoaded && <LoadingSequence onComplete={handleLoadComplete} />}
 
       {isLoaded && (
-        <main className="relative z-10">
-          <SectionTransition accent="#6366f1" sectionKey="hero">
-            <HeroEntrance />
-          </SectionTransition>
+        <>
+          <CustomCursor />
+          <AuroraBackground />
+          <FilmGrain />
 
-          <div data-section="theater">
-            <TheaterSection />
-          </div>
+          <main className="relative z-10">
+            <SectionTransition accent="#6366f1" sectionKey="hero">
+              <HeroEntrance />
+            </SectionTransition>
 
-          <SectionTransition accent="#10b981" sectionKey="typography">
-            <TypographySection />
-          </SectionTransition>
+            <div data-section="theater">
+              <TheaterSection />
+            </div>
 
-          <SectionTransition accent="#a855f7" sectionKey="orrery">
-            <OrrerySection />
-          </SectionTransition>
+            <SectionTransition accent="#10b981" sectionKey="typography">
+              <TypographySection />
+            </SectionTransition>
 
-          <SectionTransition accent="#06b6d4" sectionKey="patterns">
-            <PatternSection />
-          </SectionTransition>
+            <SectionTransition accent="#a855f7" sectionKey="orrery">
+              <OrrerySection />
+            </SectionTransition>
 
-          <SectionTransition accent="#fbbf24" sectionKey="tools">
-            <ToolBeltSection />
-          </SectionTransition>
+            <SectionTransition accent="#06b6d4" sectionKey="patterns">
+              <PatternSection />
+            </SectionTransition>
 
-          <SectionTransition accent="#6366f1" sectionKey="footer">
-            <CreditsFooter />
-          </SectionTransition>
-        </main>
+            <SectionTransition accent="#fbbf24" sectionKey="tools">
+              <ToolBeltSection />
+            </SectionTransition>
+
+            <SectionTransition accent="#6366f1" sectionKey="footer">
+              <CreditsFooter />
+            </SectionTransition>
+          </main>
+
+          <Navigation />
+        </>
       )}
-
-      <Navigation />
     </SmoothScroll>
   )
 }

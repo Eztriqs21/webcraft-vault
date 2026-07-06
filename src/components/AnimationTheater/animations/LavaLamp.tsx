@@ -1,8 +1,16 @@
 import { useRef, useEffect } from 'react'
 
+interface Blob {
+  x: number
+  y: number
+  vx: number
+  vy: number
+  r: number
+}
+
 export function LavaLamp() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const blobsRef = useRef<{ x: number; y: number; vx: number; vy: number; r: number }[]>([])
+  const blobsRef = useRef<Blob[]>([])
   const animRef = useRef<number>(0)
 
   useEffect(() => {
@@ -11,34 +19,21 @@ export function LavaLamp() {
     const ctx = canvas.getContext('2d')
     if (!ctx) return
 
-    const resize = () => {
-      const rect = canvas.parentElement?.getBoundingClientRect()
-      if (rect) {
-        canvas.width = rect.width * 0.8
-        canvas.height = rect.height * 0.8
-      }
-    }
-    resize()
-    window.addEventListener('resize', resize)
+    const W = 280
+    const H = 280
+    canvas.width = W
+    canvas.height = H
 
-    const w = canvas.width
-    const h = canvas.height
-
-    for (let i = 0; i < 8; i++) {
-      blobsRef.current.push({
-        x: Math.random() * w,
-        y: Math.random() * h,
-        vx: (Math.random() - 0.5) * 0.5,
-        vy: (Math.random() - 0.5) * 0.5,
-        r: 20 + Math.random() * 20,
-      })
-    }
+    blobsRef.current = Array.from({ length: 6 }, () => ({
+      x: W * 0.2 + Math.random() * W * 0.6,
+      y: H * 0.2 + Math.random() * H * 0.6,
+      vx: (Math.random() - 0.5) * 0.8,
+      vy: (Math.random() - 0.5) * 0.8,
+      r: 25 + Math.random() * 15,
+    }))
 
     const animate = () => {
-      if (!ctx || !canvas) return
-
-      ctx.fillStyle = 'rgba(3, 3, 3, 0.15)'
-      ctx.fillRect(0, 0, canvas.width, canvas.height)
+      if (!ctx) return
 
       const blobs = blobsRef.current
 
@@ -46,44 +41,82 @@ export function LavaLamp() {
         blob.x += blob.vx
         blob.y += blob.vy
 
-        if (blob.x < blob.r || blob.x > canvas.width - blob.r) blob.vx *= -1
-        if (blob.y < blob.r || blob.y > canvas.height - blob.r) blob.vy *= -1
+        if (blob.x < blob.r) { blob.x = blob.r; blob.vx *= -0.8 }
+        if (blob.x > W - blob.r) { blob.x = W - blob.r; blob.vx *= -0.8 }
+        if (blob.y < blob.r) { blob.y = blob.r; blob.vy *= -0.8 }
+        if (blob.y > H - blob.r) { blob.y = H - blob.r; blob.vy *= -0.8 }
 
         for (const other of blobs) {
           if (blob === other) continue
-          const dist = Math.hypot(blob.x - other.x, blob.y - other.y)
-          if (dist < blob.r + other.r) {
-            const angle = Math.atan2(blob.y - other.y, blob.x - other.x)
-            blob.vx += Math.cos(angle) * 0.1
-            blob.vy += Math.sin(angle) * 0.1
+          const dx = other.x - blob.x
+          const dy = other.y - blob.y
+          const dist = Math.hypot(dx, dy)
+          const minDist = blob.r + other.r
+
+          if (dist < minDist && dist > 0) {
+            const force = (minDist - dist) / dist * 0.03
+            blob.vx -= dx * force
+            blob.vy -= dy * force
+          } else if (dist > minDist && dist < minDist * 2.5) {
+            const force = 0.005
+            blob.vx += dx * force
+            blob.vy += dy * force
           }
         }
 
-        const gradient = ctx.createRadialGradient(blob.x, blob.y, 0, blob.x, blob.y, blob.r)
-        gradient.addColorStop(0, 'rgba(244, 63, 94, 0.6)')
-        gradient.addColorStop(0.5, 'rgba(168, 85, 247, 0.3)')
-        gradient.addColorStop(1, 'rgba(168, 85, 247, 0)')
-
-        ctx.beginPath()
-        ctx.arc(blob.x, blob.y, blob.r, 0, Math.PI * 2)
-        ctx.fillStyle = gradient
-        ctx.fill()
+        blob.vx *= 0.99
+        blob.vy *= 0.99
+        blob.vy += 0.01
       }
+
+      const imageData = ctx.createImageData(W, H)
+      const data = imageData.data
+
+      for (let py = 0; py < H; py++) {
+        for (let px = 0; px < W; px++) {
+          let field = 0
+          for (const blob of blobs) {
+            const dx = px - blob.x
+            const dy = py - blob.y
+            const dist = Math.hypot(dx, dy)
+            field += (blob.r * blob.r) / (dist * dist + 1)
+          }
+
+          const idx = (py * W + px) * 4
+          if (field > 0.8) {
+            const t = Math.min((field - 0.8) * 3, 1)
+            data[idx] = 30 + t * 214
+            data[idx + 1] = 10 + t * 53
+            data[idx + 2] = 40 + t * 54
+            data[idx + 3] = 255
+          } else if (field > 0.4) {
+            const t = (field - 0.4) * 2.5
+            data[idx] = 10 + t * 20
+            data[idx + 1] = 10 + t * 5
+            data[idx + 2] = 30 + t * 10
+            data[idx + 3] = 255
+          } else {
+            data[idx] = 3
+            data[idx + 1] = 3
+            data[idx + 2] = 3
+            data[idx + 3] = 255
+          }
+        }
+      }
+
+      ctx.putImageData(imageData, 0, 0)
 
       animRef.current = requestAnimationFrame(animate)
     }
 
-    animate()
+    animRef.current = requestAnimationFrame(animate)
 
-    return () => {
-      window.removeEventListener('resize', resize)
-      cancelAnimationFrame(animRef.current)
-    }
+    return () => cancelAnimationFrame(animRef.current)
   }, [])
 
   return (
     <div className="w-full h-full flex items-center justify-center">
-      <canvas ref={canvasRef} className="max-w-[280px] max-h-[280px]" />
+      <canvas ref={canvasRef} className="rounded-lg max-w-[280px] max-h-[280px]" />
     </div>
   )
 }

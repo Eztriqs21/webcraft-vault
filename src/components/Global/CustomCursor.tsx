@@ -11,6 +11,7 @@ export function CustomCursor() {
   const trail = useRef<Array<{ x: number; y: number; life: number }>>([])
   const prefersReducedMotion = useReducedMotion()
   const accentColor = useRef('#6366f1')
+  const cachedBoxShadow = useRef('')
 
   const lerp = useCallback((a: number, b: number, t: number) => a + (b - a) * t, [])
 
@@ -40,6 +41,7 @@ export function CustomCursor() {
       const customEvent = e as CustomEvent
       if (customEvent.detail?.accent) {
         accentColor.current = customEvent.detail.accent
+        cachedBoxShadow.current = `0 0 20px rgba(${hexToRgb(customEvent.detail.accent)},0.3), inset 0 0 20px rgba(${hexToRgb(customEvent.detail.accent)},0.1)`
       }
     }
 
@@ -71,13 +73,25 @@ export function CustomCursor() {
 
     const canvas = trailRef.current
     const ctx = canvas?.getContext('2d')
+    const dpr = Math.min(window.devicePixelRatio, 1.5)
     let raf: number
+
+    const resize = () => {
+      if (!canvas) return
+      canvas.width = window.innerWidth * dpr
+      canvas.height = window.innerHeight * dpr
+      canvas.style.width = window.innerWidth + 'px'
+      canvas.style.height = window.innerHeight + 'px'
+      if (ctx) ctx.scale(dpr, dpr)
+    }
+    resize()
+    window.addEventListener('resize', resize)
+
+    cachedBoxShadow.current = `0 0 20px rgba(${hexToRgb(accentColor.current)},0.3), inset 0 0 20px rgba(${hexToRgb(accentColor.current)},0.1)`
 
     const animate = () => {
       if (canvas && ctx) {
-        canvas.width = window.innerWidth
-        canvas.height = window.innerHeight
-        ctx.clearRect(0, 0, canvas.width, canvas.height)
+        ctx.clearRect(0, 0, window.innerWidth, window.innerHeight)
 
         trail.current = trail.current.filter((p) => {
           p.life -= 0.04
@@ -96,13 +110,13 @@ export function CustomCursor() {
 
       if (ringRef.current) {
         const scale = magneticTarget.current ? 1.5 : 1
-        ringRef.current.style.transform = `translate(${ringPos.current.x - 30}px, ${ringPos.current.y - 30}px) scale(${scale})`
-        ringRef.current.style.boxShadow = `0 0 20px rgba(${hexToRgb(accentColor.current)},0.3), inset 0 0 20px rgba(${hexToRgb(accentColor.current)},0.1)`
+        ringRef.current.style.transform = `translate3d(${ringPos.current.x - 30}px, ${ringPos.current.y - 30}px, 0) scale(${scale})`
+        ringRef.current.style.boxShadow = cachedBoxShadow.current
         ringRef.current.style.borderColor = accentColor.current
       }
 
       if (dotRef.current) {
-        dotRef.current.style.transform = `translate(${mouse.current.x - 4}px, ${mouse.current.y - 4}px)`
+        dotRef.current.style.transform = `translate3d(${mouse.current.x - 4}px, ${mouse.current.y - 4}px, 0)`
         dotRef.current.style.backgroundColor = accentColor.current
       }
 
@@ -118,6 +132,7 @@ export function CustomCursor() {
       window.removeEventListener('section-accent-change', handleAccentChange)
       document.removeEventListener('mouseover', handleMouseOver)
       document.removeEventListener('mouseout', handleMouseOut)
+      window.removeEventListener('resize', resize)
       cancelAnimationFrame(raf)
     }
   }, [prefersReducedMotion, lerp])
@@ -133,11 +148,12 @@ export function CustomCursor() {
       />
       <div
         ref={ringRef}
-        className="fixed top-0 left-0 w-[60px] h-[60px] rounded-full pointer-events-none transition-transform duration-100"
+        className="fixed top-0 left-0 w-[60px] h-[60px] rounded-full pointer-events-none"
         style={{
           border: '1.5px solid #6366f1',
           opacity: 0,
           zIndex: 10000,
+          willChange: 'transform',
         }}
       />
       <div
@@ -148,6 +164,7 @@ export function CustomCursor() {
           opacity: 0,
           transition: 'opacity 0.3s',
           zIndex: 10001,
+          willChange: 'transform',
         }}
       />
     </>

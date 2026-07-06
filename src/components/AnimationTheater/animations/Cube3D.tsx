@@ -1,37 +1,25 @@
-import { useRef, useEffect, useState } from 'react'
+import { useRef, useEffect } from 'react'
 
 export function Cube3D() {
-  const containerRef = useRef<HTMLDivElement>(null)
-  const [rotate, setRotate] = useState({ x: -25, y: 25 })
+  const cubeRef = useRef<HTMLDivElement>(null)
+  const animRef = useRef<number>(0)
 
   useEffect(() => {
-    const container = containerRef.current
-    if (!container) return
-
-    let animId: number
     let angle = 0
 
     const animate = () => {
       angle += 0.5
-      setRotate({
-        x: -25 + Math.sin(angle * 0.01) * 15,
-        y: 25 + angle % 360,
-      })
-      animId = requestAnimationFrame(animate)
+      if (cubeRef.current) {
+        const rx = -25 + Math.sin(angle * 0.01) * 15
+        const ry = 25 + (angle % 360)
+        cubeRef.current.style.transform = `rotateX(${rx}deg) rotateY(${ry}deg)`
+      }
+      animRef.current = requestAnimationFrame(animate)
     }
-    animId = requestAnimationFrame(animate)
+    animRef.current = requestAnimationFrame(animate)
 
-    return () => cancelAnimationFrame(animId)
+    return () => cancelAnimationFrame(animRef.current)
   }, [])
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    const rect = e.currentTarget.getBoundingClientRect()
-    const x = (e.clientY - rect.top) / rect.height - 0.5
-    const y = (e.clientX - rect.left) / rect.width - 0.5
-    setRotate({ x: -x * 60, y: y * 60 })
-  }
-
-  const handleMouseLeave = () => {}
 
   const size = 80
 
@@ -44,24 +32,19 @@ export function Cube3D() {
     { transform: `rotateX(-90deg) translateZ(${size / 2}px)`, bg: 'rgba(251,191,36,0.7)' },
   ]
 
+  const labels = ['FRONT', 'RIGHT', 'BACK', 'LEFT', 'TOP', 'BOTTOM']
+
   return (
     <div className="w-full h-full flex items-center justify-center">
-      <div
-        ref={containerRef}
-        className="cursor-pointer"
-        style={{ perspective: 400 }}
-        onMouseMove={handleMouseMove}
-        onMouseLeave={handleMouseLeave}
-        data-cursor="pointer"
-      >
+      <div style={{ perspective: 400 }}>
         <div
+          ref={cubeRef}
           style={{
             width: size,
             height: size,
             position: 'relative',
             transformStyle: 'preserve-3d',
-            transform: `rotateX(${rotate.x}deg) rotateY(${rotate.y}deg)`,
-            transition: 'transform 0.1s ease-out',
+            willChange: 'transform',
           }}
         >
           {faces.map((face, i) => (
@@ -83,7 +66,7 @@ export function Cube3D() {
                 color: 'white',
               }}
             >
-              {['FRONT', 'RIGHT', 'BACK', 'LEFT', 'TOP', 'BOTTOM'][i]}
+              {labels[i]}
             </div>
           ))}
         </div>
