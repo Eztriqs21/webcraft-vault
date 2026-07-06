@@ -1,4 +1,4 @@
-import { useRef, useEffect, useCallback } from 'react'
+import { useRef, useEffect } from 'react'
 
 export function RippleGrid() {
   const canvasRef = useRef<HTMLCanvasElement>(null)

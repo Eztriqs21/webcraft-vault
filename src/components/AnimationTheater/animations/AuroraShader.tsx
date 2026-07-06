@@ -1,4 +1,4 @@
-import { useRef, useEffect, useCallback } from 'react'
+import { useRef, useEffect } from 'react'
 
 export function AuroraShader() {
   const canvasRef = useRef<HTMLCanvasElement>(null)

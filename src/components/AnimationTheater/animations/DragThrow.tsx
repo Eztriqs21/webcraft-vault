@@ -8,14 +8,14 @@ export function DragThrow() {
     <div className="w-full h-full flex items-center justify-center" ref={constraintsRef}>
       <div className="relative w-64 h-48">
         {[0, 1, 2].map((i) => (
-          <DraggableBall key={i} index={i} parentRef={constraintsRef} />
+          <DraggableBall key={i} index={i} />
         ))}
       </div>
     </div>
   )
 }
 
-function DraggableBall({ index, parentRef }: { index: number; parentRef: React.RefObject<HTMLDivElement | null> }) {
+function DraggableBall({ index }: { index: number }) {
   const colors = ['#6366f1', '#f43f5e', '#10b981']
   const [pos, setPos] = useState({ x: index * 80 + 20, y: 100 })
 

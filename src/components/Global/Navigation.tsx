@@ -17,7 +17,6 @@ export function Navigation() {
   const [activeSection, setActiveSection] = useState('hero')
   const [hoveredItem, setHoveredItem] = useState<string | null>(null)
 
-  const activeAccent = SECTION_MOODS[activeSection as keyof typeof SECTION_MOODS]?.accent || '#6366f1'
   const activeAccentRgb = SECTION_MOODS[activeSection as keyof typeof SECTION_MOODS]?.accentRgb || '99,102,241'
 
   useEffect(() => {

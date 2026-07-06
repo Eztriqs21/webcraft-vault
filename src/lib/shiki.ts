@@ -1,17 +1,12 @@
-import { createHighlighterCore } from 'shiki/core'
-import darkPlus from 'shiki/themes/dark-plus'
-import typescriptLang from 'shiki/langs/typescript'
-import javascriptLang from 'shiki/langs/javascript'
-import cssLang from 'shiki/langs/css'
-import htmlLang from 'shiki/langs/html'
+import { createHighlighter } from 'shiki'
 
-let highlighterPromise: ReturnType<typeof createHighlighterCore> | null = null
+let highlighterPromise: ReturnType<typeof createHighlighter> | null = null
 
 export function getHighlighter() {
   if (!highlighterPromise) {
-    highlighterPromise = createHighlighterCore({
-      themes: [darkPlus],
-      langs: [typescriptLang, javascriptLang, cssLang, htmlLang],
+    highlighterPromise = createHighlighter({
+      themes: ['dark-plus'],
+      langs: ['javascript', 'typescript', 'css', 'html'],
     })
   }
   return highlighterPromise

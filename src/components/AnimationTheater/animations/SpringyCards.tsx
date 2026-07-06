@@ -8,7 +8,7 @@ const CARDS = [
 ]
 
 export function SpringyCards() {
-  const [cards, setCards] = useState(CARDS)
+  const cards = useState(CARDS)[0]
 
   return (
     <div className="w-full h-full flex items-center justify-center">
