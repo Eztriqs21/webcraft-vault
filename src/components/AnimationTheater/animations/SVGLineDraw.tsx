@@ -3,6 +3,7 @@ import { useRef, useEffect } from 'react'
 export function SVGLineDraw() {
   const pathsRef = useRef<SVGPathElement[]>([])
   const animRef = useRef<number>(0)
+  const timeoutRef = useRef<number>(0)
 
   useEffect(() => {
     const paths = pathsRef.current
@@ -33,7 +34,7 @@ export function SVGLineDraw() {
       if (progress < 1) {
         animRef.current = requestAnimationFrame(animate)
       } else {
-        setTimeout(() => {
+        timeoutRef.current = window.setTimeout(() => {
           startTime = null
           animRef.current = requestAnimationFrame(animate)
         }, 2000)
@@ -42,7 +43,10 @@ export function SVGLineDraw() {
 
     animRef.current = requestAnimationFrame(animate)
 
-    return () => cancelAnimationFrame(animRef.current)
+    return () => {
+      cancelAnimationFrame(animRef.current)
+      clearTimeout(timeoutRef.current)
+    }
   }, [])
 
   return (

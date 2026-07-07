@@ -3,6 +3,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 export function Typewriter() {
   const [text, setText] = useState('')
   const indexRef = useRef(0)
+  const resetTimeoutRef = useRef<number>(0)
   const fullText = 'WebCraft Vault — Where animations come to life'
 
   const type = useCallback(() => {
@@ -10,7 +11,7 @@ export function Typewriter() {
       setText(fullText.slice(0, indexRef.current))
       indexRef.current++
     } else {
-      setTimeout(() => {
+      resetTimeoutRef.current = window.setTimeout(() => {
         indexRef.current = 0
         setText('')
       }, 2000)
@@ -19,7 +20,10 @@ export function Typewriter() {
 
   useEffect(() => {
     const interval = setInterval(type, 80)
-    return () => clearInterval(interval)
+    return () => {
+      clearInterval(interval)
+      clearTimeout(resetTimeoutRef.current)
+    }
   }, [type])
 
   return (

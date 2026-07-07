@@ -19,10 +19,13 @@ export function MorphingGradient() {
             hsl(${(hue + 240) % 360}, 80%, 50%))`,
           borderRadius: ['20%', '50%', '20%'],
         }}
-        transition={{ duration: 1.5, ease: 'easeInOut' }}
+        transition={{
+          background: { duration: 1.5, ease: 'easeInOut' },
+          borderRadius: { duration: 1.5, ease: 'easeInOut' },
+        }}
         onClick={handleClick}
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.95 }}
+        whileHover={{ scale: 1.1, transition: { duration: 0.2 } }}
+        whileTap={{ scale: 0.95, transition: { duration: 0.1 } }}
         data-cursor="pointer"
       />
     </div>

@@ -20,8 +20,8 @@ export function TiltCard() {
   }, [x, y])
 
   const handleMouseLeave = useCallback(() => {
-    x.set(0.5)
-    y.set(0.5)
+    x.set(0)
+    y.set(0)
   }, [x, y])
 
   return (

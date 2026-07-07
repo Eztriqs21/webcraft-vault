@@ -30,7 +30,7 @@ export function PreviewRiver() {
           className="flex items-center gap-6"
           style={{
             width: 'fit-content',
-            animation: hoveredId === null ? 'river-scroll 60s linear infinite' : 'none',
+            animation: 'river-scroll 60s linear infinite',
           }}
         >
           {[...SHAPES, ...SHAPES].map((shape, i) => (

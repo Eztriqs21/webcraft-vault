@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState } from 'react'
 import { motion } from 'framer-motion'
 
 const items = [
@@ -9,24 +9,25 @@ const items = [
   { id: 4, color: '#06b6d4', label: '05' },
 ]
 
+const ITEM_WIDTH = 128
+
 export function SnapCarousel() {
   const [active, setActive] = useState(0)
-  const constraintsRef = useRef(null)
 
   return (
     <div className="w-full h-full flex items-center justify-center">
-      <div className="relative w-64 h-48 overflow-hidden rounded-xl" ref={constraintsRef}>
+      <div className="relative w-64 h-48 overflow-hidden rounded-xl">
         <motion.div
           className="flex h-full"
           drag="x"
-          dragConstraints={{ left: -200, right: 0 }}
+          dragConstraints={{ left: -(items.length * ITEM_WIDTH - 256), right: 0 }}
           dragElastic={0.2}
           onDragEnd={(_, info) => {
-            const snap = Math.round(info.offset.x / 128)
-            const newActive = Math.max(0, Math.min(4, active - snap))
+            const snap = Math.round(info.offset.x / ITEM_WIDTH)
+            const newActive = Math.max(0, Math.min(items.length - 1, active - snap))
             setActive(newActive)
           }}
-          animate={{ x: -active * 128 }}
+          animate={{ x: -active * ITEM_WIDTH }}
           transition={{ type: 'spring', stiffness: 300, damping: 30 }}
         >
           {items.map((item) => (

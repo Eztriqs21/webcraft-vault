@@ -1,5 +1,5 @@
 import { useRef, useCallback } from 'react'
-import { motion, useMotionValue, useTransform } from 'framer-motion'
+import { motion, useMotionValue, useTransform, animate } from 'framer-motion'
 
 export function MagneticButtons() {
   const ref = useRef<HTMLDivElement>(null)
@@ -19,8 +19,8 @@ export function MagneticButtons() {
   }, [x, y])
 
   const handleMouseLeave = useCallback(() => {
-    x.set(0)
-    y.set(0)
+    animate(x, 0, { type: 'spring', stiffness: 300, damping: 30 })
+    animate(y, 0, { type: 'spring', stiffness: 300, damping: 30 })
   }, [x, y])
 
   return (
@@ -65,8 +65,8 @@ function MagneticButton({ label, index }: { label: string; index: number }) {
   }, [x, y])
 
   const handleMouseLeave = useCallback(() => {
-    x.set(0)
-    y.set(0)
+    animate(x, 0, { type: 'spring', stiffness: 300, damping: 30 })
+    animate(y, 0, { type: 'spring', stiffness: 300, damping: 30 })
   }, [x, y])
 
   return (
