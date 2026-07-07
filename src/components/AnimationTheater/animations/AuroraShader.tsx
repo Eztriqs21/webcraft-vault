@@ -30,10 +30,7 @@ export function AuroraShader() {
     let lastFrame = 0
 
     const animate = (now: number) => {
-      if (!isVisible) {
-        animRef.current = requestAnimationFrame(animate)
-        return
-      }
+      if (!isVisible) return
       if (now - lastFrame < 33) {
         animRef.current = requestAnimationFrame(animate)
         return

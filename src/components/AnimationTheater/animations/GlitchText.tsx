@@ -2,6 +2,7 @@ import { useRef, useEffect } from 'react'
 
 export function GlitchText() {
   const ref = useRef<HTMLDivElement>(null)
+  const tRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
     const el = ref.current
@@ -11,11 +12,15 @@ export function GlitchText() {
 
     const glitch = () => {
       el.classList.add('glitching')
-      setTimeout(() => el.classList.remove('glitching'), 200)
+      if (tRef.current) clearTimeout(tRef.current)
+      tRef.current = setTimeout(() => el.classList.remove('glitching'), 200)
     }
 
     interval = setInterval(glitch, 3000)
-    return () => clearInterval(interval)
+    return () => {
+      clearInterval(interval)
+      if (tRef.current) clearTimeout(tRef.current)
+    }
   }, [])
 
   return (

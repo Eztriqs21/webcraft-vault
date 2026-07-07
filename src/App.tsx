@@ -39,7 +39,7 @@ export default function App() {
               <HeroEntrance />
             </SectionTransition>
 
-            <div data-section="theater">
+            <div>
               <TheaterSection />
             </div>
 

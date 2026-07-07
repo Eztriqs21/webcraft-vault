@@ -1,5 +1,6 @@
 import { useRef, useEffect } from 'react'
 import * as THREE from 'three'
+import { useCanvasPause } from '../../../hooks/useCanvasPause'
 
 export function WebGLDistortion() {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -9,6 +10,7 @@ export function WebGLDistortion() {
   const materialRef = useRef<THREE.ShaderMaterial | null>(null)
   const animRef = useRef<number>(0)
   const mouseRef = useRef({ x: 0, y: 0 })
+  const { ref: wrapperRef, isVisible } = useCanvasPause(0)
 
   useEffect(() => {
     const container = containerRef.current
@@ -73,6 +75,7 @@ export function WebGLDistortion() {
     let time = 0
 
     const animate = () => {
+      if (!isVisible) return
       time += 0.016
       material.uniforms.uTime.value = time
       material.uniforms.uMouse.value.set(mouseRef.current.x, mouseRef.current.y)
@@ -99,10 +102,10 @@ export function WebGLDistortion() {
         container.removeChild(renderer.domElement)
       }
     }
-  }, [])
+  }, [isVisible])
 
   return (
-    <div className="w-full h-full flex items-center justify-center">
+    <div ref={wrapperRef} className="w-full h-full flex items-center justify-center">
       <div ref={containerRef} className="max-w-[320px] max-h-[280px] cursor-crosshair rounded-lg overflow-hidden" />
     </div>
   )

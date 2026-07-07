@@ -30,10 +30,7 @@ export function CursorTrail() {
     canvas.addEventListener('mousemove', onMouseMove)
 
     const animate = () => {
-      if (!isVisible) {
-        animRef.current = requestAnimationFrame(animate)
-        return
-      }
+      if (!isVisible) return
       if (!ctx) return
       ctx.clearRect(0, 0, W, H)
 

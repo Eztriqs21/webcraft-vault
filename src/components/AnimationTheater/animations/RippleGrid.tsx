@@ -43,10 +43,7 @@ export function RippleGrid() {
     canvas.addEventListener('mousemove', onMouseMove)
 
     const animate = () => {
-      if (!isVisible) {
-        animRef.current = requestAnimationFrame(animate)
-        return
-      }
+      if (!isVisible) return
       if (!ctx || !canvas) return
       const w = canvas.width
       const h = canvas.height

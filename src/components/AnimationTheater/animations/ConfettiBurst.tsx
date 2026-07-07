@@ -64,10 +64,7 @@ export function ConfettiBurst() {
     canvas.addEventListener('click', onClick)
 
     const animate = () => {
-      if (!isVisible) {
-        animRef.current = requestAnimationFrame(animate)
-        return
-      }
+      if (!isVisible) return
       if (!ctx) return
       ctx.clearRect(0, 0, W, H)
 

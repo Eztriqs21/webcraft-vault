@@ -1,16 +1,25 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 export function PageTransition() {
   const [page, setPage] = useState<'a' | 'b'>('a')
   const [isTransitioning, setIsTransitioning] = useState(false)
+  const t1Ref = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const t2Ref = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    return () => {
+      if (t1Ref.current) clearTimeout(t1Ref.current)
+      if (t2Ref.current) clearTimeout(t2Ref.current)
+    }
+  }, [])
 
   const switchPage = useCallback(() => {
     if (isTransitioning) return
     setIsTransitioning(true)
-    setTimeout(() => {
+    t1Ref.current = setTimeout(() => {
       setPage((prev) => (prev === 'a' ? 'b' : 'a'))
-      setTimeout(() => setIsTransitioning(false), 600)
+      t2Ref.current = setTimeout(() => setIsTransitioning(false), 600)
     }, 300)
   }, [isTransitioning])
 

@@ -66,10 +66,7 @@ export function ParticleFountain() {
     canvas.addEventListener('mouseleave', onMouseLeave)
 
     const animate = () => {
-      if (!isVisible) {
-        animRef.current = requestAnimationFrame(animate)
-        return
-      }
+      if (!isVisible) return
       if (!ctx || !canvas) return
 
       ctx.fillStyle = 'rgba(3, 3, 3, 0.15)'
@@ -77,9 +74,9 @@ export function ParticleFountain() {
 
       if (mouseRef.current.active && Math.random() > 0.5) {
         spawn(mouseRef.current.x, mouseRef.current.y)
+      } else {
+        spawn(canvas.width / 2, canvas.height * 0.85)
       }
-
-      spawn(canvas.width / 2, canvas.height * 0.85)
 
       const gravity = 0.15
       const particles = particlesRef.current

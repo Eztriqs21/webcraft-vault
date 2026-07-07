@@ -1,15 +1,14 @@
-import { useRef, useCallback, useState } from 'react'
+import { useRef, useCallback } from 'react'
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion'
 
 export function Product3DCard() {
   const ref = useRef<HTMLDivElement>(null)
+  const glareRef = useRef<HTMLDivElement>(null)
   const x = useMotionValue(0)
   const y = useMotionValue(0)
 
   const rotateX = useSpring(useTransform(y, [-0.5, 0.5], [20, -20]), { stiffness: 300, damping: 30 })
   const rotateY = useSpring(useTransform(x, [-0.5, 0.5], [-20, 20]), { stiffness: 300, damping: 30 })
-
-  const [glarePos, setGlarePos] = useState({ x: 50, y: 50 })
 
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
     if (!ref.current) return
@@ -18,13 +17,17 @@ export function Product3DCard() {
     const ny = (e.clientY - rect.top) / rect.height - 0.5
     x.set(nx)
     y.set(ny)
-    setGlarePos({ x: (nx + 0.5) * 100, y: (ny + 0.5) * 100 })
+    if (glareRef.current) {
+      glareRef.current.style.background = `radial-gradient(circle at ${(nx + 0.5) * 100}% ${(ny + 0.5) * 100}%, rgba(255,255,255,0.2) 0%, transparent 50%)`
+    }
   }, [x, y])
 
   const handleMouseLeave = useCallback(() => {
     x.set(0)
     y.set(0)
-    setGlarePos({ x: 50, y: 50 })
+    if (glareRef.current) {
+      glareRef.current.style.background = `radial-gradient(circle at 50% 50%, rgba(255,255,255,0.2) 0%, transparent 50%)`
+    }
   }, [x, y])
 
   return (
@@ -45,9 +48,10 @@ export function Product3DCard() {
         />
 
         <div
+          ref={glareRef}
           className="absolute inset-0 rounded-2xl pointer-events-none"
           style={{
-            background: `radial-gradient(circle at ${glarePos.x}% ${glarePos.y}%, rgba(255,255,255,0.2) 0%, transparent 50%)`,
+            background: 'radial-gradient(circle at 50% 50%, rgba(255,255,255,0.2) 0%, transparent 50%)',
           }}
         />
 

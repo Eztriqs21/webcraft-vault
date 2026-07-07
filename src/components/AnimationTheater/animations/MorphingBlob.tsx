@@ -1,11 +1,14 @@
 import { useRef, useEffect, useCallback } from 'react'
+import { useCanvasPause } from '../../../hooks/useCanvasPause'
 
 export function MorphingBlob() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const timeRef = useRef(0)
   const animRef = useRef<number>(0)
+  const { ref: wrapperRef, isVisible } = useCanvasPause(0)
 
   const draw = useCallback(() => {
+    if (!isVisible) return
     const canvas = canvasRef.current
     if (!canvas) return
     const ctx = canvas.getContext('2d')
@@ -67,10 +70,10 @@ export function MorphingBlob() {
       window.removeEventListener('resize', resize)
       cancelAnimationFrame(animRef.current)
     }
-  }, [draw])
+  }, [draw, isVisible])
 
   return (
-    <div className="w-full h-full flex items-center justify-center">
+    <div ref={wrapperRef} className="w-full h-full flex items-center justify-center">
       <canvas ref={canvasRef} className="max-w-[280px] max-h-[280px]" />
     </div>
   )

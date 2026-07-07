@@ -35,10 +35,7 @@ export function LavaLamp() {
     }))
 
     const animate = () => {
-      if (!isVisible) {
-        animRef.current = requestAnimationFrame(animate)
-        return
-      }
+      if (!isVisible) return
       if (!ctx) return
 
       const blobs = blobsRef.current

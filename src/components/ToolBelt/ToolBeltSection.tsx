@@ -2,10 +2,10 @@ import { useState, useRef, useEffect, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import { TOOLS, TOOL_CONNECTIONS } from '../../data/tools'
 
-const MAX_VELOCITY = 15
-const REPULSION = 8000
-const CENTER_GRAVITY = 0.01
-const DAMPING = 0.85
+const MAX_VELOCITY = 0.003
+const REPULSION = 0.0005
+const CENTER_GRAVITY = 0.0005
+const DAMPING = 0.92
 
 interface Node {
   x: number
@@ -24,6 +24,7 @@ export function ToolBeltSection() {
   const [hoveredTool, setHoveredTool] = useState<number | null>(null)
   const hoveredRef = useRef<number | null>(null)
   const draggingRef = useRef<number | null>(null)
+  const didDragRef = useRef(false)
   const dragOffset = useRef({ x: 0, y: 0 })
   const rafRef = useRef<number>(0)
   const [isMobile, setIsMobile] = useState(false)
@@ -72,7 +73,7 @@ export function ToolBeltSection() {
           const dy = nodes[i].y - nodes[j].y
           const distSq = dx * dx + dy * dy + 0.001
           const dist = Math.sqrt(distSq)
-          const force = REPULSION / (distSq * 1000)
+          const force = REPULSION / (dist + 0.01)
           fx += (dx / dist) * force
           fy += (dy / dist) * force
         }
@@ -82,8 +83,8 @@ export function ToolBeltSection() {
             const other = a === i ? b : a
             const dx = nodes[other].x - nodes[i].x
             const dy = nodes[other].y - nodes[i].y
-            fx += dx * 0.002
-            fy += dy * 0.002
+            fx += dx * 0.02
+            fy += dy * 0.02
           }
         }
 
@@ -133,6 +134,7 @@ export function ToolBeltSection() {
 
   const handlePointerDown = useCallback((i: number, e: React.PointerEvent) => {
     draggingRef.current = i
+    didDragRef.current = false
     const nodes = nodesRef.current
     nodes[i].vx = 0
     nodes[i].vy = 0
@@ -149,6 +151,7 @@ export function ToolBeltSection() {
 
   const handlePointerMove = useCallback((e: React.PointerEvent) => {
     if (draggingRef.current === null) return
+    didDragRef.current = true
     const container = containerRef.current
     if (!container) return
     const rect = container.getBoundingClientRect()
@@ -210,7 +213,7 @@ export function ToolBeltSection() {
                   onMouseEnter={() => setHoveredTool(i)}
                   onMouseLeave={() => setHoveredTool(null)}
                   onClick={() => {
-                    if (draggingRef.current === null) {
+                    if (!didDragRef.current) {
                       window.open(tool.url, '_blank')
                     }
                   }}

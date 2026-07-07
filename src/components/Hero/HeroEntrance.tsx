@@ -1,11 +1,8 @@
 import { useCallback, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { gsap } from 'gsap'
-import { ScrollToPlugin } from 'gsap/ScrollToPlugin'
 import { ParallaxLetters } from './ParallaxLetters'
 import { PreviewRiver } from './PreviewRiver'
-
-gsap.registerPlugin(ScrollToPlugin)
 
 export function HeroEntrance() {
   const heroRef = useRef<HTMLElement>(null)
@@ -24,14 +21,13 @@ export function HeroEntrance() {
       ease: 'power2.in',
     })
 
-    tl.to(window, {
-      scrollTo: { y: '[data-section="theater"]', offsetY: 0 },
-      duration: 1.2,
-      ease: 'power2.inOut',
-      onComplete: () => {
-        gsap.set(hero, { scale: 1, filter: 'none', opacity: 1 })
-      },
-    })
+    tl.call(() => {
+      const target = document.querySelector('[data-section="theater"]')
+      if (target) {
+        window.scrollTo({ top: (target as HTMLElement).offsetTop || 0, behavior: 'auto' })
+      }
+      gsap.set(hero, { scale: 1, filter: 'none', opacity: 1 })
+    }, undefined, 0.9)
   }, [])
 
   return (

@@ -2,6 +2,7 @@ import { useRef, useEffect } from 'react'
 
 export function ScrollStagger() {
   const containerRef = useRef<HTMLDivElement>(null)
+  const timeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([])
 
   useEffect(() => {
     const container = containerRef.current
@@ -13,9 +14,10 @@ export function ScrollStagger() {
           if (entry.isIntersecting) {
             const el = entry.target as HTMLElement
             const delay = parseInt(el.dataset.delay || '0')
-            setTimeout(() => {
+            const t = setTimeout(() => {
               el.classList.add('stagger-visible')
             }, delay)
+            timeoutsRef.current.push(t)
           }
         })
       },
@@ -23,7 +25,11 @@ export function ScrollStagger() {
     )
 
     container.querySelectorAll('.stagger-item').forEach((item) => observer.observe(item))
-    return () => observer.disconnect()
+    return () => {
+      observer.disconnect()
+      timeoutsRef.current.forEach(clearTimeout)
+      timeoutsRef.current = []
+    }
   }, [])
 
   const items = Array.from({ length: 8 }, (_, i) => i)

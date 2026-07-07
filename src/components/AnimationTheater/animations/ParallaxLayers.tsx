@@ -1,9 +1,8 @@
-import { useRef, useEffect, useState } from 'react'
+import { useRef, useEffect } from 'react'
 
 export function ParallaxLayers() {
   const containerRef = useRef<HTMLDivElement>(null)
-  const mouse = useRef({ x: 0, y: 0 })
-  const [offset, setOffset] = useState({ x: 0, y: 0 })
+  const layerRefs = useRef<(HTMLDivElement | null)[]>([])
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -11,9 +10,16 @@ export function ParallaxLayers() {
       const rect = containerRef.current.getBoundingClientRect()
       const cx = rect.left + rect.width / 2
       const cy = rect.top + rect.height / 2
-      mouse.current.x = (e.clientX - cx) / (rect.width / 2)
-      mouse.current.y = (e.clientY - cy) / (rect.height / 2)
-      setOffset({ x: mouse.current.x, y: mouse.current.y })
+      const mx = (e.clientX - cx) / (rect.width / 2)
+      const my = (e.clientY - cy) / (rect.height / 2)
+
+      const depths = [0.1, 0.25, 0.45, 0.7]
+      for (let i = 0; i < layerRefs.current.length; i++) {
+        const el = layerRefs.current[i]
+        if (el) {
+          el.style.transform = `translate3d(${mx * depths[i] * 40}px, ${my * depths[i] * 40}px, ${depths[i] * 60}px)`
+        }
+      }
     }
 
     window.addEventListener('mousemove', handleMouseMove)
@@ -33,6 +39,7 @@ export function ParallaxLayers() {
         {layers.map((layer, i) => (
           <div
             key={i}
+            ref={(el) => { layerRefs.current[i] = el }}
             className="absolute rounded-full"
             style={{
               width: layer.size,
@@ -40,7 +47,7 @@ export function ParallaxLayers() {
               left: `calc(50% - ${layer.size / 2}px)`,
               top: `calc(50% - ${layer.size / 2}px)`,
               background: layer.color,
-              transform: `translate3d(${offset.x * layer.depth * 40}px, ${offset.y * layer.depth * 40}px, ${layer.depth * 60}px)`,
+              transform: `translate3d(0px, 0px, ${layer.depth * 60}px)`,
               transition: 'transform 0.15s ease-out',
               willChange: 'transform',
             }}

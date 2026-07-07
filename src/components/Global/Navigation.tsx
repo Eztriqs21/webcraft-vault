@@ -47,7 +47,10 @@ export function Navigation() {
 
   const scrollTo = (id: string) => {
     const el = document.querySelector(`[data-section="${id}"]`)
-    el?.scrollIntoView({ behavior: 'smooth' })
+    if (el) {
+      const y = el instanceof HTMLElement ? el.offsetTop : 0
+      window.scrollTo({ top: y, behavior: 'auto' })
+    }
   }
 
   return (

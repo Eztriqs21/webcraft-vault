@@ -33,10 +33,7 @@ export function WaveInterference() {
     let lastFrame = 0
 
     const animate = (now: number) => {
-      if (!isVisible) {
-        animRef.current = requestAnimationFrame(animate)
-        return
-      }
+      if (!isVisible) return
       if (now - lastFrame < 50) {
         animRef.current = requestAnimationFrame(animate)
         return
