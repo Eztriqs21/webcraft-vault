@@ -159,17 +159,6 @@ body.custom-cursor-active * {
   border-radius: 4px;
 }
 
-/* ── Section containment ── */
-section {
-  contain: layout style paint;
-}
-
-/* ── Animation frame containment ── */
-.animation-frame {
-  contain: strict;
-  content-visibility: auto;
-}
-
 /* ── Custom scrollbar ── */
 .custom-scrollbar {
   scrollbar-width: thin;
