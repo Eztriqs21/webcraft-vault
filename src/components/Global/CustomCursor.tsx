@@ -91,7 +91,8 @@ export function CustomCursor() {
 
     const animate = () => {
       if (canvas && ctx) {
-        ctx.clearRect(0, 0, window.innerWidth, window.innerHeight)
+        ctx.fillStyle = 'rgba(3, 3, 3, 0.1)'
+        ctx.fillRect(0, 0, window.innerWidth, window.innerHeight)
 
         trail.current = trail.current.filter((p) => {
           p.life -= 0.04

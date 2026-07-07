@@ -1,9 +1,11 @@
 import { useRef, useEffect } from 'react'
+import { useCanvasPause } from '../../../hooks/useCanvasPause'
 
 export function WaveInterference() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const mouseRef = useRef({ x: 0, y: 0 })
   const animRef = useRef<number>(0)
+  const { ref: wrapperRef, isVisible } = useCanvasPause(0)
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -31,6 +33,10 @@ export function WaveInterference() {
     let lastFrame = 0
 
     const animate = (now: number) => {
+      if (!isVisible) {
+        animRef.current = requestAnimationFrame(animate)
+        return
+      }
       if (now - lastFrame < 50) {
         animRef.current = requestAnimationFrame(animate)
         return
@@ -81,10 +87,10 @@ export function WaveInterference() {
       canvas.removeEventListener('mousemove', onMouseMove)
       cancelAnimationFrame(animRef.current)
     }
-  }, [])
+  }, [isVisible])
 
   return (
-    <div className="w-full h-full flex items-center justify-center">
+    <div ref={wrapperRef} className="w-full h-full flex items-center justify-center">
       <canvas ref={canvasRef} className="cursor-crosshair" />
     </div>
   )

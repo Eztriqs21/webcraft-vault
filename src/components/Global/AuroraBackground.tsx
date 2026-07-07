@@ -1,10 +1,23 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useReducedMotion } from '../../hooks/useReducedMotion'
 
 export function AuroraBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const wrapperRef = useRef<HTMLDivElement>(null)
   const mouse = useRef({ x: 0.5, y: 0.5 })
   const prefersReducedMotion = useReducedMotion()
+  const [isVisible, setIsVisible] = useState(true)
+
+  useEffect(() => {
+    const el = wrapperRef.current
+    if (!el) return
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsVisible(entry.isIntersecting),
+      { threshold: 0 }
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -35,6 +48,10 @@ export function AuroraBackground() {
     window.addEventListener('resize', resize)
 
     const draw = (now: number) => {
+      if (!isVisible) {
+        raf = requestAnimationFrame(draw)
+        return
+      }
       if (now - lastFrame < 33) {
         raf = requestAnimationFrame(draw)
         return
@@ -99,13 +116,11 @@ export function AuroraBackground() {
       window.removeEventListener('mousemove', handleMouseMove)
       window.removeEventListener('resize', resize)
     }
-  }, [prefersReducedMotion])
+  }, [prefersReducedMotion, isVisible])
 
   return (
-    <canvas
-      ref={canvasRef}
-      className="fixed inset-0 pointer-events-none"
-      style={{ zIndex: 0 }}
-    />
+    <div ref={wrapperRef} className="fixed inset-0 pointer-events-none" style={{ zIndex: 0 }}>
+      <canvas ref={canvasRef} />
+    </div>
   )
 }

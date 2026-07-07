@@ -1,4 +1,5 @@
 import { useRef, useEffect, useCallback } from 'react'
+import { useCanvasPause } from '../../../hooks/useCanvasPause'
 
 interface Particle {
   x: number
@@ -16,6 +17,7 @@ export function ParticleFountain() {
   const particlesRef = useRef<Particle[]>([])
   const mouseRef = useRef({ x: 0, y: 0, active: false })
   const animRef = useRef<number>(0)
+  const { ref: wrapperRef, isVisible } = useCanvasPause(0)
 
   const spawn = useCallback((x: number, y: number) => {
     const count = 5
@@ -64,6 +66,10 @@ export function ParticleFountain() {
     canvas.addEventListener('mouseleave', onMouseLeave)
 
     const animate = () => {
+      if (!isVisible) {
+        animRef.current = requestAnimationFrame(animate)
+        return
+      }
       if (!ctx || !canvas) return
 
       ctx.fillStyle = 'rgba(3, 3, 3, 0.15)'
@@ -118,10 +124,10 @@ export function ParticleFountain() {
       canvas.removeEventListener('mouseleave', onMouseLeave)
       cancelAnimationFrame(animRef.current)
     }
-  }, [spawn])
+  }, [spawn, isVisible])
 
   return (
-    <div className="w-full h-full flex items-center justify-center">
+    <div ref={wrapperRef} className="w-full h-full flex items-center justify-center">
       <canvas ref={canvasRef} className="max-w-[320px] max-h-[280px] cursor-crosshair" />
     </div>
   )

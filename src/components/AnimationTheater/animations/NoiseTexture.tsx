@@ -1,8 +1,10 @@
 import { useRef, useEffect } from 'react'
+import { useCanvasPause } from '../../../hooks/useCanvasPause'
 
 export function NoiseTexture() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const animRef = useRef<number>(0)
+  const { ref: wrapperRef, isVisible } = useCanvasPause(0)
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -21,6 +23,10 @@ export function NoiseTexture() {
     let lastFrame = 0
 
     const animate = (now: number) => {
+      if (!isVisible) {
+        animRef.current = requestAnimationFrame(animate)
+        return
+      }
       if (now - lastFrame < 50) {
         animRef.current = requestAnimationFrame(animate)
         return
@@ -56,10 +62,10 @@ export function NoiseTexture() {
     animRef.current = requestAnimationFrame(animate)
 
     return () => cancelAnimationFrame(animRef.current)
-  }, [])
+  }, [isVisible])
 
   return (
-    <div className="w-full h-full flex items-center justify-center">
+    <div ref={wrapperRef} className="w-full h-full flex items-center justify-center">
       <canvas ref={canvasRef} className="rounded-lg" />
     </div>
   )

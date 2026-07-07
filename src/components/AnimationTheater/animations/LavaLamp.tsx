@@ -1,4 +1,5 @@
 import { useRef, useEffect } from 'react'
+import { useCanvasPause } from '../../../hooks/useCanvasPause'
 
 interface Blob {
   x: number
@@ -12,6 +13,7 @@ export function LavaLamp() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const blobsRef = useRef<Blob[]>([])
   const animRef = useRef<number>(0)
+  const { ref: wrapperRef, isVisible } = useCanvasPause(0)
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -33,6 +35,10 @@ export function LavaLamp() {
     }))
 
     const animate = () => {
+      if (!isVisible) {
+        animRef.current = requestAnimationFrame(animate)
+        return
+      }
       if (!ctx) return
 
       const blobs = blobsRef.current
@@ -112,10 +118,10 @@ export function LavaLamp() {
     animRef.current = requestAnimationFrame(animate)
 
     return () => cancelAnimationFrame(animRef.current)
-  }, [])
+  }, [isVisible])
 
   return (
-    <div className="w-full h-full flex items-center justify-center">
+    <div ref={wrapperRef} className="w-full h-full flex items-center justify-center">
       <canvas ref={canvasRef} className="rounded-lg max-w-[280px] max-h-[280px]" />
     </div>
   )

@@ -27,30 +27,31 @@ export function SectionTransition({ accent = '#6366f1', children, sectionKey }: 
       if (prefersReducedMotionRef.current) return
 
       gsap.set(overlay, {
-        clipPath: 'inset(100% 0 0 0)',
+        clipPath: 'polygon(50% 0%, 50% 0%, 50% 100%, 50% 100%)',
         opacity: 1,
       })
 
       ScrollTrigger.create({
         trigger: el,
-        start: 'top bottom',
-        end: 'top center',
-        onEnter: () => {
-          gsap.to(overlay, {
-            clipPath: 'inset(0% 0 0 0)',
-            duration: 0.6,
-            ease: 'power3.inOut',
-            onComplete: () => {
-              gsap.to(overlay, {
-                clipPath: 'inset(0 0 100% 0)',
-                duration: 0.6,
-                ease: 'power3.inOut',
-                delay: 0.1,
-              })
-            },
-          })
+        start: 'top 80%',
+        end: 'top 20%',
+        scrub: 0.5,
+        onUpdate: (self) => {
+          const progress = self.progress
+          if (progress <= 0.5) {
+            const p = progress * 2
+            const x = 50 - p * 50
+            gsap.set(overlay, {
+              clipPath: `polygon(${x}% 0%, 50% 0%, 50% 100%, ${x}% 100%)`,
+            })
+          } else {
+            const p = (progress - 0.5) * 2
+            const x = p * 50
+            gsap.set(overlay, {
+              clipPath: `polygon(0% 0%, ${x}% 0%, ${x}% 100%, 0% 100%)`,
+            })
+          }
         },
-        once: true,
       })
     }, el)
 

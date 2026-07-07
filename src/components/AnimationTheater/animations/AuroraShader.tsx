@@ -1,9 +1,11 @@
 import { useRef, useEffect } from 'react'
+import { useCanvasPause } from '../../../hooks/useCanvasPause'
 
 export function AuroraShader() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const mouseRef = useRef({ x: 0.5, y: 0.5 })
   const animRef = useRef<number>(0)
+  const { ref: wrapperRef, isVisible } = useCanvasPause(0)
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -28,6 +30,10 @@ export function AuroraShader() {
     let lastFrame = 0
 
     const animate = (now: number) => {
+      if (!isVisible) {
+        animRef.current = requestAnimationFrame(animate)
+        return
+      }
       if (now - lastFrame < 33) {
         animRef.current = requestAnimationFrame(animate)
         return
@@ -87,10 +93,10 @@ export function AuroraShader() {
       canvas.removeEventListener('mousemove', onMouseMove)
       cancelAnimationFrame(animRef.current)
     }
-  }, [])
+  }, [isVisible])
 
   return (
-    <div className="w-full h-full flex items-center justify-center">
+    <div ref={wrapperRef} className="w-full h-full flex items-center justify-center">
       <canvas ref={canvasRef} className="rounded-lg cursor-crosshair" />
     </div>
   )

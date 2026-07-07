@@ -1,10 +1,12 @@
 import { useRef, useEffect } from 'react'
+import { useCanvasPause } from '../../../hooks/useCanvasPause'
 
 export function RippleGrid() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const mouseRef = useRef({ x: 0, y: 0 })
   const ripplesRef = useRef<{ x: number; y: number; radius: number; maxRadius: number; alpha: number }[]>([])
   const animRef = useRef<number>(0)
+  const { ref: wrapperRef, isVisible } = useCanvasPause(0)
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -41,6 +43,10 @@ export function RippleGrid() {
     canvas.addEventListener('mousemove', onMouseMove)
 
     const animate = () => {
+      if (!isVisible) {
+        animRef.current = requestAnimationFrame(animate)
+        return
+      }
       if (!ctx || !canvas) return
       const w = canvas.width
       const h = canvas.height
@@ -96,10 +102,10 @@ export function RippleGrid() {
       canvas.removeEventListener('mousemove', onMouseMove)
       cancelAnimationFrame(animRef.current)
     }
-  }, [])
+  }, [isVisible])
 
   return (
-    <div className="w-full h-full flex items-center justify-center">
+    <div ref={wrapperRef} className="w-full h-full flex items-center justify-center">
       <canvas ref={canvasRef} className="max-w-[320px] max-h-[280px] cursor-crosshair" />
     </div>
   )

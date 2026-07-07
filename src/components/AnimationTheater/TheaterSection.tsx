@@ -26,8 +26,10 @@ export function TheaterSection() {
         ease: 'none',
         scrollTrigger: {
           trigger: container,
-          pin: true,
+          pin: inner,
           scrub: 1,
+          start: 'top center',
+          anticipatePin: 1,
           end: () => `+=${totalScroll}`,
           invalidateOnRefresh: true,
           onUpdate: (self) => {
@@ -78,10 +80,10 @@ export function TheaterSection() {
         </p>
       </div>
 
-      <div ref={containerRef} className="relative h-screen">
+      <div ref={containerRef} className="relative" style={{ height: '400vh' }}>
         <div
           ref={innerRef}
-          className="flex items-stretch h-full gap-6 px-4 md:px-8"
+          className="flex items-stretch h-screen gap-6 px-4 md:px-8 pt-[10vh]"
           style={{ width: 'fit-content' }}
         >
           {ANIMATIONS.map((anim, index) => (
@@ -117,7 +119,7 @@ function TheaterFrame({
 
   return (
     <div
-      className="flex-shrink-0 w-[85vw] md:w-[60vw] lg:w-[45vw] h-[70vh] md:h-[75vh] rounded-2xl overflow-hidden border border-[rgba(255,255,255,0.06)] bg-[rgba(10,10,10,0.8)] backdrop-blur-sm flex flex-col md:flex-row snap-center"
+      className="flex-shrink-0 w-[85vw] md:w-[60vw] lg:w-[45vw] h-[85vh] rounded-2xl overflow-hidden border border-[rgba(255,255,255,0.06)] bg-[rgba(10,10,10,0.8)] backdrop-blur-sm flex flex-col md:flex-row snap-center"
       style={{
         boxShadow: isActive
           ? '0 0 40px rgba(244,63,94,0.1), 0 20px 60px rgba(0,0,0,0.5)'

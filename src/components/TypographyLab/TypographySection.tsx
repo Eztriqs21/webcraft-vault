@@ -7,6 +7,7 @@ const CONTEXTS = ['hero', 'product', 'blog', 'dashboard'] as const
 export function TypographySection() {
   const [activeIndex, setActiveIndex] = useState(0)
   const [context, setContext] = useState<(typeof CONTEXTS)[number]>('hero')
+  const [copiedIndex, setCopiedIndex] = useState<number | null>(null)
   const listRef = useRef<HTMLDivElement>(null)
   const activePairing = FONT_PAIRINGS[activeIndex]
 
@@ -47,6 +48,13 @@ export function TypographySection() {
 
   const handleShuffle = useCallback(() => {
     setActiveIndex(Math.floor(Math.random() * FONT_PAIRINGS.length))
+  }, [])
+
+  const handleCopyCSS = useCallback((pairing: { heading: string; body: string }, index: number) => {
+    const css = `font-family: '${pairing.heading}', sans-serif;\n/* Body: '${pairing.body}' */`
+    navigator.clipboard.writeText(css).catch(() => {})
+    setCopiedIndex(index)
+    setTimeout(() => setCopiedIndex(null), 1500)
   }, [])
 
   return (
@@ -156,15 +164,14 @@ export function TypographySection() {
 
           <div
             ref={listRef}
-            className="w-full md:w-1/2 space-y-3 md:space-y-4 overflow-y-auto md:max-h-[70vh] md:pr-4"
-            style={{ scrollbarWidth: 'thin' }}
+            className="w-full md:w-1/2 space-y-3 md:space-y-4 overflow-y-auto md:max-h-[70vh] md:pr-4 custom-scrollbar"
           >
             {FONT_PAIRINGS.map((pairing, i) => (
               <div
                 key={i}
                 data-index={i}
                 onClick={() => setActiveIndex(i)}
-                className={`p-4 md:p-6 rounded-xl border cursor-pointer transition-all ${
+                className={`group relative p-4 md:p-6 rounded-xl border cursor-pointer transition-all ${
                   i === activeIndex
                     ? 'border-[rgba(16,185,129,0.3)] bg-[rgba(16,185,129,0.05)]'
                     : 'border-[rgba(255,255,255,0.06)] bg-[rgba(10,10,10,0.4)] hover:border-[rgba(255,255,255,0.12)]'
@@ -172,15 +179,33 @@ export function TypographySection() {
                 data-cursor="pointer"
               >
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-vault-text-bright font-medium text-sm md:text-base">
+                  <span
+                    className="text-vault-text-bright font-medium text-sm md:text-base"
+                    style={{ fontFamily: pairing.heading }}
+                  >
                     {pairing.heading}
                   </span>
                   <span className="text-[#666] mx-2">+</span>
-                  <span className="text-vault-text-bright font-medium text-sm md:text-base">
+                  <span
+                    className="text-vault-text-bright font-medium text-sm md:text-base"
+                    style={{ fontFamily: pairing.body }}
+                  >
                     {pairing.body}
                   </span>
                 </div>
-                <span className="text-xs text-[#666] font-mono">{pairing.personality}</span>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-[#666] font-mono">{pairing.personality}</span>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      handleCopyCSS(pairing, i)
+                    }}
+                    className="opacity-0 group-hover:opacity-100 transition-opacity px-2 py-1 text-[10px] font-mono rounded bg-[rgba(255,255,255,0.05)] text-[#666] hover:text-[#10b981]"
+                    data-cursor="pointer"
+                  >
+                    {copiedIndex === i ? 'Copied!' : 'Copy CSS'}
+                  </button>
+                </div>
               </div>
             ))}
           </div>

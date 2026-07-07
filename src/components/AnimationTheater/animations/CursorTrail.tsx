@@ -1,10 +1,12 @@
 import { useRef, useEffect } from 'react'
+import { useCanvasPause } from '../../../hooks/useCanvasPause'
 
 export function CursorTrail() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const trailRef = useRef<{ x: number; y: number; age: number }[]>([])
   const mouseRef = useRef({ x: 0, y: 0 })
   const animRef = useRef<number>(0)
+  const { ref: wrapperRef, isVisible } = useCanvasPause(0)
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -28,6 +30,10 @@ export function CursorTrail() {
     canvas.addEventListener('mousemove', onMouseMove)
 
     const animate = () => {
+      if (!isVisible) {
+        animRef.current = requestAnimationFrame(animate)
+        return
+      }
       if (!ctx) return
       ctx.clearRect(0, 0, W, H)
 
@@ -87,10 +93,10 @@ export function CursorTrail() {
       canvas.removeEventListener('mousemove', onMouseMove)
       cancelAnimationFrame(animRef.current)
     }
-  }, [])
+  }, [isVisible])
 
   return (
-    <div className="w-full h-full flex items-center justify-center">
+    <div ref={wrapperRef} className="w-full h-full flex items-center justify-center">
       <canvas ref={canvasRef} className="cursor-crosshair rounded-lg" />
     </div>
   )
