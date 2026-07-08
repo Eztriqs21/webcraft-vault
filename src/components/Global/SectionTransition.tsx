@@ -1,8 +1,5 @@
 import { useRef, useLayoutEffect } from 'react'
-import { gsap } from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
-
-gsap.registerPlugin(ScrollTrigger)
+import { motion, useInView } from 'framer-motion'
 
 interface SectionTransitionProps {
   accent?: string
@@ -12,12 +9,11 @@ interface SectionTransitionProps {
 
 export function SectionTransition({ accent = '#6366f1', children, sectionKey }: SectionTransitionProps) {
   const ref = useRef<HTMLDivElement>(null)
-  const contentRef = useRef<HTMLDivElement>(null)
+  const isInView = useInView(ref, { once: true, margin: '-15% 0px' })
 
   useLayoutEffect(() => {
     const el = ref.current
-    const content = contentRef.current
-    if (!el || !content) return
+    if (!el) return
 
     const handler = () => {
       window.dispatchEvent(
@@ -25,42 +21,26 @@ export function SectionTransition({ accent = '#6366f1', children, sectionKey }: 
       )
     }
 
-    const accentObserver = new IntersectionObserver(
+    const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) handler()
       },
       { threshold: 0.3 }
     )
-    accentObserver.observe(el)
+    observer.observe(el)
 
-    gsap.fromTo(content,
-      { y: 60, opacity: 0 },
-      {
-        y: 0,
-        opacity: 1,
-        duration: 1,
-        ease: 'power3.out',
-        scrollTrigger: {
-          trigger: el,
-          start: 'top 85%',
-          once: true,
-        },
-      }
-    )
-
-    return () => {
-      accentObserver.disconnect()
-      ScrollTrigger.getAll().forEach(st => {
-        if (st.trigger === el) st.kill()
-      })
-    }
+    return () => observer.disconnect()
   }, [accent])
 
   return (
     <div ref={ref} data-section={sectionKey} className="relative">
-      <div ref={contentRef}>
+      <motion.div
+        initial={{ opacity: 0, y: 40 }}
+        animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
+        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+      >
         {children}
-      </div>
+      </motion.div>
 
       <div
         className="absolute bottom-0 left-0 right-0 h-px pointer-events-none"

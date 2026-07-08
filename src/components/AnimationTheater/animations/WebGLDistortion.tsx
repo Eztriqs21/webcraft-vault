@@ -80,10 +80,7 @@ export function WebGLDistortion() {
     let time = 0
 
     const animate = () => {
-      if (!isVisibleRef.current) {
-        animRef.current = requestAnimationFrame(animate)
-        return
-      }
+      if (!isVisibleRef.current) return
       time += 0.016
       material.uniforms.uTime.value = time
       material.uniforms.uMouse.value.set(mouseRef.current.x, mouseRef.current.y)
