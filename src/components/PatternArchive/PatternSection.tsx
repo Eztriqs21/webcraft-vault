@@ -51,6 +51,7 @@ export function PatternSection() {
               layout
               role="button"
               tabIndex={0}
+              aria-expanded={expandedId === pattern.id}
               className={`relative rounded-2xl border border-[rgba(255,255,255,0.06)] bg-vault-bg overflow-hidden cursor-pointer ${
                 i === 0 ? 'sm:col-span-2' : ''
               } ${expandedId === pattern.id ? 'sm:col-span-2 lg:col-span-3 min-h-[60vh]' : 'min-h-[200px] md:min-h-[250px]'}`}

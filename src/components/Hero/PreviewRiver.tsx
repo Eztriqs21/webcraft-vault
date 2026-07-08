@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 const SHAPES = Array.from({ length: 32 }, (_, i) => ({
   id: i,
@@ -16,8 +16,24 @@ const SHAPES = Array.from({ length: 32 }, (_, i) => ({
   color: ['#6366f1', '#f43f5e', '#10b981', '#a855f7', '#06b6d4', '#fbbf24'][i % 6],
 }))
 
+const riverStyleId = 'preview-river-shared-style'
+
+function ensureRiverStyle() {
+  if (document.getElementById(riverStyleId)) return
+  const style = document.createElement('style')
+  style.id = riverStyleId
+  style.textContent = `
+    @keyframes river-scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+    @keyframes fade-in { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+    .animate-fade-in { animation: fade-in 0.3s ease-out; }
+  `
+  document.head.appendChild(style)
+}
+
 export function PreviewRiver() {
   const [hoveredId, setHoveredId] = useState<number | null>(null)
+
+  useEffect(() => { ensureRiverStyle() }, [])
 
   return (
     <div className="w-full overflow-hidden py-8">
@@ -56,20 +72,6 @@ export function PreviewRiver() {
           {SHAPES[hoveredId]?.name}
         </div>
       )}
-
-      <style>{`
-        @keyframes river-scroll {
-          0% { transform: translateX(0); }
-          100% { transform: translateX(-50%); }
-        }
-        @keyframes fade-in {
-          from { opacity: 0; transform: translateY(-10px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        .animate-fade-in {
-          animation: fade-in 0.3s ease-out;
-        }
-      `}</style>
     </div>
   )
 }

@@ -29,7 +29,6 @@ export function ParallaxLetters() {
         const ox = mouse.current.x * depth * 0.15
         const oy = mouse.current.y * depth * 0.15
         span.style.transform = `translate3d(${ox}px, ${oy}px, ${depth}px) rotateX(${oy * 0.1}deg) rotateY(${ox * 0.1}deg)`
-        span.style.textShadow = `0 ${Math.abs(depth) * 0.1}px ${Math.abs(depth) * 0.2}px rgba(99,102,241,${Math.abs(depth) * 0.003}), 0 ${Math.abs(depth) * 0.05}px ${Math.abs(depth) * 0.1}px rgba(99,102,241,${Math.abs(depth) * 0.005})`
       })
       rafRef.current = requestAnimationFrame(update)
     }
