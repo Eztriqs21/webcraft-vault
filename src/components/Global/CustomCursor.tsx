@@ -59,7 +59,8 @@ export function CustomCursor() {
 
     const handleMouseOut = (e: MouseEvent) => {
       const target = e.target as HTMLElement
-      if (target.closest('[data-cursor]')) {
+      const relatedTarget = e.relatedTarget as HTMLElement
+      if (target.closest('[data-cursor]') && !relatedTarget?.closest('[data-cursor]')) {
         magneticTarget.current = null
       }
     }

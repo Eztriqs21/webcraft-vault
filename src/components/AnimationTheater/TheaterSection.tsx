@@ -1,4 +1,4 @@
-import { useRef, useState, useLayoutEffect } from 'react'
+import React, { useRef, useState, useLayoutEffect } from 'react'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { ANIMATIONS } from '../../data/animations'
@@ -19,17 +19,15 @@ export function TheaterSection() {
     if (!container || !inner) return
 
     const ctx = gsap.context(() => {
-      const totalScroll = inner.scrollWidth - window.innerWidth
-
       gsap.to(inner, {
-        x: () => -totalScroll,
+        x: () => -(inner.scrollWidth - window.innerWidth),
         ease: 'none',
         scrollTrigger: {
           trigger: container,
           pin: container,
           scrub: 1,
           anticipatePin: 1,
-          end: () => `+=${totalScroll}`,
+          end: () => `+=${inner.scrollWidth - window.innerWidth}`,
           invalidateOnRefresh: true,
           onUpdate: (self) => {
             const progress = self.progress
@@ -59,14 +57,20 @@ export function TheaterSection() {
         lang: 'typescript',
         theme: 'dark-plus',
       })
-      setHighlightedCode(html)
+      setViewingCode((current) => {
+        if (current === id) setHighlightedCode(html)
+        return current
+      })
     } catch {
-      setHighlightedCode(`<pre>${anim.code}</pre>`)
+      setViewingCode((current) => {
+        if (current === id) setHighlightedCode(`<pre>${anim.code}</pre>`)
+        return current
+      })
     }
   }
 
   return (
-    <section data-section="theater" className="relative">
+    <section className="relative">
       <div className="max-w-7xl mx-auto px-4 pt-16 md:pt-24 pb-8">
         <h2 className="font-display text-4xl sm:text-5xl md:text-7xl font-bold text-vault-text-bright mb-4">
           Animation Theater
@@ -89,10 +93,11 @@ export function TheaterSection() {
             <TheaterFrame
               key={anim.id}
               animation={anim}
+              animationId={anim.id}
               isActive={index === activeIndex}
               isViewingCode={viewingCode === anim.id}
               highlightedCode={highlightedCode}
-              onViewCode={() => handleViewCode(anim.id)}
+              onViewCode={handleViewCode}
             />
           ))}
         </div>
@@ -101,18 +106,20 @@ export function TheaterSection() {
   )
 }
 
-function TheaterFrame({
+const TheaterFrame = React.memo(function TheaterFrame({
   animation,
+  animationId,
   isActive,
   isViewingCode,
   highlightedCode,
   onViewCode,
 }: {
   animation: (typeof ANIMATIONS)[0]
+  animationId: number
   isActive: boolean
   isViewingCode: boolean
   highlightedCode: string
-  onViewCode: () => void
+  onViewCode: (id: number) => void
 }) {
   const AnimComponent = animation.component
 
@@ -145,7 +152,7 @@ function TheaterFrame({
           ))}
         </div>
         <button
-          onClick={onViewCode}
+          onClick={() => onViewCode(animationId)}
           className="mt-auto px-3 md:px-4 py-1.5 md:py-2 text-xs md:text-sm font-medium rounded-lg bg-[rgba(255,255,255,0.05)] text-[#999] hover:bg-[rgba(255,255,255,0.1)] hover:text-vault-text-bright transition-all self-start"
           data-cursor="pointer"
         >
@@ -169,4 +176,4 @@ function TheaterFrame({
       )}
     </div>
   )
-}
+})

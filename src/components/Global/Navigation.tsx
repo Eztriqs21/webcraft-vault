@@ -48,7 +48,7 @@ export function Navigation() {
   const scrollTo = (id: string) => {
     const el = document.querySelector(`[data-section="${id}"]`)
     if (el) {
-      const y = el instanceof HTMLElement ? el.offsetTop : 0
+      const y = el.getBoundingClientRect().top + window.scrollY
       window.scrollTo({ top: y, behavior: 'auto' })
     }
   }

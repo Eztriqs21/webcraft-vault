@@ -82,10 +82,18 @@ function Starfield() {
     }))
 
     let raf: number
+    let cachedW = 0
+    let cachedH = 0
 
     const animate = () => {
-      canvas.width = canvas.offsetWidth
-      canvas.height = canvas.offsetHeight
+      const newW = canvas.offsetWidth
+      const newH = canvas.offsetHeight
+      if (newW !== cachedW || newH !== cachedH) {
+        cachedW = newW
+        cachedH = newH
+        canvas.width = newW
+        canvas.height = newH
+      }
 
       ctx.fillStyle = '#030303'
       ctx.fillRect(0, 0, canvas.width, canvas.height)

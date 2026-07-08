@@ -7,6 +7,8 @@ export function LoadingSequence({ onComplete }: { onComplete: () => void }) {
   const [scrambledText, setScrambledText] = useState('')
   const targetText = 'Assembling the vault...'
   const intervalRef = useRef<ReturnType<typeof setInterval>>(null)
+  const onCompleteRef = useRef(onComplete)
+  onCompleteRef.current = onComplete
 
   useEffect(() => {
     const t1 = setTimeout(() => setPhase('text'), 800)
@@ -41,27 +43,37 @@ export function LoadingSequence({ onComplete }: { onComplete: () => void }) {
   useEffect(() => {
     if (phase !== 'bar') return
 
-    const loadPromise = document.fonts.ready
+    let cancelled = false
+    let rafId: number
+    let timeoutId: ReturnType<typeof setTimeout>
     let current = 0
 
     const tick = () => {
       current += 2
       setProgress(Math.min(current, 100))
-      if (current < 100) requestAnimationFrame(tick)
+      if (current < 100 && !cancelled) rafId = requestAnimationFrame(tick)
     }
-    requestAnimationFrame(tick)
+    rafId = requestAnimationFrame(tick)
 
-    loadPromise.then(() => {
-      setTimeout(() => setPhase('reveal'), 600)
+    document.fonts.ready.then(() => {
+      if (!cancelled) {
+        timeoutId = setTimeout(() => setPhase('reveal'), 600)
+      }
     })
+
+    return () => {
+      cancelled = true
+      cancelAnimationFrame(rafId)
+      clearTimeout(timeoutId)
+    }
   }, [phase])
 
   useEffect(() => {
     if (phase === 'reveal') {
-      const t = setTimeout(onComplete, 800)
+      const t = setTimeout(() => onCompleteRef.current(), 800)
       return () => clearTimeout(t)
     }
-  }, [phase, onComplete])
+  }, [phase])
 
   return (
     <AnimatePresence>

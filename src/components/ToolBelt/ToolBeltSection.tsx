@@ -43,6 +43,9 @@ export function ToolBeltSection() {
   useEffect(() => {
     if (isMobile) return
 
+    let cachedW = 0
+    let cachedH = 0
+
     const animate = () => {
       const canvas = canvasRef.current
       if (!canvas) { rafRef.current = requestAnimationFrame(animate); return }
@@ -54,8 +57,12 @@ export function ToolBeltSection() {
 
       const w = container.offsetWidth
       const h = container.offsetHeight
-      canvas.width = w
-      canvas.height = h
+      if (w !== cachedW || h !== cachedH) {
+        cachedW = w
+        cachedH = h
+        canvas.width = w
+        canvas.height = h
+      }
 
       ctx.clearRect(0, 0, w, h)
 

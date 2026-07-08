@@ -1,5 +1,4 @@
 import { useRef, useLayoutEffect } from 'react'
-import { useReducedMotion } from '../../hooks/useReducedMotion'
 
 interface SectionTransitionProps {
   accent?: string
@@ -9,7 +8,6 @@ interface SectionTransitionProps {
 
 export function SectionTransition({ accent = '#6366f1', children, sectionKey }: SectionTransitionProps) {
   const ref = useRef<HTMLDivElement>(null)
-  const prefersReducedMotion = useReducedMotion()
 
   useLayoutEffect(() => {
     const el = ref.current
@@ -30,7 +28,7 @@ export function SectionTransition({ accent = '#6366f1', children, sectionKey }: 
 
     observer.observe(el)
     return () => observer.disconnect()
-  }, [accent, prefersReducedMotion])
+  }, [accent])
 
   return (
     <div ref={ref} data-section={sectionKey} className="relative">

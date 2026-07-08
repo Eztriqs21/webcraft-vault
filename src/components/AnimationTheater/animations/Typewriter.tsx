@@ -11,10 +11,13 @@ export function Typewriter() {
       setText(fullText.slice(0, indexRef.current))
       indexRef.current++
     } else {
-      resetTimeoutRef.current = window.setTimeout(() => {
-        indexRef.current = 0
-        setText('')
-      }, 2000)
+      if (!resetTimeoutRef.current) {
+        resetTimeoutRef.current = window.setTimeout(() => {
+          indexRef.current = 0
+          setText('')
+          resetTimeoutRef.current = 0
+        }, 2000)
+      }
     }
   }, [fullText])
 
@@ -30,7 +33,7 @@ export function Typewriter() {
     <div className="w-full h-full flex items-center justify-center">
       <div className="font-mono text-lg md:text-xl text-vault-text-bright">
         <span>{text}</span>
-        <span className="inline-block w-0.5 h-5 bg-vault-accent ml-1 animate-pulse" />
+        <span className="inline-block w-0.5 h-5 bg-[#6366f1] ml-1 animate-pulse" />
       </div>
     </div>
   )

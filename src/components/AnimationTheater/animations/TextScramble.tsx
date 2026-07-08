@@ -3,6 +3,17 @@ import { motion } from 'framer-motion'
 
 const CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*'
 
+const PHRASES = [
+  'HOVER ME',
+  'TEXT SCRAMBLE',
+  'DIGITAL GLITCH',
+  'RANDOM CHARS',
+  'NOW READABLE',
+  'ANIMATION',
+  'WEB CRAFT',
+  'VAULT',
+]
+
 export function TextScramble() {
   const [text, setText] = useState('HOVER ME')
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
@@ -36,24 +47,13 @@ export function TextScramble() {
     }, 30)
   }, [])
 
-  const phrases = [
-    'HOVER ME',
-    'TEXT SCRAMBLE',
-    'DIGITAL GLITCH',
-    'RANDOM CHARS',
-    'NOW READABLE',
-    'ANIMATION',
-    'WEB CRAFT',
-    'VAULT',
-  ]
-
   const [phraseIndex, setPhraseIndex] = useState(0)
 
   const handleHover = useCallback(() => {
-    const nextIndex = (phraseIndex + 1) % phrases.length
+    const nextIndex = (phraseIndex + 1) % PHRASES.length
     setPhraseIndex(nextIndex)
-    scramble(phrases[nextIndex])
-  }, [phraseIndex, scramble, phrases])
+    scramble(PHRASES[nextIndex])
+  }, [phraseIndex, scramble])
 
   useEffect(() => {
     return () => {

@@ -1,4 +1,4 @@
-import { useCallback, useRef } from 'react'
+import { useCallback, useRef, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { gsap } from 'gsap'
 import { ParallaxLetters } from './ParallaxLetters'
@@ -6,12 +6,21 @@ import { PreviewRiver } from './PreviewRiver'
 
 export function HeroEntrance() {
   const heroRef = useRef<HTMLElement>(null)
+  const tlRef = useRef<gsap.core.Timeline | null>(null)
+
+  useEffect(() => {
+    return () => {
+      tlRef.current?.kill()
+    }
+  }, [])
 
   const handleEnter = useCallback(() => {
     const hero = heroRef.current
     if (!hero) return
 
+    tlRef.current?.kill()
     const tl = gsap.timeline()
+    tlRef.current = tl
 
     tl.to(hero, {
       scale: 1.1,

@@ -48,10 +48,7 @@ export function AuroraBackground() {
     window.addEventListener('resize', resize)
 
     const draw = (now: number) => {
-      if (!isVisible) {
-        raf = requestAnimationFrame(draw)
-        return
-      }
+      if (!isVisible) return
       if (now - lastFrame < 33) {
         raf = requestAnimationFrame(draw)
         return

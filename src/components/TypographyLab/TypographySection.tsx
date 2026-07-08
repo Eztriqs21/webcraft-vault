@@ -9,7 +9,14 @@ export function TypographySection() {
   const [context, setContext] = useState<(typeof CONTEXTS)[number]>('hero')
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null)
   const listRef = useRef<HTMLDivElement>(null)
+  const copiedTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const activePairing = FONT_PAIRINGS[activeIndex]
+
+  useEffect(() => {
+    return () => {
+      if (copiedTimeoutRef.current) clearTimeout(copiedTimeoutRef.current)
+    }
+  }, [])
 
   useEffect(() => {
     loadFont(activePairing.heading)
@@ -54,7 +61,8 @@ export function TypographySection() {
     const css = `font-family: '${pairing.heading}', sans-serif;\n/* Body: '${pairing.body}' */`
     navigator.clipboard.writeText(css).catch(() => {})
     setCopiedIndex(index)
-    setTimeout(() => setCopiedIndex(null), 1500)
+    if (copiedTimeoutRef.current) clearTimeout(copiedTimeoutRef.current)
+    copiedTimeoutRef.current = setTimeout(() => setCopiedIndex(null), 1500)
   }, [])
 
   return (
