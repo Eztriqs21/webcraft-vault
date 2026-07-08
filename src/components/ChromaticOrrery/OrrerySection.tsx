@@ -55,6 +55,10 @@ export function OrrerySection() {
                     }
                     transition={{ type: 'spring', stiffness: 300, damping: 25 }}
                     onClick={() => handlePlanetClick(i)}
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`${palette.name} color palette`}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handlePlanetClick(i) } }}
                     data-cursor="pointer"
                   >
                     <div

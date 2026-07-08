@@ -65,7 +65,10 @@ export function TextScramble() {
     <div className="w-full h-full flex items-center justify-center">
       <motion.div
         className="cursor-pointer select-none"
+        role="button"
+        tabIndex={0}
         onMouseEnter={handleHover}
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleHover() } }}
         whileHover={{ scale: 1.05 }}
         data-cursor="pointer"
       >

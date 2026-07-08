@@ -66,6 +66,7 @@ export function CreditsFooter() {
 
 function Starfield() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const isVisibleRef = useRef(true)
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -85,7 +86,17 @@ function Starfield() {
     let cachedW = 0
     let cachedH = 0
 
+    const observer = new IntersectionObserver(
+      ([entry]) => { isVisibleRef.current = entry.isIntersecting },
+      { threshold: 0.1 }
+    )
+    observer.observe(canvas)
+
     const animate = () => {
+      if (!isVisibleRef.current) {
+        raf = requestAnimationFrame(animate)
+        return
+      }
       const newW = canvas.offsetWidth
       const newH = canvas.offsetHeight
       if (newW !== cachedW || newH !== cachedH) {
@@ -124,7 +135,10 @@ function Starfield() {
     }
 
     raf = requestAnimationFrame(animate)
-    return () => cancelAnimationFrame(raf)
+    return () => {
+      cancelAnimationFrame(raf)
+      observer.disconnect()
+    }
   }, [])
 
   return (

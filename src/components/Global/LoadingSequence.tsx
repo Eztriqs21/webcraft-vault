@@ -19,6 +19,7 @@ export function LoadingSequence({ onComplete }: { onComplete: () => void }) {
     if (phase !== 'text') return
     let iteration = 0
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+    let t: ReturnType<typeof setTimeout>
 
     intervalRef.current = setInterval(() => {
       setScrambledText(
@@ -34,11 +35,14 @@ export function LoadingSequence({ onComplete }: { onComplete: () => void }) {
       iteration += 0.6
       if (iteration > targetText.length) {
         clearInterval(intervalRef.current!)
-        setTimeout(() => setPhase('bar'), 400)
+        t = setTimeout(() => setPhase('bar'), 400)
       }
     }, 35)
 
-    return () => clearInterval(intervalRef.current!)
+    return () => {
+      clearInterval(intervalRef.current!)
+      clearTimeout(t)
+    }
   }, [phase])
 
   useEffect(() => {

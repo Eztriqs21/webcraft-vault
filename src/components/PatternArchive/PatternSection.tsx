@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 
 const PATTERNS = [
@@ -16,6 +16,15 @@ const PATTERNS = [
 
 export function PatternSection() {
   const [expandedId, setExpandedId] = useState<number | null>(null)
+
+  useEffect(() => {
+    if (expandedId === null) return
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setExpandedId(null)
+    }
+    window.addEventListener('keydown', handleEscape)
+    return () => window.removeEventListener('keydown', handleEscape)
+  }, [expandedId])
 
   return (
     <section className="relative py-16 md:py-24 min-h-screen">

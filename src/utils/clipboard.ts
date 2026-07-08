@@ -6,12 +6,22 @@ export function copyToClipboard(text: string): Promise<boolean> {
 }
 
 let toastTimeout: ReturnType<typeof setTimeout> | null = null
+let toastStyleEl: HTMLStyleElement | null = null
+
+function ensureToastStyle() {
+  if (toastStyleEl && document.head.contains(toastStyleEl)) return
+  toastStyleEl = document.createElement('style')
+  toastStyleEl.textContent = `@keyframes toast-progress { from { width: 100%; } to { width: 0%; } }`
+  document.head.appendChild(toastStyleEl)
+}
 
 export function showToast(message: string) {
   const existing = document.getElementById('vault-toast')
   if (existing) existing.remove()
 
   if (toastTimeout) clearTimeout(toastTimeout)
+
+  ensureToastStyle()
 
   const toast = document.createElement('div')
   toast.id = 'vault-toast'
@@ -57,10 +67,6 @@ export function showToast(message: string) {
     animation: toast-progress 2s linear forwards;
   `
 
-  const style = document.createElement('style')
-  style.textContent = `@keyframes toast-progress { from { width: 100%; } to { width: 0%; } }`
-  document.head.appendChild(style)
-
   toast.appendChild(check)
   toast.appendChild(text)
   toast.appendChild(progress)
@@ -76,7 +82,6 @@ export function showToast(message: string) {
     toast.style.transform = 'translateX(-50%) translateY(20px)'
     setTimeout(() => {
       toast.remove()
-      style.remove()
     }, 300)
   }, 2000)
 }

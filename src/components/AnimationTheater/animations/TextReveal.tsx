@@ -1,9 +1,20 @@
 import { useRef, useEffect } from 'react'
 
+const sharedStyleId = 'text-reveal-shared-style'
+
+function ensureSharedStyle() {
+  if (document.getElementById(sharedStyleId)) return
+  const style = document.createElement('style')
+  style.id = sharedStyleId
+  style.textContent = `.text-reveal-container.revealed span { transform: translateY(0) !important; }`
+  document.head.appendChild(style)
+}
+
 export function TextReveal() {
   const ref = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
+    ensureSharedStyle()
     const el = ref.current
     if (!el) return
 
@@ -39,11 +50,6 @@ export function TextReveal() {
             </span>
           ))}
         </div>
-        <style>{`
-          .text-reveal-container.revealed span {
-            transform: translateY(0) !important;
-          }
-        `}</style>
       </div>
     </div>
   )
