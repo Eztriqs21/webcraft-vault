@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { SmoothScroll } from './components/Global/SmoothScroll'
 import { CustomCursor } from './components/Global/CustomCursor'
 import { AuroraBackground } from './components/Global/AuroraBackground'
@@ -21,6 +21,15 @@ export default function App() {
   const handleLoadComplete = useCallback(() => {
     setIsLoaded(true)
   }, [])
+
+  useEffect(() => {
+    if (!isLoaded) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => { document.body.style.overflow = '' }
+  }, [isLoaded])
 
   return (
     <SmoothScroll>

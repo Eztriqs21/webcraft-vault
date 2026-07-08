@@ -63,7 +63,7 @@ export function Navigation() {
           transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
           className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[9990]"
         >
-          <div className="flex items-center gap-1 px-3 py-2 rounded-full bg-[rgba(10,10,10,0.7)] backdrop-blur-xl border border-[rgba(255,255,255,0.06)] shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
+          <nav className="flex items-center gap-1 px-3 py-2 rounded-full bg-[rgba(10,10,10,0.7)] backdrop-blur-xl border border-[rgba(255,255,255,0.06)] shadow-[0_8px_32px_rgba(0,0,0,0.4)]" aria-label="Section navigation">
             {NAV_ITEMS.map((item) => {
               const isActive = activeSection === item.id
               return (
@@ -72,10 +72,11 @@ export function Navigation() {
                   onClick={() => scrollTo(item.id)}
                   onMouseEnter={() => setHoveredItem(item.id)}
                   onMouseLeave={() => setHoveredItem(null)}
+                  aria-label={`Navigate to ${item.label}`}
                   className={`relative flex items-center gap-2 px-3 py-2 rounded-full text-xs font-medium transition-all duration-300 ${
                     isActive
                       ? 'text-white'
-                      : 'text-[#666] hover:text-[#999]'
+                      : 'text-[#888] hover:text-[#999]'
                   }`}
                   data-cursor="pointer"
                 >
@@ -107,7 +108,7 @@ export function Navigation() {
                 </button>
               )
             })}
-          </div>
+          </nav>
         </motion.div>
       )}
     </AnimatePresence>

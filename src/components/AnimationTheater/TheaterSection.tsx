@@ -1,4 +1,4 @@
-import React, { useRef, useState, useLayoutEffect } from 'react'
+import React, { useRef, useState, useLayoutEffect, useCallback } from 'react'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { ANIMATIONS } from '../../data/animations'
@@ -9,6 +9,7 @@ export function TheaterSection() {
   const containerRef = useRef<HTMLDivElement>(null)
   const innerRef = useRef<HTMLDivElement>(null)
   const [activeIndex, setActiveIndex] = useState(0)
+  const viewingCodeRef = useRef<number | null>(null)
   const [viewingCode, setViewingCode] = useState<number | null>(null)
   const [highlightedCode, setHighlightedCode] = useState<string>('')
 
@@ -40,8 +41,9 @@ export function TheaterSection() {
     return () => ctx.revert()
   }, [])
 
-  const handleViewCode = async (id: number) => {
-    if (viewingCode === id) {
+  const handleViewCode = useCallback(async (id: number) => {
+    if (viewingCodeRef.current === id) {
+      viewingCodeRef.current = null
       setViewingCode(null)
       return
     }
@@ -49,6 +51,7 @@ export function TheaterSection() {
     const anim = ANIMATIONS.find((a) => a.id === id)
     if (!anim) return
 
+    viewingCodeRef.current = id
     setViewingCode(id)
     try {
       const { getHighlighter } = await import('../../lib/shiki')
@@ -67,7 +70,7 @@ export function TheaterSection() {
         return current
       })
     }
-  }
+  }, [])
 
   return (
     <section className="relative">
@@ -75,10 +78,10 @@ export function TheaterSection() {
         <h2 className="font-display text-4xl sm:text-5xl md:text-7xl font-bold text-vault-text-bright mb-4">
           Animation Theater
         </h2>
-        <p className="text-[#666] text-lg max-w-xl mb-2">
+        <p className="text-[#888] text-lg max-w-xl mb-2">
           32 living, breathing animations. Each one real, interactive, and ready to ship.
         </p>
-        <p className="text-[#444] text-sm font-mono">
+        <p className="text-[#888] text-sm font-mono">
           Frame {activeIndex + 1} / {ANIMATIONS.length}
         </p>
       </div>
@@ -140,7 +143,7 @@ const TheaterFrame = React.memo(function TheaterFrame({
         <h3 className="font-display text-lg md:text-2xl font-bold text-vault-text-bright mb-1 md:mb-2">
           {animation.name}
         </h3>
-        <p className="text-[#666] text-xs md:text-sm mb-2 md:mb-3">{animation.mood}</p>
+        <p className="text-[#888] text-xs md:text-sm mb-2 md:mb-3">{animation.mood}</p>
         <div className="flex flex-wrap gap-1 md:gap-1.5 mb-3 md:mb-4">
           {animation.tags.map((tag) => (
             <span
@@ -168,7 +171,7 @@ const TheaterFrame = React.memo(function TheaterFrame({
               dangerouslySetInnerHTML={{ __html: highlightedCode }}
             />
           ) : (
-            <pre className="p-4 md:p-6 text-xs md:text-sm font-mono text-[#666]">
+            <pre className="p-4 md:p-6 text-xs md:text-sm font-mono text-[#888]">
               {animation.code}
             </pre>
           )}

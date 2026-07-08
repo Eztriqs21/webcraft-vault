@@ -81,7 +81,7 @@ export function SpringyCards() {
             className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
               mode === m.id
                 ? 'text-white'
-                : 'text-[#666] hover:text-[#999]'
+                : 'text-[#888] hover:text-[#999]'
             }`}
             style={{
               background: mode === m.id ? `${MODE_COLORS[m.id]}20` : 'rgba(255,255,255,0.03)',

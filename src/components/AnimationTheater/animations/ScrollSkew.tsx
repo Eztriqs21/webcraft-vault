@@ -5,12 +5,14 @@ export function ScrollSkew() {
   const innerRef = useRef<HTMLDivElement>(null)
   const currentSkew = useRef(0)
   const rafRef = useRef<number>(0)
+  const isVisibleRef = useRef(true)
 
   useEffect(() => {
     let lastScroll = window.scrollY
     let lastTime = performance.now()
 
     const handleScroll = () => {
+      if (!isVisibleRef.current) return
       const now = performance.now()
       const dt = Math.max(now - lastTime, 1)
       lastTime = now
@@ -24,6 +26,10 @@ export function ScrollSkew() {
     }
 
     const decay = () => {
+      if (!isVisibleRef.current) {
+        rafRef.current = requestAnimationFrame(decay)
+        return
+      }
       currentSkew.current *= 0.92
       if (Math.abs(currentSkew.current) < 0.1) currentSkew.current = 0
 
@@ -37,12 +43,19 @@ export function ScrollSkew() {
       rafRef.current = requestAnimationFrame(decay)
     }
 
+    const observer = new IntersectionObserver(
+      ([entry]) => { isVisibleRef.current = entry.isIntersecting },
+      { threshold: 0.1 }
+    )
+    if (containerRef.current) observer.observe(containerRef.current)
+
     window.addEventListener('scroll', handleScroll, { passive: true })
     rafRef.current = requestAnimationFrame(decay)
 
     return () => {
       window.removeEventListener('scroll', handleScroll)
       cancelAnimationFrame(rafRef.current)
+      observer.disconnect()
     }
   }, [])
 

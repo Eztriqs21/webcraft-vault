@@ -53,7 +53,7 @@ export function HeroEntrance() {
         <ParallaxLetters />
 
         <motion.p
-          className="text-center text-[#666] text-base md:text-xl font-light mt-6 md:mt-8 mb-8 md:mb-12 max-w-2xl mx-auto px-2"
+          className="text-center text-[#888] text-base md:text-xl font-light mt-6 md:mt-8 mb-8 md:mb-12 max-w-2xl mx-auto px-2"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.8, duration: 0.8 }}

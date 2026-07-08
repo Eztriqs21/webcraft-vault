@@ -30,7 +30,7 @@ export function PatternSection() {
           <h2 className="font-display text-4xl sm:text-5xl md:text-7xl font-bold text-vault-text-bright mb-4">
             Pattern Archive
           </h2>
-          <p className="text-[#666] text-lg max-w-xl">
+          <p className="text-[#888] text-lg max-w-xl">
             10 essential UI patterns. Each one a live, interactive demo.
           </p>
         </motion.div>
@@ -40,11 +40,14 @@ export function PatternSection() {
             <motion.div
               key={pattern.id}
               layout
+              role="button"
+              tabIndex={0}
               className={`relative rounded-2xl border border-[rgba(255,255,255,0.06)] bg-vault-bg overflow-hidden cursor-pointer ${
                 i === 0 ? 'sm:col-span-2' : ''
               } ${expandedId === pattern.id ? 'sm:col-span-2 lg:col-span-3 min-h-[60vh]' : 'min-h-[200px] md:min-h-[250px]'}`}
               whileHover={{ scale: expandedId === pattern.id ? 1 : 1.02 }}
               onClick={() => setExpandedId(expandedId === pattern.id ? null : pattern.id)}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setExpandedId(expandedId === pattern.id ? null : pattern.id) } }}
               data-cursor="pointer"
             >
               {expandedId === pattern.id ? (
@@ -61,7 +64,7 @@ export function PatternSection() {
                       <h3 className="font-display text-base md:text-lg font-bold text-vault-text-bright">
                         {pattern.name}
                       </h3>
-                      <p className="text-[10px] md:text-xs text-[#666]">{pattern.description}</p>
+                      <p className="text-[10px] md:text-xs text-[#888]">{pattern.description}</p>
                     </div>
                     <button
                       onClick={(e) => {
@@ -81,7 +84,7 @@ export function PatternSection() {
                     <h3 className="font-display text-base md:text-lg font-bold text-vault-text-bright mb-1">
                       {pattern.name}
                     </h3>
-                    <p className="text-[10px] md:text-xs text-[#666]">{pattern.description}</p>
+                    <p className="text-[10px] md:text-xs text-[#888]">{pattern.description}</p>
                   </div>
                 </div>
               )}
@@ -293,7 +296,7 @@ function PatternFullDemo({ patternId }: { patternId: number }) {
           <div key={i} className="rounded-xl p-4" style={{ background: c.bg04, border: `1px solid ${c.bd06}` }}>
             <div className="flex items-center justify-between">
               <div className="h-3 w-32 rounded" style={{ background: c.bg12 }} />
-              <div className="text-[#666] text-lg">+</div>
+              <div className="text-[#888] text-lg">+</div>
             </div>
           </div>
         ))}

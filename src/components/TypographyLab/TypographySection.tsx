@@ -80,7 +80,7 @@ export function TypographySection() {
               <h2 className="font-display text-4xl sm:text-5xl md:text-7xl font-bold text-vault-text-bright mb-4">
                 Typography Laboratory
               </h2>
-              <p className="text-[#666] text-lg max-w-xl">
+              <p className="text-[#888] text-lg max-w-xl">
                 20 curated font pairings. Live-updating editorial canvas. Find the perfect voice.
               </p>
             </div>
@@ -124,7 +124,7 @@ export function TypographySection() {
                   className={`px-3 py-1 text-xs font-medium rounded-full transition-all capitalize whitespace-nowrap ${
                     context === c
                       ? 'bg-[rgba(16,185,129,0.15)] text-[#10b981]'
-                      : 'bg-[rgba(255,255,255,0.05)] text-[#666]'
+                      : 'bg-[rgba(255,255,255,0.05)] text-[#888]'
                   }`}
                 >
                   {c}
@@ -160,7 +160,7 @@ export function TypographySection() {
                   className={`px-3 py-1 text-xs font-medium rounded-full transition-all capitalize ${
                     context === c
                       ? 'bg-[rgba(16,185,129,0.15)] text-[#10b981]'
-                      : 'bg-[rgba(255,255,255,0.05)] text-[#666] hover:text-[#999]'
+                      : 'bg-[rgba(255,255,255,0.05)] text-[#888] hover:text-[#999]'
                   }`}
                   data-cursor="pointer"
                 >
@@ -178,7 +178,10 @@ export function TypographySection() {
               <div
                 key={i}
                 data-index={i}
+                role="button"
+                tabIndex={0}
                 onClick={() => setActiveIndex(i)}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setActiveIndex(i) } }}
                 className={`group relative p-4 md:p-6 rounded-xl border cursor-pointer transition-all ${
                   i === activeIndex
                     ? 'border-[rgba(16,185,129,0.3)] bg-[rgba(16,185,129,0.05)]'
@@ -193,7 +196,7 @@ export function TypographySection() {
                   >
                     {pairing.heading}
                   </span>
-                  <span className="text-[#666] mx-2">+</span>
+                  <span className="text-[#888] mx-2">+</span>
                   <span
                     className="text-vault-text-bright font-medium text-sm md:text-base"
                     style={{ fontFamily: pairing.body }}
@@ -202,13 +205,13 @@ export function TypographySection() {
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-xs text-[#666] font-mono">{pairing.personality}</span>
+                  <span className="text-xs text-[#888] font-mono">{pairing.personality}</span>
                   <button
                     onClick={(e) => {
                       e.stopPropagation()
                       handleCopyCSS(pairing, i)
                     }}
-                    className="opacity-0 group-hover:opacity-100 transition-opacity px-2 py-1 text-[10px] font-mono rounded bg-[rgba(255,255,255,0.05)] text-[#666] hover:text-[#10b981]"
+                    className="opacity-0 group-hover:opacity-100 transition-opacity px-2 py-1 text-[10px] font-mono rounded bg-[rgba(255,255,255,0.05)] text-[#888] hover:text-[#10b981]"
                     data-cursor="pointer"
                   >
                     {copiedIndex === i ? 'Copied!' : 'Copy CSS'}
@@ -263,7 +266,7 @@ function ContextCanvas({
         <div className="text-lg md:text-2xl font-bold text-vault-text-bright" style={{ fontFamily: heading }}>
           Premium Headphones
         </div>
-        <div className="text-xs md:text-base text-[#666]" style={{ fontFamily: body }}>
+        <div className="text-xs md:text-base text-[#888]" style={{ fontFamily: body }}>
           Experience sound like never before. Crystal-clear audio with active noise cancellation.
         </div>
         <div className="flex items-center gap-4">
@@ -279,7 +282,7 @@ function ContextCanvas({
   if (context === 'blog') {
     return (
       <div className="space-y-3 md:space-y-4">
-        <div className="text-[10px] md:text-xs text-[#666] font-mono">JULY 5, 2026</div>
+        <div className="text-[10px] md:text-xs text-[#888] font-mono">JULY 5, 2026</div>
         <div className="text-xl md:text-3xl font-bold text-vault-text-bright leading-tight" style={{ fontFamily: heading }}>
           The Future of Design Systems
         </div>
@@ -287,7 +290,7 @@ function ContextCanvas({
           As design tools evolve, so must our approach to building scalable, maintainable systems.
           The intersection of code and creativity is where the magic happens.
         </div>
-        <div className="text-[10px] md:text-sm text-[#666]" style={{ fontFamily: body }}>5 min read</div>
+        <div className="text-[10px] md:text-sm text-[#888]" style={{ fontFamily: body }}>5 min read</div>
       </div>
     )
   }
@@ -300,7 +303,7 @@ function ContextCanvas({
       <div className="grid grid-cols-2 gap-2 md:gap-3">
         {[1, 2, 3, 4].map((i) => (
           <div key={i} className="p-3 md:p-4 rounded-xl bg-[rgba(255,255,255,0.03)]">
-            <div className="text-[10px] md:text-xs text-[#666]" style={{ fontFamily: body }}>Revenue</div>
+            <div className="text-[10px] md:text-xs text-[#888]" style={{ fontFamily: body }}>Revenue</div>
             <div className="text-base md:text-xl font-bold text-vault-text-bright mt-1" style={{ fontFamily: heading }}>
               ${(i * 1234).toLocaleString()}
             </div>

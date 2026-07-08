@@ -28,6 +28,12 @@ function DraggableBall({ index }: { index: number }) {
   const MAX_X = 220
   const MAX_Y = 140
 
+  const updateTransform = useCallback((x: number, y: number) => {
+    if (ballRef.current) {
+      ballRef.current.style.transform = `translate(${x}px, ${y}px)`
+    }
+  }, [])
+
   const physicsLoop = useCallback(() => {
     if (isDragging.current) {
       rafRef.current = requestAnimationFrame(physicsLoop)
@@ -48,15 +54,12 @@ function DraggableBall({ index }: { index: number }) {
     if (pos.y < 0) { pos.y = 0; vel.y *= -BOUNCE }
     if (pos.y > MAX_Y) { pos.y = MAX_Y; vel.y *= -BOUNCE }
 
-    if (ballRef.current) {
-      ballRef.current.style.left = `${pos.x}px`
-      ballRef.current.style.top = `${pos.y}px`
-    }
+    updateTransform(pos.x, pos.y)
 
     if (Math.abs(vel.x) > 0.1 || Math.abs(vel.y) > 0.1) {
       rafRef.current = requestAnimationFrame(physicsLoop)
     }
-  }, [])
+  }, [updateTransform])
 
   useEffect(() => {
     return () => cancelAnimationFrame(rafRef.current)
@@ -84,11 +87,8 @@ function DraggableBall({ index }: { index: number }) {
     posRef.current = { x: newX, y: newY }
     lastMouse.current = { x: e.clientX, y: e.clientY, time: now }
 
-    if (ballRef.current) {
-      ballRef.current.style.left = `${newX}px`
-      ballRef.current.style.top = `${newY}px`
-    }
-  }, [])
+    updateTransform(newX, newY)
+  }, [updateTransform])
 
   const handlePointerUp = useCallback(() => {
     isDragging.current = false
@@ -104,11 +104,10 @@ function DraggableBall({ index }: { index: number }) {
       whileTap={{ scale: 1.2 }}
       className="absolute w-12 h-12 rounded-full cursor-grab active:cursor-grabbing touch-none"
       style={{
-        left: posRef.current.x,
-        top: posRef.current.y,
+        transform: `translate(${posRef.current.x}px, ${posRef.current.y}px)`,
         background: colors[index],
         boxShadow: `0 4px 20px ${colors[index]}55`,
-        willChange: 'left, top',
+        willChange: 'transform',
       }}
       data-cursor="grab"
     />

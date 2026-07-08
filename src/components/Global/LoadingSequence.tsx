@@ -183,7 +183,7 @@ export function LoadingSequence({ onComplete }: { onComplete: () => void }) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 0.3 }}
             transition={{ delay: 1.5, duration: 1 }}
-            className="absolute bottom-12 font-mono text-xs text-[#444] tracking-[0.3em] uppercase"
+            className="absolute bottom-12 font-mono text-xs text-[#888] tracking-[0.3em] uppercase"
           >
             Anatomy of Iconic Websites
           </motion.p>

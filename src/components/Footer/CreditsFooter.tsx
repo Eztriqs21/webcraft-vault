@@ -36,7 +36,7 @@ export function CreditsFooter() {
                 transition={{ delay: i * 0.1, duration: 0.6 }}
               >
                 {credit.label && (
-                  <div className="text-xs text-[#666] font-mono uppercase tracking-[0.3em] mb-2">
+                  <div className="text-xs text-[#888] font-mono uppercase tracking-[0.3em] mb-2">
                     {credit.label}
                   </div>
                 )}
@@ -54,7 +54,7 @@ export function CreditsFooter() {
             transition={{ delay: 1, duration: 1 }}
             className="mt-24 pt-12 border-t border-[rgba(255,255,255,0.06)]"
           >
-            <div className="text-xs text-[#444] font-mono">
+            <div className="text-xs text-[#888] font-mono">
               WebCraft Vault — An immersive exhibition of award-winning web design
             </div>
           </motion.div>

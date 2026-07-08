@@ -27,6 +27,7 @@ export function ToolBeltSection() {
   const didDragRef = useRef(false)
   const dragOffset = useRef({ x: 0, y: 0 })
   const rafRef = useRef<number>(0)
+  const isVisibleRef = useRef(true)
   const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
@@ -46,7 +47,17 @@ export function ToolBeltSection() {
     let cachedW = 0
     let cachedH = 0
 
+    const observer = new IntersectionObserver(
+      ([entry]) => { isVisibleRef.current = entry.isIntersecting },
+      { threshold: 0.1 }
+    )
+    if (containerRef.current) observer.observe(containerRef.current)
+
     const animate = () => {
+      if (!isVisibleRef.current) {
+        rafRef.current = requestAnimationFrame(animate)
+        return
+      }
       const canvas = canvasRef.current
       if (!canvas) { rafRef.current = requestAnimationFrame(animate); return }
       const ctx = canvas.getContext('2d')
@@ -136,7 +147,10 @@ export function ToolBeltSection() {
     }
 
     rafRef.current = requestAnimationFrame(animate)
-    return () => cancelAnimationFrame(rafRef.current)
+    return () => {
+      cancelAnimationFrame(rafRef.current)
+      observer.disconnect()
+    }
   }, [isMobile])
 
   const handlePointerDown = useCallback((i: number, e: React.PointerEvent) => {
@@ -188,7 +202,7 @@ export function ToolBeltSection() {
           <h2 className="font-display text-4xl sm:text-5xl md:text-7xl font-bold text-vault-text-bright mb-4">
             The Tool Belt
           </h2>
-          <p className="text-[#666] text-lg max-w-xl">
+          <p className="text-[#888] text-lg max-w-xl">
             The tools, libraries, and inspiration sources that power award-winning websites.
           </p>
         </motion.div>
@@ -248,7 +262,7 @@ export function ToolBeltSection() {
                     {hoveredTool === i && (
                       <div className="absolute top-full left-1/2 -translate-x-1/2 mt-3 w-48 p-3 rounded-xl bg-[rgba(10,10,10,0.95)] border border-[rgba(255,255,255,0.08)] backdrop-blur-xl shadow-xl z-50 pointer-events-none">
                         <div className="text-xs font-bold text-vault-text-bright mb-1">{tool.name}</div>
-                        <div className="text-[10px] text-[#666] leading-relaxed">{tool.description}</div>
+                        <div className="text-[10px] text-[#888] leading-relaxed">{tool.description}</div>
                         <div className="mt-2 text-[10px] text-[#fbbf24] font-mono">{tool.category}</div>
                       </div>
                     )}
@@ -274,7 +288,7 @@ export function ToolBeltSection() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="text-sm font-medium text-vault-text-bright">{tool.name}</div>
-                  <div className="text-xs text-[#666] truncate">{tool.description}</div>
+                  <div className="text-xs text-[#888] truncate">{tool.description}</div>
                 </div>
                 <div className="text-[10px] text-[#fbbf24] font-mono">{tool.category}</div>
               </a>

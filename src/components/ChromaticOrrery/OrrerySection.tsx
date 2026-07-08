@@ -23,7 +23,7 @@ export function OrrerySection() {
           <h2 className="font-display text-4xl sm:text-5xl md:text-7xl font-bold text-vault-text-bright mb-4">
             Chromatic Orrery
           </h2>
-          <p className="text-[#666] text-lg max-w-xl">
+          <p className="text-[#888] text-lg max-w-xl">
             15 color palettes orbiting in space. Click to explore. Click a color to copy.
           </p>
         </motion.div>
@@ -64,7 +64,7 @@ export function OrrerySection() {
                         boxShadow: `0 0 30px ${palette.colors[1]}40, 0 0 60px ${palette.colors[1]}20`,
                       }}
                     />
-                    <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 whitespace-nowrap text-xs text-[#666] font-mono">
+                    <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 whitespace-nowrap text-xs text-[#888] font-mono">
                       {palette.name}
                     </div>
                   </motion.div>
@@ -98,7 +98,7 @@ export function OrrerySection() {
                       boxShadow: `0 0 30px ${palette.colors[1]}40`,
                     }}
                   />
-                  <div className="text-sm font-mono text-[#666]">{palette.name}</div>
+                  <div className="text-sm font-mono text-[#888]">{palette.name}</div>
                   <div className="flex gap-1 mt-3">
                     {palette.colors.map((c, ci) => (
                       <div
@@ -141,7 +141,7 @@ export function OrrerySection() {
                       className="h-16 md:h-24 rounded-xl mb-2 group-hover:scale-105 transition-transform"
                       style={{ backgroundColor: color }}
                     />
-                    <span className="text-[10px] md:text-xs font-mono text-[#666] group-hover:text-[#999]">
+                    <span className="text-[10px] md:text-xs font-mono text-[#888] group-hover:text-[#999]">
                       {color}
                     </span>
                   </button>
