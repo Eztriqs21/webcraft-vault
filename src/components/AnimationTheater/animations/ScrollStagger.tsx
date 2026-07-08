@@ -2,34 +2,38 @@ import { useRef, useEffect } from 'react'
 
 export function ScrollStagger() {
   const containerRef = useRef<HTMLDivElement>(null)
-  const timeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([])
+  const itemsRef = useRef<(HTMLDivElement | null)[]>([])
 
   useEffect(() => {
     const container = containerRef.current
     if (!container) return
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            const el = entry.target as HTMLElement
-            const delay = parseInt(el.dataset.delay || '0')
-            const t = setTimeout(() => {
-              el.classList.add('stagger-visible')
-            }, delay)
-            timeoutsRef.current.push(t)
-          }
-        })
-      },
-      { threshold: 0.2 }
-    )
+    const handleScroll = () => {
+      const containerRect = container.getBoundingClientRect()
+      const containerTop = containerRect.top
+      const containerHeight = containerRect.height
+      const viewportHeight = window.innerHeight
 
-    container.querySelectorAll('.stagger-item').forEach((item) => observer.observe(item))
-    return () => {
-      observer.disconnect()
-      timeoutsRef.current.forEach(clearTimeout)
-      timeoutsRef.current = []
+      const progress = Math.max(0, Math.min(1,
+        (viewportHeight - containerTop) / (containerHeight + viewportHeight)
+      ))
+
+      itemsRef.current.forEach((el, i) => {
+        if (!el) return
+        const itemThreshold = (i + 1) / itemsRef.current.length
+        const itemProgress = Math.max(0, Math.min(1,
+          (progress - itemThreshold + 0.3) / 0.3
+        ))
+
+        el.style.opacity = String(itemProgress)
+        el.style.transform = `translateY(${(1 - itemProgress) * 20}px)`
+      })
     }
+
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    handleScroll()
+
+    return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
   const items = Array.from({ length: 8 }, (_, i) => i)
@@ -40,20 +44,16 @@ export function ScrollStagger() {
         {items.map((i) => (
           <div
             key={i}
-            className="stagger-item w-14 h-14 md:w-16 md:h-16 rounded-lg opacity-0 translate-y-4"
-            data-delay={i * 80}
+            ref={(el) => { itemsRef.current[i] = el }}
+            className="w-14 h-14 md:w-16 md:h-16 rounded-lg"
             style={{
               background: `hsl(${i * 45}, 70%, 50%)`,
-              transition: 'all 0.5s cubic-bezier(0.16, 1, 0.3, 1)',
+              opacity: 0,
+              transform: 'translateY(20px)',
+              willChange: 'transform, opacity',
             }}
           />
         ))}
-        <style>{`
-          .stagger-visible {
-            opacity: 1 !important;
-            transform: translateY(0) !important;
-          }
-        `}</style>
       </div>
     </div>
   )

@@ -10,7 +10,12 @@ export function WebGLDistortion() {
   const materialRef = useRef<THREE.ShaderMaterial | null>(null)
   const animRef = useRef<number>(0)
   const mouseRef = useRef({ x: 0, y: 0 })
+  const isVisibleRef = useRef(true)
   const { ref: wrapperRef, isVisible } = useCanvasPause(0)
+
+  useEffect(() => {
+    isVisibleRef.current = isVisible
+  }, [isVisible])
 
   useEffect(() => {
     const container = containerRef.current
@@ -75,7 +80,10 @@ export function WebGLDistortion() {
     let time = 0
 
     const animate = () => {
-      if (!isVisible) return
+      if (!isVisibleRef.current) {
+        animRef.current = requestAnimationFrame(animate)
+        return
+      }
       time += 0.016
       material.uniforms.uTime.value = time
       material.uniforms.uMouse.value.set(mouseRef.current.x, mouseRef.current.y)
@@ -102,7 +110,7 @@ export function WebGLDistortion() {
         container.removeChild(renderer.domElement)
       }
     }
-  }, [isVisible])
+  }, [])
 
   return (
     <div ref={wrapperRef} className="w-full h-full flex items-center justify-center">

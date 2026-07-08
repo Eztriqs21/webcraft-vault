@@ -71,6 +71,10 @@ export function ConfettiBurst() {
       const gravity = 0.18
       const pieces = confettiRef.current
 
+      if (pieces.length > 400) {
+        pieces.splice(0, pieces.length - 400)
+      }
+
       for (let i = pieces.length - 1; i >= 0; i--) {
         const p = pieces[i]
         p.vy += gravity

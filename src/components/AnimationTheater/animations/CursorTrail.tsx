@@ -3,8 +3,8 @@ import { useCanvasPause } from '../../../hooks/useCanvasPause'
 
 export function CursorTrail() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const trailRef = useRef<{ x: number; y: number; age: number }[]>([])
-  const mouseRef = useRef({ x: 0, y: 0 })
+  const trailRef = useRef<{ x: number; y: number; age: number; dist: number }[]>([])
+  const lastPosRef = useRef({ x: 0, y: 0 })
   const animRef = useRef<number>(0)
   const { ref: wrapperRef, isVisible } = useCanvasPause(0)
 
@@ -21,10 +21,28 @@ export function CursorTrail() {
 
     const onMouseMove = (e: MouseEvent) => {
       const rect = canvas.getBoundingClientRect()
-      mouseRef.current.x = e.clientX - rect.left
-      mouseRef.current.y = e.clientY - rect.top
-      trailRef.current.push({ x: mouseRef.current.x, y: mouseRef.current.y, age: 0 })
-      if (trailRef.current.length > 60) trailRef.current.shift()
+      const x = ((e.clientX - rect.left) / rect.width) * W
+      const y = ((e.clientY - rect.top) / rect.height) * H
+
+      const dx = x - lastPosRef.current.x
+      const dy = y - lastPosRef.current.y
+      const dist = Math.hypot(dx, dy)
+
+      if (dist > 2) {
+        const steps = Math.min(Math.ceil(dist / 3), 8)
+        for (let s = 0; s < steps; s++) {
+          const t = (s + 1) / steps
+          trailRef.current.push({
+            x: lastPosRef.current.x + dx * t,
+            y: lastPosRef.current.y + dy * t,
+            age: 0,
+            dist: 0,
+          })
+        }
+        if (trailRef.current.length > 80) trailRef.current.splice(0, trailRef.current.length - 80)
+      }
+
+      lastPosRef.current = { x, y }
     }
 
     canvas.addEventListener('mousemove', onMouseMove)
@@ -35,16 +53,16 @@ export function CursorTrail() {
       ctx.clearRect(0, 0, W, H)
 
       const trail = trailRef.current
+
       for (let i = trail.length - 1; i >= 0; i--) {
         const point = trail[i]
         point.age++
-        if (point.age > 60) {
+        if (point.age > 50) {
           trail.splice(i, 1)
-          continue
         }
       }
 
-      if (trail.length > 2) {
+      if (trail.length > 3) {
         ctx.beginPath()
         ctx.moveTo(trail[0].x, trail[0].y)
         for (let i = 1; i < trail.length - 1; i++) {
@@ -60,9 +78,9 @@ export function CursorTrail() {
           last.x, last.y
         )
         gradient.addColorStop(0, 'rgba(99, 102, 241, 0)')
-        gradient.addColorStop(1, 'rgba(99, 102, 241, 0.6)')
+        gradient.addColorStop(1, 'rgba(99, 102, 241, 0.7)')
         ctx.strokeStyle = gradient
-        ctx.lineWidth = 3
+        ctx.lineWidth = 4
         ctx.lineCap = 'round'
         ctx.lineJoin = 'round'
         ctx.stroke()
@@ -70,10 +88,10 @@ export function CursorTrail() {
 
       for (let i = 0; i < trail.length; i++) {
         const point = trail[i]
-        const progress = point.age / 60
-        const size = (1 - progress) * 6
-        const alpha = (1 - progress) * 0.8
-        const hue = (i * 12) % 360
+        const progress = point.age / 50
+        const size = (1 - progress) * 5
+        const alpha = (1 - progress * progress) * 0.9
+        const hue = (230 + i * 3) % 360
 
         ctx.beginPath()
         ctx.arc(point.x, point.y, size, 0, Math.PI * 2)

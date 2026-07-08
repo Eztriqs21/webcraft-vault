@@ -36,9 +36,10 @@ export function PreviewRiver() {
           {[...SHAPES, ...SHAPES].map((shape, i) => (
             <div
               key={`${shape.id}-${i}`}
-              className="flex-shrink-0 cursor-pointer transition-transform duration-200"
+              className="flex-shrink-0 cursor-pointer transition-all duration-300 ease-out"
               style={{
                 transform: hoveredId === shape.id ? 'scale(2.5)' : 'scale(1)',
+                filter: hoveredId === shape.id ? 'drop-shadow(0 0 12px rgba(99,102,241,0.4))' : 'none',
               }}
               onMouseEnter={() => setHoveredId(shape.id)}
               onMouseLeave={() => setHoveredId(null)}

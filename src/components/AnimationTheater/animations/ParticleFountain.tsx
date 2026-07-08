@@ -72,10 +72,10 @@ export function ParticleFountain() {
       ctx.fillStyle = 'rgba(3, 3, 3, 0.15)'
       ctx.fillRect(0, 0, canvas.width, canvas.height)
 
+      spawn(canvas.width / 2, canvas.height * 0.85)
+
       if (mouseRef.current.active && Math.random() > 0.5) {
         spawn(mouseRef.current.x, mouseRef.current.y)
-      } else {
-        spawn(canvas.width / 2, canvas.height * 0.85)
       }
 
       const gravity = 0.15

@@ -12,6 +12,7 @@ export function CustomCursor() {
   const prefersReducedMotion = useReducedMotion()
   const accentColor = useRef('#6366f1')
   const cachedBoxShadow = useRef('')
+  const currentScale = useRef(1)
 
   const lerp = useCallback((a: number, b: number, t: number) => a + (b - a) * t, [])
 
@@ -110,8 +111,9 @@ export function CustomCursor() {
       ringPos.current.y = lerp(ringPos.current.y, mouse.current.y, lerpFactor)
 
       if (ringRef.current) {
-        const scale = magneticTarget.current ? 1.5 : 1
-        ringRef.current.style.transform = `translate3d(${ringPos.current.x - 30}px, ${ringPos.current.y - 30}px, 0) scale(${scale})`
+        const targetScale = magneticTarget.current ? 1.5 : 1
+        currentScale.current = lerp(currentScale.current, targetScale, 0.15)
+        ringRef.current.style.transform = `translate3d(${ringPos.current.x - 30}px, ${ringPos.current.y - 30}px, 0) scale(${currentScale.current})`
         ringRef.current.style.boxShadow = cachedBoxShadow.current
         ringRef.current.style.borderColor = accentColor.current
       }

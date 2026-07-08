@@ -1,4 +1,4 @@
-import { useRef, useCallback } from 'react'
+import { useRef, useEffect, useCallback } from 'react'
 import { motion } from 'framer-motion'
 
 export function DragThrow() {
@@ -16,33 +16,99 @@ export function DragThrow() {
 function DraggableBall({ index }: { index: number }) {
   const colors = ['#6366f1', '#f43f5e', '#10b981']
   const posRef = useRef({ x: index * 80 + 20, y: 100 })
+  const velRef = useRef({ x: 0, y: 0 })
   const ballRef = useRef<HTMLDivElement>(null)
+  const rafRef = useRef<number>(0)
+  const isDragging = useRef(false)
+  const dragStart = useRef({ x: 0, y: 0 })
+  const lastMouse = useRef({ x: 0, y: 0, time: 0 })
 
-  const handleDragEnd = useCallback((_: unknown, info: { velocity: { x: number; y: number }; offset: { x: number; y: number } }) => {
-    const start = posRef.current
-    const newX = Math.max(0, Math.min(220, start.x + info.offset.x + info.velocity.x * 0.5))
-    const newY = Math.max(0, Math.min(140, start.y + info.offset.y + info.velocity.y * 0.5))
+  const FRICTION = 0.96
+  const BOUNCE = 0.6
+  const MAX_X = 220
+  const MAX_Y = 140
+
+  const physicsLoop = useCallback(() => {
+    if (isDragging.current) {
+      rafRef.current = requestAnimationFrame(physicsLoop)
+      return
+    }
+
+    const pos = posRef.current
+    const vel = velRef.current
+
+    vel.x *= FRICTION
+    vel.y *= FRICTION
+
+    pos.x += vel.x
+    pos.y += vel.y
+
+    if (pos.x < 0) { pos.x = 0; vel.x *= -BOUNCE }
+    if (pos.x > MAX_X) { pos.x = MAX_X; vel.x *= -BOUNCE }
+    if (pos.y < 0) { pos.y = 0; vel.y *= -BOUNCE }
+    if (pos.y > MAX_Y) { pos.y = MAX_Y; vel.y *= -BOUNCE }
+
+    if (ballRef.current) {
+      ballRef.current.style.left = `${pos.x}px`
+      ballRef.current.style.top = `${pos.y}px`
+    }
+
+    if (Math.abs(vel.x) > 0.1 || Math.abs(vel.y) > 0.1) {
+      rafRef.current = requestAnimationFrame(physicsLoop)
+    }
+  }, [])
+
+  useEffect(() => {
+    return () => cancelAnimationFrame(rafRef.current)
+  }, [])
+
+  const handlePointerDown = useCallback((e: React.PointerEvent) => {
+    isDragging.current = true
+    dragStart.current = { x: e.clientX - posRef.current.x, y: e.clientY - posRef.current.y }
+    lastMouse.current = { x: e.clientX, y: e.clientY, time: performance.now() }
+    velRef.current = { x: 0, y: 0 }
+    ;(e.target as HTMLElement).setPointerCapture(e.pointerId)
+  }, [])
+
+  const handlePointerMove = useCallback((e: React.PointerEvent) => {
+    if (!isDragging.current) return
+    const now = performance.now()
+    const dt = Math.max(now - lastMouse.current.time, 1)
+
+    const newX = Math.max(0, Math.min(MAX_X, e.clientX - dragStart.current.x))
+    const newY = Math.max(0, Math.min(MAX_Y, e.clientY - dragStart.current.y))
+
+    velRef.current.x = (newX - posRef.current.x) / dt * 16
+    velRef.current.y = (newY - posRef.current.y) / dt * 16
+
     posRef.current = { x: newX, y: newY }
+    lastMouse.current = { x: e.clientX, y: e.clientY, time: now }
+
     if (ballRef.current) {
       ballRef.current.style.left = `${newX}px`
       ballRef.current.style.top = `${newY}px`
     }
   }, [])
 
+  const handlePointerUp = useCallback(() => {
+    isDragging.current = false
+    rafRef.current = requestAnimationFrame(physicsLoop)
+  }, [physicsLoop])
+
   return (
     <motion.div
       ref={ballRef}
-      drag
-      dragMomentum={false}
-      dragElastic={0.5}
-      onDragEnd={handleDragEnd}
-      whileDrag={{ scale: 1.2 }}
-      className="absolute w-12 h-12 rounded-full cursor-grab active:cursor-grabbing"
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
+      whileTap={{ scale: 1.2 }}
+      className="absolute w-12 h-12 rounded-full cursor-grab active:cursor-grabbing touch-none"
       style={{
         left: posRef.current.x,
         top: posRef.current.y,
         background: colors[index],
         boxShadow: `0 4px 20px ${colors[index]}55`,
+        willChange: 'left, top',
       }}
       data-cursor="grab"
     />
