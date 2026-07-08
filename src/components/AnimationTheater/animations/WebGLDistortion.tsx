@@ -1,13 +1,13 @@
 import { useRef, useEffect } from 'react'
-import * as THREE from 'three'
+import { WebGLRenderer, Scene, OrthographicCamera, ShaderMaterial, Vector2, PlaneGeometry, Mesh } from 'three'
 import { useCanvasPause } from '../../../hooks/useCanvasPause'
 
 export function WebGLDistortion() {
   const containerRef = useRef<HTMLDivElement>(null)
-  const rendererRef = useRef<THREE.WebGLRenderer | null>(null)
-  const sceneRef = useRef<THREE.Scene | null>(null)
-  const cameraRef = useRef<THREE.OrthographicCamera | null>(null)
-  const materialRef = useRef<THREE.ShaderMaterial | null>(null)
+  const rendererRef = useRef<WebGLRenderer | null>(null)
+  const sceneRef = useRef<Scene | null>(null)
+  const cameraRef = useRef<OrthographicCamera | null>(null)
+  const materialRef = useRef<ShaderMaterial | null>(null)
   const animRef = useRef<number>(0)
   const mouseRef = useRef({ x: 0, y: 0 })
   const isVisibleRef = useRef(true)
@@ -24,16 +24,16 @@ export function WebGLDistortion() {
     const w = 320
     const h = 280
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true })
+    const renderer = new WebGLRenderer({ antialias: true })
     renderer.setSize(w, h)
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
     container.appendChild(renderer.domElement)
     rendererRef.current = renderer
 
-    const scene = new THREE.Scene()
+    const scene = new Scene()
     sceneRef.current = scene
 
-    const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1)
+    const camera = new OrthographicCamera(-1, 1, 1, -1, 0, 1)
     cameraRef.current = camera
 
     const vertexShader = `
@@ -63,18 +63,18 @@ export function WebGLDistortion() {
       }
     `
 
-    const material = new THREE.ShaderMaterial({
+    const material = new ShaderMaterial({
       vertexShader,
       fragmentShader,
       uniforms: {
-        uMouse: { value: new THREE.Vector2(0, 0) },
+        uMouse: { value: new Vector2(0, 0) },
         uTime: { value: 0 },
       },
     })
     materialRef.current = material
 
-    const geometry = new THREE.PlaneGeometry(2, 2)
-    const mesh = new THREE.Mesh(geometry, material)
+    const geometry = new PlaneGeometry(2, 2)
+    const mesh = new Mesh(geometry, material)
     scene.add(mesh)
 
     let time = 0

@@ -2,7 +2,6 @@ import React, { useRef, useState, useLayoutEffect } from 'react'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { ANIMATIONS } from '../../data/animations'
-import { getHighlighter } from '../../lib/shiki'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -52,6 +51,7 @@ export function TheaterSection() {
 
     setViewingCode(id)
     try {
+      const { getHighlighter } = await import('../../lib/shiki')
       const highlighter = await getHighlighter()
       const html = highlighter.codeToHtml(anim.code, {
         lang: 'typescript',

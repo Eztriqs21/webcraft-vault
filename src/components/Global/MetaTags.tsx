@@ -8,11 +8,11 @@ export function MetaTags() {
       <meta property="og:type" content="website" />
       <meta property="og:title" content="WebCraft Vault — The Anatomy of Iconic Websites" />
       <meta property="og:description" content="An immersive exhibition of award-winning web design ingredients." />
-      <meta property="og:image" content="/og-image.png" />
+      <meta property="og:image" content="/og-image.svg" />
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content="WebCraft Vault" />
       <meta name="twitter:description" content="An immersive exhibition of award-winning web design ingredients." />
-      <meta name="twitter:image" content="/og-image.png" />
+      <meta name="twitter:image" content="/og-image.svg" />
       <script type="application/ld+json">
         {JSON.stringify({
           '@context': 'https://schema.org',
