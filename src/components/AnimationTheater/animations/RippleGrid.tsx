@@ -1,5 +1,6 @@
 import { useRef, useEffect } from 'react'
 import { useCanvasPause } from '../../../hooks/useCanvasPause'
+import { useDebouncedCallback } from '../../../utils/useDebouncedCallback'
 
 export function RippleGrid() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -14,13 +15,13 @@ export function RippleGrid() {
     const ctx = canvas.getContext('2d')
     if (!ctx) return
 
-    const resize = () => {
+    const resize = useDebouncedCallback(() => {
       const rect = canvas.parentElement?.getBoundingClientRect()
       if (rect) {
         canvas.width = rect.width * 0.8
         canvas.height = rect.height * 0.8
       }
-    }
+    }, 100)
     resize()
     window.addEventListener('resize', resize)
 
@@ -42,8 +43,11 @@ export function RippleGrid() {
 
     canvas.addEventListener('mousemove', onMouseMove)
 
-    const animate = () => {
+    let lastFrame = 0
+    const animate = (now: number) => {
       if (!isVisible) return
+      if (now - lastFrame < 33) { animRef.current = requestAnimationFrame(animate); return }
+      lastFrame = now
       if (!ctx || !canvas) return
       const w = canvas.width
       const h = canvas.height
@@ -92,7 +96,7 @@ export function RippleGrid() {
       animRef.current = requestAnimationFrame(animate)
     }
 
-    animate()
+    requestAnimationFrame(animate)
 
     return () => {
       window.removeEventListener('resize', resize)

@@ -63,8 +63,11 @@ export function ConfettiBurst() {
 
     canvas.addEventListener('click', onClick)
 
-    const animate = () => {
+    let lastFrame = 0
+    const animate = (now: number) => {
       if (!isVisible) return
+      if (now - lastFrame < 33) { animRef.current = requestAnimationFrame(animate); return }
+      lastFrame = now
       if (!ctx) return
       ctx.clearRect(0, 0, W, H)
 

@@ -26,7 +26,7 @@ export function WebGLDistortion() {
 
     const renderer = new WebGLRenderer({ antialias: true })
     renderer.setSize(w, h)
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5))
     container.appendChild(renderer.domElement)
     rendererRef.current = renderer
 
@@ -80,7 +80,10 @@ export function WebGLDistortion() {
     let time = 0
 
     const animate = () => {
-      if (!isVisibleRef.current) return
+      if (!isVisibleRef.current) {
+        animRef.current = requestAnimationFrame(animate)
+        return
+      }
       time += 0.016
       material.uniforms.uTime.value = time
       material.uniforms.uMouse.value.set(mouseRef.current.x, mouseRef.current.y)

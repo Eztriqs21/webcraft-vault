@@ -9,8 +9,11 @@ export function Cube3D() {
   useEffect(() => {
     let angle = 0
 
-    const animate = () => {
+    let lastFrame = 0
+    const animate = (now: number) => {
       if (!isVisible) return
+      if (now - lastFrame < 33) { animRef.current = requestAnimationFrame(animate); return }
+      lastFrame = now
       angle += 0.5
       if (cubeRef.current) {
         const rx = -25 + Math.sin(angle * 0.01) * 15

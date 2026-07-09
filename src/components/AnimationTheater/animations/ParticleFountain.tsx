@@ -1,5 +1,6 @@
 import { useRef, useEffect, useCallback } from 'react'
 import { useCanvasPause } from '../../../hooks/useCanvasPause'
+import { useDebouncedCallback } from '../../../utils/useDebouncedCallback'
 
 interface Particle {
   x: number
@@ -17,6 +18,7 @@ export function ParticleFountain() {
   const particlesRef = useRef<Particle[]>([])
   const mouseRef = useRef({ x: 0, y: 0, active: false })
   const animRef = useRef<number>(0)
+  const lastSpawnRef = useRef({ x: 0, y: 0 })
   const { ref: wrapperRef, isVisible } = useCanvasPause(0)
 
   const spawn = useCallback((x: number, y: number) => {
@@ -41,13 +43,13 @@ export function ParticleFountain() {
     const ctx = canvas.getContext('2d')
     if (!ctx) return
 
-    const resize = () => {
+    const resize = useDebouncedCallback(() => {
       const rect = canvas.parentElement?.getBoundingClientRect()
       if (rect) {
         canvas.width = rect.width * 0.8
         canvas.height = rect.height * 0.8
       }
-    }
+    }, 100)
     resize()
     window.addEventListener('resize', resize)
 
@@ -65,17 +67,26 @@ export function ParticleFountain() {
     canvas.addEventListener('mousemove', onMouseMove)
     canvas.addEventListener('mouseleave', onMouseLeave)
 
-    const animate = () => {
+    let lastFrame = 0
+    const animate = (now: number) => {
       if (!isVisible) return
+      if (now - lastFrame < 33) { animRef.current = requestAnimationFrame(animate); return }
+      lastFrame = now
       if (!ctx || !canvas) return
 
       ctx.fillStyle = 'rgba(3, 3, 3, 0.15)'
       ctx.fillRect(0, 0, canvas.width, canvas.height)
 
-      spawn(canvas.width / 2, canvas.height * 0.85)
-
-      if (mouseRef.current.active && Math.random() > 0.5) {
-        spawn(mouseRef.current.x, mouseRef.current.y)
+      if (mouseRef.current.active) {
+        const dx = mouseRef.current.x - lastSpawnRef.current.x
+        const dy = mouseRef.current.y - lastSpawnRef.current.y
+        if (Math.hypot(dx, dy) > 5) {
+          spawn(mouseRef.current.x, mouseRef.current.y)
+          lastSpawnRef.current = { x: mouseRef.current.x, y: mouseRef.current.y }
+        }
+        if (Math.random() > 0.7) {
+          spawn(canvas.width / 2, canvas.height * 0.85)
+        }
       }
 
       const gravity = 0.15
@@ -113,7 +124,7 @@ export function ParticleFountain() {
       animRef.current = requestAnimationFrame(animate)
     }
 
-    animate()
+    requestAnimationFrame(animate)
 
     return () => {
       window.removeEventListener('resize', resize)

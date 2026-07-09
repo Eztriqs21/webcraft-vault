@@ -1,5 +1,6 @@
 import { useEffect, useRef, useCallback } from 'react'
 import { useReducedMotion } from '../../hooks/useReducedMotion'
+import { useDebouncedCallback } from '../../utils/useDebouncedCallback'
 
 export function CustomCursor() {
   const ringRef = useRef<HTMLDivElement>(null)
@@ -78,20 +79,24 @@ export function CustomCursor() {
     const dpr = Math.min(window.devicePixelRatio, 1.5)
     let raf: number
 
-    const resize = () => {
+    const resize = useDebouncedCallback(() => {
       if (!canvas) return
       canvas.width = window.innerWidth * dpr
       canvas.height = window.innerHeight * dpr
       canvas.style.width = window.innerWidth + 'px'
       canvas.style.height = window.innerHeight + 'px'
       if (ctx) ctx.scale(dpr, dpr)
-    }
+    }, 100)
     resize()
     window.addEventListener('resize', resize)
 
     cachedBoxShadow.current = `0 0 20px rgba(${hexToRgb(accentColor.current)},0.3), inset 0 0 20px rgba(${hexToRgb(accentColor.current)},0.1)`
 
-    const animate = () => {
+    let lastFrame = 0
+    const animate = (now: number) => {
+      if (now - lastFrame < 16) { raf = requestAnimationFrame(animate); return }
+      lastFrame = now
+
       if (canvas && ctx) {
         ctx.clearRect(0, 0, window.innerWidth, window.innerHeight)
 

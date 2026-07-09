@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import { TOOLS, TOOL_CONNECTIONS } from '../../data/tools'
+import { useReducedMotion } from '../../hooks/useReducedMotion'
 
 const MAX_VELOCITY = 0.003
 const REPULSION = 0.0005
@@ -26,15 +27,16 @@ export function ToolBeltSection() {
   const draggingRef = useRef<number | null>(null)
   const didDragRef = useRef(false)
   const dragOffset = useRef({ x: 0, y: 0 })
-  const rafRef = useRef<number>(0)
   const isVisibleRef = useRef(true)
   const [isMobile, setIsMobile] = useState(false)
+  const prefersReducedMotion = useReducedMotion()
 
   useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 768)
-    check()
-    window.addEventListener('resize', check)
-    return () => window.removeEventListener('resize', check)
+    const mql = window.matchMedia('(min-width: 768px)')
+    const check = (e: MediaQueryListEvent | MediaQueryList) => setIsMobile(!e.matches)
+    check(mql)
+    mql.addEventListener('change', check)
+    return () => mql.removeEventListener('change', check)
   }, [])
 
   useEffect(() => {
@@ -46,6 +48,8 @@ export function ToolBeltSection() {
 
     let cachedW = 0
     let cachedH = 0
+    let lastFrame = 0
+    let rafId = 0
 
     const observer = new IntersectionObserver(
       ([entry]) => { isVisibleRef.current = entry.isIntersecting },
@@ -53,18 +57,18 @@ export function ToolBeltSection() {
     )
     if (containerRef.current) observer.observe(containerRef.current)
 
-    const animate = () => {
-      if (!isVisibleRef.current) {
-        rafRef.current = requestAnimationFrame(animate)
-        return
-      }
+    const animate = (now: number) => {
+      if (!isVisibleRef.current || prefersReducedMotion) return
+      if (now - lastFrame < 33) { rafId = requestAnimationFrame(animate); return }
+      lastFrame = now
+
       const canvas = canvasRef.current
-      if (!canvas) { rafRef.current = requestAnimationFrame(animate); return }
+      if (!canvas) { rafId = requestAnimationFrame(animate); return }
       const ctx = canvas.getContext('2d')
-      if (!ctx) { rafRef.current = requestAnimationFrame(animate); return }
+      if (!ctx) { rafId = requestAnimationFrame(animate); return }
 
       const container = containerRef.current
-      if (!container) { rafRef.current = requestAnimationFrame(animate); return }
+      if (!container) { rafId = requestAnimationFrame(animate); return }
 
       const w = container.offsetWidth
       const h = container.offsetHeight
@@ -143,15 +147,20 @@ export function ToolBeltSection() {
         }
       }
 
-      rafRef.current = requestAnimationFrame(animate)
+      rafId = requestAnimationFrame(animate)
     }
 
-    rafRef.current = requestAnimationFrame(animate)
+    const kickOff = () => {
+      lastFrame = 0
+      rafId = requestAnimationFrame(animate)
+    }
+    kickOff()
+
     return () => {
-      cancelAnimationFrame(rafRef.current)
+      cancelAnimationFrame(rafId)
       observer.disconnect()
     }
-  }, [isMobile])
+  }, [isMobile, prefersReducedMotion])
 
   const handlePointerDown = useCallback((i: number, e: React.PointerEvent) => {
     draggingRef.current = i

@@ -21,6 +21,7 @@ export function NoiseTexture() {
 
     let time = 0
     let lastFrame = 0
+    const imageData = ctx.createImageData(INTERNAL, INTERNAL)
 
     const animate = (now: number) => {
       if (!isVisible) return
@@ -32,7 +33,6 @@ export function NoiseTexture() {
 
       if (!ctx) return
 
-      const imageData = ctx.createImageData(INTERNAL, INTERNAL)
       const data = imageData.data
 
       for (let i = 0; i < data.length; i += 4) {

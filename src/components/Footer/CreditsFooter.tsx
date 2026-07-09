@@ -85,6 +85,7 @@ function Starfield() {
     let raf: number
     let cachedW = 0
     let cachedH = 0
+    let lastFrame = 0
 
     const observer = new IntersectionObserver(
       ([entry]) => { isVisibleRef.current = entry.isIntersecting },
@@ -92,11 +93,11 @@ function Starfield() {
     )
     observer.observe(canvas)
 
-    const animate = () => {
-      if (!isVisibleRef.current) {
-        raf = requestAnimationFrame(animate)
-        return
-      }
+    const animate = (now: number) => {
+      if (!isVisibleRef.current) return
+      if (now - lastFrame < 33) { raf = requestAnimationFrame(animate); return }
+      lastFrame = now
+
       const newW = canvas.offsetWidth
       const newH = canvas.offsetHeight
       if (newW !== cachedW || newH !== cachedH) {

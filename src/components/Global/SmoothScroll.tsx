@@ -31,7 +31,6 @@ export function SmoothScroll({ children }: { children: React.ReactNode }) {
       lenis.raf(time * 1000)
     }
     gsap.ticker.add(rafCallback)
-    gsap.ticker.lagSmoothing(0)
 
     return () => {
       gsap.ticker.remove(rafCallback)

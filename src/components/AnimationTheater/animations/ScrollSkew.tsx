@@ -26,10 +26,7 @@ export function ScrollSkew() {
     }
 
     const decay = () => {
-      if (!isVisibleRef.current) {
-        rafRef.current = requestAnimationFrame(decay)
-        return
-      }
+      if (!isVisibleRef.current) return
       currentSkew.current *= 0.92
       if (Math.abs(currentSkew.current) < 0.1) currentSkew.current = 0
 

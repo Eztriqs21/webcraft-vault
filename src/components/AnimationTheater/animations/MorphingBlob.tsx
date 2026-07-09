@@ -1,5 +1,6 @@
 import { useRef, useEffect } from 'react'
 import { useCanvasPause } from '../../../hooks/useCanvasPause'
+import { useDebouncedCallback } from '../../../utils/useDebouncedCallback'
 
 export function MorphingBlob() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -11,18 +12,22 @@ export function MorphingBlob() {
     const canvas = canvasRef.current
     if (!canvas) return
 
-    const resize = () => {
+    const resize = useDebouncedCallback(() => {
       const rect = canvas.parentElement?.getBoundingClientRect()
       if (rect) {
         canvas.width = rect.width * 0.8
         canvas.height = rect.height * 0.8
       }
-    }
+    }, 100)
     resize()
     window.addEventListener('resize', resize)
 
-    const draw = () => {
+    let lastFrame = 0
+    const draw = (now: number) => {
       if (!isVisible) return
+      if (now - lastFrame < 33) { animRef.current = requestAnimationFrame(draw); return }
+      lastFrame = now
+
       const ctx = canvas.getContext('2d')
       if (!ctx) return
 

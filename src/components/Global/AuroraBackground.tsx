@@ -34,7 +34,7 @@ export function AuroraBackground() {
       mouse.current.y = e.clientY / window.innerHeight
     }
 
-    window.addEventListener('mousemove', handleMouseMove)
+    window.addEventListener('mousemove', handleMouseMove, { passive: true })
 
     const dpr = Math.min(window.devicePixelRatio, 1.5)
     const resize = () => {

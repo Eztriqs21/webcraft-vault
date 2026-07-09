@@ -1,9 +1,11 @@
 import { useRef, useEffect } from 'react'
+import { useCanvasPause } from '../../../hooks/useCanvasPause'
 
 export function SVGLineDraw() {
   const pathsRef = useRef<SVGPathElement[]>([])
   const animRef = useRef<number>(0)
   const timeoutRef = useRef<number>(0)
+  const { ref: wrapperRef, isVisible } = useCanvasPause(0)
 
   useEffect(() => {
     const paths = pathsRef.current
@@ -19,6 +21,7 @@ export function SVGLineDraw() {
     const duration = 2000
 
     const animate = (timestamp: number) => {
+      if (!isVisible) return
       if (!startTime) startTime = timestamp
       const elapsed = timestamp - startTime
       const progress = Math.min(elapsed / duration, 1)
@@ -47,10 +50,10 @@ export function SVGLineDraw() {
       cancelAnimationFrame(animRef.current)
       clearTimeout(timeoutRef.current)
     }
-  }, [])
+  }, [isVisible])
 
   return (
-    <div className="w-full h-full flex items-center justify-center">
+    <div ref={wrapperRef} className="w-full h-full flex items-center justify-center">
       <svg width="200" height="200" viewBox="0 0 200 200" fill="none">
         <path
           ref={(el) => { if (el) pathsRef.current[0] = el }}
