@@ -13,6 +13,7 @@ export function TypographySection() {
   const copiedTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const activePairing = FONT_PAIRINGS[activeIndex]
   const prefersReducedMotion = useReducedMotion()
+  const [customText, setCustomText] = useState<Record<string, Record<string, string>>>({})
 
   useEffect(() => {
     return () => {
@@ -67,6 +68,17 @@ export function TypographySection() {
     copiedTimeoutRef.current = setTimeout(() => setCopiedIndex(null), 1500)
   }, [])
 
+  const getText = useCallback((ctx: string, key: string, fallback: string) => {
+    return customText[ctx]?.[key] ?? fallback
+  }, [customText])
+
+  const handleTextChange = useCallback((ctx: string, key: string, value: string) => {
+    setCustomText((prev) => ({
+      ...prev,
+      [ctx]: { ...prev[ctx], [key]: value },
+    }))
+  }, [])
+
   return (
     <section className="relative py-24 min-h-screen" id="typography-lab" aria-labelledby="typography-heading">
       <div className="max-w-7xl mx-auto px-4">
@@ -115,6 +127,8 @@ export function TypographySection() {
                   heading={activePairing.heading}
                   body={activePairing.body}
                   context={context}
+                  getText={getText}
+                  onTextChange={handleTextChange}
                 />
               </motion.div>
             </AnimatePresence>
@@ -150,6 +164,8 @@ export function TypographySection() {
                   heading={activePairing.heading}
                   body={activePairing.body}
                   context={context}
+                  getText={getText}
+                  onTextChange={handleTextChange}
                 />
               </motion.div>
             </AnimatePresence>
@@ -232,11 +248,17 @@ function ContextCanvas({
   heading,
   body,
   context,
+  getText,
+  onTextChange,
 }: {
   heading: string
   body: string
   context: string
+  getText: (ctx: string, key: string, fallback: string) => string
+  onTextChange: (ctx: string, key: string, value: string) => void
 }) {
+  const editableClass = 'outline-none rounded px-1 -mx-1 transition-colors hover:bg-[rgba(255,255,255,0.05)] focus:bg-[rgba(255,255,255,0.08)] cursor-text'
+
   if (context === 'hero') {
     return (
       <div className="space-y-4 md:space-y-6">
@@ -244,10 +266,24 @@ function ContextCanvas({
           className="text-2xl md:text-4xl font-bold text-vault-text-bright leading-tight"
           style={{ fontFamily: heading }}
         >
-          Design is not just what it looks like.
+          <span
+            contentEditable
+            suppressContentEditableWarning
+            className={editableClass}
+            onBlur={(e) => onTextChange('hero', 'heading', e.currentTarget.textContent || '')}
+          >
+            {getText('hero', 'heading', 'Design is not just what it looks like.')}
+          </span>
         </div>
         <div className="text-sm md:text-lg text-[#888]" style={{ fontFamily: body }}>
-          Design is how it works. Every pixel, every interaction, every moment matters.
+          <span
+            contentEditable
+            suppressContentEditableWarning
+            className={editableClass}
+            onBlur={(e) => onTextChange('hero', 'body', e.currentTarget.textContent || '')}
+          >
+            {getText('hero', 'body', 'Design is how it works. Every pixel, every interaction, every moment matters.')}
+          </span>
         </div>
         <div className="flex gap-3 pt-2 md:pt-4">
           <div className="px-4 md:px-6 py-2 md:py-3 rounded-full bg-[#10b981] text-white text-xs md:text-sm font-medium" style={{ fontFamily: body }}>
@@ -266,10 +302,24 @@ function ContextCanvas({
       <div className="space-y-3 md:space-y-4">
         <div className="w-full h-24 md:h-40 rounded-xl bg-[rgba(255,255,255,0.03)]" />
         <div className="text-lg md:text-2xl font-bold text-vault-text-bright" style={{ fontFamily: heading }}>
-          Premium Headphones
+          <span
+            contentEditable
+            suppressContentEditableWarning
+            className={editableClass}
+            onBlur={(e) => onTextChange('product', 'heading', e.currentTarget.textContent || '')}
+          >
+            {getText('product', 'heading', 'Premium Headphones')}
+          </span>
         </div>
         <div className="text-xs md:text-base text-[#888]" style={{ fontFamily: body }}>
-          Experience sound like never before. Crystal-clear audio with active noise cancellation.
+          <span
+            contentEditable
+            suppressContentEditableWarning
+            className={editableClass}
+            onBlur={(e) => onTextChange('product', 'body', e.currentTarget.textContent || '')}
+          >
+            {getText('product', 'body', 'Experience sound like never before. Crystal-clear audio with active noise cancellation.')}
+          </span>
         </div>
         <div className="flex items-center gap-4">
           <span className="text-lg md:text-xl font-bold text-vault-text-bright" style={{ fontFamily: heading }}>$299</span>
@@ -286,11 +336,24 @@ function ContextCanvas({
       <div className="space-y-3 md:space-y-4">
         <div className="text-[10px] md:text-xs text-[#888] font-mono">JULY 5, 2026</div>
         <div className="text-xl md:text-3xl font-bold text-vault-text-bright leading-tight" style={{ fontFamily: heading }}>
-          The Future of Design Systems
+          <span
+            contentEditable
+            suppressContentEditableWarning
+            className={editableClass}
+            onBlur={(e) => onTextChange('blog', 'heading', e.currentTarget.textContent || '')}
+          >
+            {getText('blog', 'heading', 'The Future of Design Systems')}
+          </span>
         </div>
         <div className="text-xs md:text-base text-[#888] leading-relaxed" style={{ fontFamily: body }}>
-          As design tools evolve, so must our approach to building scalable, maintainable systems.
-          The intersection of code and creativity is where the magic happens.
+          <span
+            contentEditable
+            suppressContentEditableWarning
+            className={editableClass}
+            onBlur={(e) => onTextChange('blog', 'body', e.currentTarget.textContent || '')}
+          >
+            {getText('blog', 'body', 'As design tools evolve, so must our approach to building scalable, maintainable systems. The intersection of code and creativity is where the magic happens.')}
+          </span>
         </div>
         <div className="text-[10px] md:text-sm text-[#888]" style={{ fontFamily: body }}>5 min read</div>
       </div>
@@ -300,7 +363,14 @@ function ContextCanvas({
   return (
     <div className="space-y-3 md:space-y-4">
       <div className="text-base md:text-lg font-bold text-vault-text-bright" style={{ fontFamily: heading }}>
-        Dashboard
+        <span
+          contentEditable
+          suppressContentEditableWarning
+          className={editableClass}
+          onBlur={(e) => onTextChange('dashboard', 'heading', e.currentTarget.textContent || '')}
+        >
+          {getText('dashboard', 'heading', 'Dashboard')}
+        </span>
       </div>
       <div className="grid grid-cols-2 gap-2 md:gap-3">
         {[1, 2, 3, 4].map((i) => (

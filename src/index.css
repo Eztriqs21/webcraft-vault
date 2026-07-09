@@ -218,3 +218,20 @@ body.custom-cursor-active * {
   0% { opacity: 0.8; transform: translate(-3px, 1px); }
   100% { opacity: 0.6; transform: translate(3px, -1px); }
 }
+
+/* ── Mobile touch targets ── */
+@media (pointer: coarse) {
+  button, [role="button"], a, input, select, textarea {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* ── Swipe hint animation ── */
+@keyframes swipe-hint {
+  0%, 100% { transform: translateX(0); opacity: 0.5; }
+  50% { transform: translateX(8px); opacity: 1; }
+}
+.swipe-hint {
+  animation: swipe-hint 1.5s ease-in-out infinite;
+}

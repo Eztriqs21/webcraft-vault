@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from 'react'
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import { motion } from 'framer-motion'
 import { TOOLS, TOOL_CONNECTIONS } from '../../data/tools'
 import { useReducedMotion } from '../../hooks/useReducedMotion'
@@ -7,6 +7,8 @@ const MAX_VELOCITY = 0.003
 const REPULSION = 0.0005
 const CENTER_GRAVITY = 0.0005
 const DAMPING = 0.92
+
+const CATEGORIES = ['All', ...Array.from(new Set(TOOLS.map((t) => t.category)))] as const
 
 interface Node {
   x: number
@@ -30,6 +32,12 @@ export function ToolBeltSection() {
   const isVisibleRef = useRef(true)
   const [isMobile, setIsMobile] = useState(false)
   const prefersReducedMotion = useReducedMotion()
+  const [activeCategory, setActiveCategory] = useState<string>('All')
+
+  const filteredIndices = useMemo(() => {
+    if (activeCategory === 'All') return null
+    return new Set(TOOLS.map((t, i) => ({ t, i })).filter(({ t }) => t.category === activeCategory).map(({ i }) => i))
+  }, [activeCategory])
 
   useEffect(() => {
     const mql = window.matchMedia('(min-width: 768px)')
@@ -126,15 +134,18 @@ export function ToolBeltSection() {
       }
 
       const hv = hoveredRef.current
+      const fi = filteredIndices
       TOOL_CONNECTIONS.forEach(([a, b]) => {
         const pa = nodes[a]
         const pb = nodes[b]
+        const isDimmed = fi !== null && (!fi.has(a) || !fi.has(b))
         ctx.beginPath()
         ctx.moveTo(pa.x * w, pa.y * h)
         ctx.lineTo(pb.x * w, pb.y * h)
-        ctx.strokeStyle = hv === a || hv === b
-          ? 'rgba(251, 191, 36, 0.3)'
-          : 'rgba(255, 255, 255, 0.05)'
+        ctx.strokeStyle = isDimmed ? 'rgba(255, 255, 255, 0.01)'
+          : hv === a || hv === b
+            ? 'rgba(251, 191, 36, 0.3)'
+            : 'rgba(255, 255, 255, 0.05)'
         ctx.lineWidth = 1
         ctx.stroke()
       })
@@ -216,6 +227,25 @@ export function ToolBeltSection() {
           </p>
         </motion.div>
 
+        <div className="flex flex-wrap gap-2 mb-8" role="radiogroup" aria-label="Filter tools by category">
+          {CATEGORIES.map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setActiveCategory(cat)}
+              className={`px-3 py-1 text-xs font-medium rounded-full transition-all ${
+                activeCategory === cat
+                  ? 'bg-[rgba(251,191,36,0.15)] text-[#fbbf24]'
+                  : 'bg-[rgba(255,255,255,0.05)] text-[#888] hover:text-[#999]'
+              }`}
+              role="radio"
+              aria-checked={activeCategory === cat}
+              data-cursor="pointer"
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+
         {!isMobile && (
           <div
             ref={containerRef}
@@ -229,6 +259,7 @@ export function ToolBeltSection() {
             {TOOLS.map((tool, i) => {
               const initX = nodesRef.current[i].x * 100
               const initY = nodesRef.current[i].y * 100
+              const isDimmed = filteredIndices !== null && !filteredIndices.has(i)
               return (
                 <div
                   key={i}
@@ -236,7 +267,7 @@ export function ToolBeltSection() {
                   role="button"
                   tabIndex={0}
                   aria-label={tool.name}
-                  className="absolute cursor-grab active:cursor-grabbing touch-none"
+                  className={`absolute cursor-grab active:cursor-grabbing touch-none transition-opacity duration-200 ${isDimmed ? 'opacity-20 pointer-events-none' : ''}`}
                   style={{
                     left: `${initX}%`,
                     top: `${initY}%`,
@@ -295,24 +326,28 @@ export function ToolBeltSection() {
 
         {isMobile && (
           <div className="space-y-3">
-            {TOOLS.map((tool, i) => (
-              <a
-                key={i}
-                href={tool.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-4 p-4 rounded-xl border border-[rgba(255,255,255,0.06)] bg-[rgba(10,10,10,0.6)] hover:border-[rgba(251,191,36,0.2)] transition-colors"
-              >
-                <div className="w-10 h-10 rounded-lg flex items-center justify-center text-xs font-bold bg-[rgba(10,10,10,0.8)] border border-[rgba(255,255,255,0.06)] text-[#999]">
-                  {tool.name.slice(0, 2)}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="text-sm font-medium text-vault-text-bright">{tool.name}</div>
-                  <div className="text-xs text-[#888] truncate">{tool.description}</div>
-                </div>
-                <div className="text-[10px] text-[#fbbf24] font-mono">{tool.category}</div>
-              </a>
-            ))}
+            {TOOLS.map((tool, i) => {
+              const isDimmed = filteredIndices !== null && !filteredIndices.has(i)
+              if (isDimmed) return null
+              return (
+                <a
+                  key={i}
+                  href={tool.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-4 p-4 rounded-xl border border-[rgba(255,255,255,0.06)] bg-[rgba(10,10,10,0.6)] hover:border-[rgba(251,191,36,0.2)] transition-colors"
+                >
+                  <div className="w-10 h-10 rounded-lg flex items-center justify-center text-xs font-bold bg-[rgba(10,10,10,0.8)] border border-[rgba(255,255,255,0.06)] text-[#999]">
+                    {tool.name.slice(0, 2)}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-medium text-vault-text-bright">{tool.name}</div>
+                    <div className="text-xs text-[#888] truncate">{tool.description}</div>
+                  </div>
+                  <div className="text-[10px] text-[#fbbf24] font-mono">{tool.category}</div>
+                </a>
+              )
+            })}
           </div>
         )}
       </div>
