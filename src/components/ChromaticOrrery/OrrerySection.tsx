@@ -2,9 +2,11 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { PALETTES } from '../../data/palettes'
 import { copyToClipboard, showToast } from '../../utils/clipboard'
+import { useReducedMotion } from '../../hooks/useReducedMotion'
 
 export function OrrerySection() {
   const [activePalette, setActivePalette] = useState<number | null>(null)
+  const prefersReducedMotion = useReducedMotion()
 
   const handlePlanetClick = (index: number) => {
     setActivePalette((prev) => (prev === index ? null : index))
@@ -14,7 +16,7 @@ export function OrrerySection() {
     <section className="relative py-24 min-h-screen overflow-hidden" id="chromatic-orrery" aria-labelledby="orrery-heading">
       <div className="max-w-7xl mx-auto px-4">
         <motion.div
-          initial={{ opacity: 0, y: 40 }}
+          initial={prefersReducedMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}

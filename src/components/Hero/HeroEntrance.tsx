@@ -4,11 +4,13 @@ import { gsap } from 'gsap'
 import { ParallaxLetters } from './ParallaxLetters'
 import { PreviewRiver } from './PreviewRiver'
 import { useLenis } from '../Global/SmoothScroll'
+import { useReducedMotion } from '../../hooks/useReducedMotion'
 
 export function HeroEntrance() {
   const heroRef = useRef<HTMLElement>(null)
   const tlRef = useRef<gsap.core.Timeline | null>(null)
   const lenis = useLenis()
+  const prefersReducedMotion = useReducedMotion()
 
   useEffect(() => {
     return () => {
@@ -21,6 +23,15 @@ export function HeroEntrance() {
     if (!hero) return
 
     tlRef.current?.kill()
+
+    if (prefersReducedMotion) {
+      const target = document.querySelector('[data-section="theater"]') as HTMLElement | null
+      if (target && lenis) {
+        lenis.scrollTo(target, { offset: -20 })
+      }
+      return
+    }
+
     const tl = gsap.timeline()
     tlRef.current = tl
 
@@ -39,7 +50,7 @@ export function HeroEntrance() {
       }
       gsap.set(hero, { scale: 1, filter: 'none', opacity: 1 })
     }, undefined, 0.9)
-  }, [lenis])
+  }, [lenis, prefersReducedMotion])
 
   return (
     <section
@@ -48,17 +59,16 @@ export function HeroEntrance() {
     >
       <motion.div
         className="relative z-10 w-full max-w-6xl mx-auto"
-        initial={{ opacity: 0 }}
+        initial={{ opacity: 1 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 0.2, duration: 1 }}
       >
         <ParallaxLetters />
 
         <motion.p
           className="text-center text-[#888] text-base md:text-xl font-light mt-6 md:mt-8 mb-8 md:mb-12 max-w-2xl mx-auto px-2"
-          initial={{ opacity: 0, y: 20 }}
+          initial={prefersReducedMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.8, duration: 0.8 }}
+          transition={{ delay: prefersReducedMotion ? 0 : 0.8, duration: 0.8 }}
         >
           A curated exhibition of the ingredients that make websites unforgettable.
           Every animation, every pairing, every palette — real and interactive.
@@ -68,9 +78,9 @@ export function HeroEntrance() {
 
         <motion.div
           className="flex justify-center mt-10 md:mt-16"
-          initial={{ opacity: 0 }}
+          initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 1.2, duration: 0.8 }}
+          transition={{ delay: prefersReducedMotion ? 0 : 1.2, duration: 0.8 }}
         >
           <button
             onClick={handleEnter}
@@ -79,24 +89,29 @@ export function HeroEntrance() {
           >
             <span className="relative z-10 flex items-center gap-2 md:gap-3">
               Enter the Vault
-              <motion.span
-                animate={{ x: [0, 4, 0] }}
-                transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
-              >
-                →
-              </motion.span>
+              {!prefersReducedMotion && (
+                <motion.span
+                  animate={{ x: [0, 4, 0] }}
+                  transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+                >
+                  →
+                </motion.span>
+              )}
+              {prefersReducedMotion && <span>→</span>}
             </span>
-            <motion.div
-              className="absolute inset-0 rounded-full border border-[rgba(99,102,241,0.3)]"
-              animate={{
-                boxShadow: [
-                  '0 0 20px rgba(99,102,241,0.1)',
-                  '0 0 40px rgba(99,102,241,0.2)',
-                  '0 0 20px rgba(99,102,241,0.1)',
-                ],
-              }}
-              transition={{ duration: 2, repeat: Infinity }}
-            />
+            {!prefersReducedMotion && (
+              <motion.div
+                className="absolute inset-0 rounded-full border border-[rgba(99,102,241,0.3)]"
+                animate={{
+                  boxShadow: [
+                    '0 0 20px rgba(99,102,241,0.1)',
+                    '0 0 40px rgba(99,102,241,0.2)',
+                    '0 0 20px rgba(99,102,241,0.1)',
+                  ],
+                }}
+                transition={{ duration: 2, repeat: Infinity }}
+              />
+            )}
           </button>
         </motion.div>
       </motion.div>

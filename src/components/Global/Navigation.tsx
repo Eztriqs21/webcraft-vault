@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { SECTION_MOODS } from '../../data/sections'
 import { useLenis } from './SmoothScroll'
+import { useReducedMotion } from '../../hooks/useReducedMotion'
 
 const NAV_ITEMS = [
   { id: 'hero', label: 'Vault', icon: '◆' },
@@ -18,6 +19,7 @@ export function Navigation() {
   const [activeSection, setActiveSection] = useState('hero')
   const [hoveredItem, setHoveredItem] = useState<string | null>(null)
   const lenis = useLenis()
+  const prefersReducedMotion = useReducedMotion()
 
   const activeAccentRgb = SECTION_MOODS[activeSection as keyof typeof SECTION_MOODS]?.accentRgb || '99,102,241'
 
@@ -58,9 +60,9 @@ export function Navigation() {
     <AnimatePresence>
       {isVisible && (
         <motion.div
-          initial={{ y: 100, opacity: 0 }}
+          initial={prefersReducedMotion ? { y: 0, opacity: 1 } : { y: 100, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          exit={{ y: 100, opacity: 0 }}
+          exit={prefersReducedMotion ? { opacity: 0 } : { y: 100, opacity: 0 }}
           transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
           className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[9990]"
         >

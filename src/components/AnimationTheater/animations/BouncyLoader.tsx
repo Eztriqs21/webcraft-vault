@@ -1,8 +1,11 @@
 import { motion } from 'framer-motion'
+import { useReducedMotion } from '../../../hooks/useReducedMotion'
 
 const colors = ['#6366f1', '#f43f5e', '#10b981', '#a855f7', '#06b6d4']
 
 export function BouncyLoader() {
+  const prefersReducedMotion = useReducedMotion()
+
   return (
     <div className="w-full h-full flex items-center justify-center">
       <div className="flex gap-2">
@@ -11,11 +14,11 @@ export function BouncyLoader() {
             key={i}
             className="w-4 h-4 rounded-full"
             style={{ background: color }}
-            animate={{
+            animate={prefersReducedMotion ? {} : {
               y: [0, -20, 0],
               scale: [1, 1.3, 1],
             }}
-            transition={{
+            transition={prefersReducedMotion ? {} : {
               duration: 0.6,
               repeat: Infinity,
               delay: i * 0.1,

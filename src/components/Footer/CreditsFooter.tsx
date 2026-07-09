@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
+import { useReducedMotion } from '../../hooks/useReducedMotion'
 
 const CREDITS = [
   { label: 'Built with', value: 'React + Vite + TypeScript + Tailwind CSS v4' },
@@ -15,6 +16,8 @@ const CREDITS = [
 ]
 
 export function CreditsFooter() {
+  const prefersReducedMotion = useReducedMotion()
+
   return (
     <footer className="relative py-32 min-h-screen flex flex-col items-center justify-center overflow-hidden">
       <Starfield />
@@ -30,10 +33,10 @@ export function CreditsFooter() {
             {CREDITS.map((credit, i) => (
               <motion.div
                 key={i}
-                initial={{ opacity: 0, y: 20 }}
+                initial={prefersReducedMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: i * 0.1, duration: 0.6 }}
+                transition={{ delay: prefersReducedMotion ? 0 : i * 0.1, duration: 0.6 }}
               >
                 {credit.label && (
                   <div className="text-xs text-[#888] font-mono uppercase tracking-[0.3em] mb-2">
@@ -67,6 +70,7 @@ export function CreditsFooter() {
 function Starfield() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const isVisibleRef = useRef(true)
+  const prefersReducedMotion = useReducedMotion()
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -94,7 +98,7 @@ function Starfield() {
     observer.observe(canvas)
 
     const animate = (now: number) => {
-      if (!isVisibleRef.current) return
+      if (!isVisibleRef.current || prefersReducedMotion) return
       if (now - lastFrame < 33) { raf = requestAnimationFrame(animate); return }
       lastFrame = now
 
@@ -140,7 +144,7 @@ function Starfield() {
       cancelAnimationFrame(raf)
       observer.disconnect()
     }
-  }, [])
+  }, [prefersReducedMotion])
 
   return (
     <canvas

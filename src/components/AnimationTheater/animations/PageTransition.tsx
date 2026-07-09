@@ -1,11 +1,13 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useReducedMotion } from '../../../hooks/useReducedMotion'
 
 export function PageTransition() {
   const [page, setPage] = useState<'a' | 'b'>('a')
   const [isTransitioning, setIsTransitioning] = useState(false)
   const t1Ref = useRef<ReturnType<typeof setTimeout> | null>(null)
   const t2Ref = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const prefersReducedMotion = useReducedMotion()
 
   useEffect(() => {
     return () => {
@@ -17,11 +19,12 @@ export function PageTransition() {
   const switchPage = useCallback(() => {
     if (isTransitioning) return
     setIsTransitioning(true)
+    const delay = prefersReducedMotion ? 0 : 300
     t1Ref.current = setTimeout(() => {
       setPage((prev) => (prev === 'a' ? 'b' : 'a'))
-      t2Ref.current = setTimeout(() => setIsTransitioning(false), 600)
-    }, 300)
-  }, [isTransitioning])
+      t2Ref.current = setTimeout(() => setIsTransitioning(false), prefersReducedMotion ? 0 : 600)
+    }, delay)
+  }, [isTransitioning, prefersReducedMotion])
 
   return (
     <div className="w-full h-full flex items-center justify-center">

@@ -1,6 +1,7 @@
 import { useRef, useEffect, useCallback } from 'react'
 import { useCanvasPause } from '../../../hooks/useCanvasPause'
 import { useDebouncedCallback } from '../../../utils/useDebouncedCallback'
+import { useReducedMotion } from '../../../hooks/useReducedMotion'
 
 interface Particle {
   x: number
@@ -20,6 +21,7 @@ export function ParticleFountain() {
   const animRef = useRef<number>(0)
   const lastSpawnRef = useRef({ x: 0, y: 0 })
   const { ref: wrapperRef, isVisible } = useCanvasPause(0)
+  const prefersReducedMotion = useReducedMotion()
 
   const spawn = useCallback((x: number, y: number) => {
     const count = 5
@@ -69,7 +71,7 @@ export function ParticleFountain() {
 
     let lastFrame = 0
     const animate = (now: number) => {
-      if (!isVisible) return
+      if (!isVisible || prefersReducedMotion) return
       if (now - lastFrame < 33) { animRef.current = requestAnimationFrame(animate); return }
       lastFrame = now
       if (!ctx || !canvas) return
@@ -132,7 +134,7 @@ export function ParticleFountain() {
       canvas.removeEventListener('mouseleave', onMouseLeave)
       cancelAnimationFrame(animRef.current)
     }
-  }, [spawn, isVisible])
+  }, [spawn, isVisible, prefersReducedMotion])
 
   return (
     <div ref={wrapperRef} className="w-full h-full flex items-center justify-center">

@@ -1,6 +1,8 @@
 import { motion } from 'framer-motion'
+import { useReducedMotion } from '../../../hooks/useReducedMotion'
 
 export function CardFan() {
+  const prefersReducedMotion = useReducedMotion()
   const cards = [
     { color: '#6366f1', rotate: -30, delay: 0 },
     { color: '#f43f5e', rotate: -15, delay: 0.1 },
@@ -22,16 +24,16 @@ export function CardFan() {
               backfaceVisibility: 'hidden',
             }}
             initial={{ rotateZ: 0, y: 0 }}
-            whileHover={{ rotateZ: card.rotate * 2, y: -20, scale: 1.1 }}
+            whileHover={prefersReducedMotion ? {} : { rotateZ: card.rotate * 2, y: -20, scale: 1.1 }}
             animate={{
-              rotateZ: card.rotate,
+              rotateZ: prefersReducedMotion ? card.rotate * 0.5 : card.rotate,
               y: i * 2,
             }}
             transition={{
               type: 'spring',
               stiffness: 200,
               damping: 20,
-              delay: card.delay,
+              delay: prefersReducedMotion ? 0 : card.delay,
             }}
             data-cursor="pointer"
           />

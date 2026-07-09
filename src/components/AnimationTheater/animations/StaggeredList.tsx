@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion'
+import { useReducedMotion } from '../../../hooks/useReducedMotion'
 
 const items = [
   { label: 'Animation', x: -20, y: 0 },
@@ -9,16 +10,18 @@ const items = [
 ]
 
 export function StaggeredList() {
+  const prefersReducedMotion = useReducedMotion()
+
   return (
     <div className="w-full h-full flex items-center justify-center">
       <div className="flex flex-col gap-2">
         {items.map((item, i) => (
           <motion.div
             key={i}
-            initial={{ opacity: 0, x: item.x, y: item.y }}
+            initial={prefersReducedMotion ? { opacity: 1, x: 0, y: 0 } : { opacity: 0, x: item.x, y: item.y }}
             animate={{ opacity: 1, x: 0, y: 0 }}
             transition={{
-              delay: i * 0.15,
+              delay: prefersReducedMotion ? 0 : i * 0.15,
               duration: 0.5,
               ease: [0.16, 1, 0.3, 1],
             }}

@@ -1,17 +1,19 @@
 import { useRef, useEffect } from 'react'
 import { useCanvasPause } from '../../../hooks/useCanvasPause'
+import { useReducedMotion } from '../../../hooks/useReducedMotion'
 
 export function Cube3D() {
   const cubeRef = useRef<HTMLDivElement>(null)
   const animRef = useRef<number>(0)
   const { ref: wrapperRef, isVisible } = useCanvasPause(0)
+  const prefersReducedMotion = useReducedMotion()
 
   useEffect(() => {
     let angle = 0
-
     let lastFrame = 0
+
     const animate = (now: number) => {
-      if (!isVisible) return
+      if (!isVisible || prefersReducedMotion) return
       if (now - lastFrame < 33) { animRef.current = requestAnimationFrame(animate); return }
       lastFrame = now
       angle += 0.5
@@ -25,7 +27,7 @@ export function Cube3D() {
     animRef.current = requestAnimationFrame(animate)
 
     return () => cancelAnimationFrame(animRef.current)
-  }, [isVisible])
+  }, [isVisible, prefersReducedMotion])
 
   const size = 80
 

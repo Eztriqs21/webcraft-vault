@@ -1,5 +1,6 @@
 import { useRef, useEffect, useCallback } from 'react'
 import { useCanvasPause } from '../../../hooks/useCanvasPause'
+import { useReducedMotion } from '../../../hooks/useReducedMotion'
 
 interface ConfettiPiece {
   x: number
@@ -21,6 +22,7 @@ export function ConfettiBurst() {
   const confettiRef = useRef<ConfettiPiece[]>([])
   const animRef = useRef<number>(0)
   const { ref: wrapperRef, isVisible } = useCanvasPause(0)
+  const prefersReducedMotion = useReducedMotion()
 
   const spawn = useCallback((cx: number, cy: number) => {
     const colors = ['#6366f1', '#f43f5e', '#10b981', '#a855f7', '#fbbf24', '#06b6d4']
@@ -65,7 +67,7 @@ export function ConfettiBurst() {
 
     let lastFrame = 0
     const animate = (now: number) => {
-      if (!isVisible) return
+      if (!isVisible || prefersReducedMotion) return
       if (now - lastFrame < 33) { animRef.current = requestAnimationFrame(animate); return }
       lastFrame = now
       if (!ctx) return
@@ -129,7 +131,7 @@ export function ConfettiBurst() {
       canvas.removeEventListener('click', onClick)
       cancelAnimationFrame(animRef.current)
     }
-  }, [spawn, isVisible])
+  }, [spawn, isVisible, prefersReducedMotion])
 
   return (
     <div ref={wrapperRef} className="w-full h-full flex items-center justify-center">

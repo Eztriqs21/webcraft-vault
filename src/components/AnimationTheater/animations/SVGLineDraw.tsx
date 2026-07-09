@@ -1,15 +1,25 @@
 import { useRef, useEffect } from 'react'
 import { useCanvasPause } from '../../../hooks/useCanvasPause'
+import { useReducedMotion } from '../../../hooks/useReducedMotion'
 
 export function SVGLineDraw() {
   const pathsRef = useRef<SVGPathElement[]>([])
   const animRef = useRef<number>(0)
   const timeoutRef = useRef<number>(0)
   const { ref: wrapperRef, isVisible } = useCanvasPause(0)
+  const prefersReducedMotion = useReducedMotion()
 
   useEffect(() => {
     const paths = pathsRef.current
     if (!paths.length) return
+
+    if (prefersReducedMotion) {
+      paths.forEach((path) => {
+        path.style.strokeDasharray = 'none'
+        path.style.strokeDashoffset = '0'
+      })
+      return
+    }
 
     paths.forEach((path) => {
       const length = path.getTotalLength()
@@ -21,7 +31,7 @@ export function SVGLineDraw() {
     const duration = 2000
 
     const animate = (timestamp: number) => {
-      if (!isVisible) return
+      if (!isVisible || prefersReducedMotion) return
       if (!startTime) startTime = timestamp
       const elapsed = timestamp - startTime
       const progress = Math.min(elapsed / duration, 1)
@@ -50,7 +60,7 @@ export function SVGLineDraw() {
       cancelAnimationFrame(animRef.current)
       clearTimeout(timeoutRef.current)
     }
-  }, [isVisible])
+  }, [isVisible, prefersReducedMotion])
 
   return (
     <div ref={wrapperRef} className="w-full h-full flex items-center justify-center">

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
+import { useReducedMotion } from '../../../hooks/useReducedMotion'
 
 type Mode = 'drag' | 'bounce' | 'spring'
 
@@ -45,6 +46,7 @@ export function SpringyCards() {
   const [mode, setMode] = useState<Mode>('drag')
   const config = MODE_CONFIG[mode]
   const color = MODE_COLORS[mode]
+  const prefersReducedMotion = useReducedMotion()
 
   return (
     <div className="w-full h-full flex flex-col items-center justify-center gap-8">
@@ -54,9 +56,9 @@ export function SpringyCards() {
         dragElastic={config.dragElastic}
         dragMomentum={config.dragMomentum}
         dragConstraints={config.dragConstraints}
-        whileDrag={{ scale: 1.1, zIndex: 10 }}
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
+        whileDrag={prefersReducedMotion ? {} : { scale: 1.1, zIndex: 10 }}
+        whileHover={prefersReducedMotion ? {} : { scale: 1.05 }}
+        whileTap={prefersReducedMotion ? {} : { scale: 0.95 }}
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={config.transition as never}

@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
 import { motion } from 'framer-motion'
+import { useReducedMotion } from '../../../hooks/useReducedMotion'
 
 const CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*' as const
 
@@ -18,6 +19,7 @@ export function TextScramble() {
   const [text, setText] = useState('HOVER ME')
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const targetRef = useRef('HOVER ME')
+  const prefersReducedMotion = useReducedMotion()
 
   const scramble = useCallback((target: string) => {
     targetRef.current = target
@@ -52,8 +54,12 @@ export function TextScramble() {
   const handleHover = useCallback(() => {
     const nextIndex = (phraseIndex + 1) % PHRASES.length
     setPhraseIndex(nextIndex)
-    scramble(PHRASES[nextIndex])
-  }, [phraseIndex, scramble])
+    if (prefersReducedMotion) {
+      setText(PHRASES[nextIndex])
+    } else {
+      scramble(PHRASES[nextIndex])
+    }
+  }, [phraseIndex, scramble, prefersReducedMotion])
 
   useEffect(() => {
     return () => {
@@ -69,7 +75,7 @@ export function TextScramble() {
         tabIndex={0}
         onMouseEnter={handleHover}
         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleHover() } }}
-        whileHover={{ scale: 1.05 }}
+        whileHover={prefersReducedMotion ? {} : { scale: 1.05 }}
         data-cursor="pointer"
       >
         <span className="font-mono text-2xl md:text-4xl font-bold text-vault-text-bright tracking-wider">

@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useReducedMotion } from '../../hooks/useReducedMotion'
 
 export function LoadingSequence({ onComplete }: { onComplete: () => void }) {
   const [phase, setPhase] = useState<'intro' | 'text' | 'bar' | 'exit'>('intro')
@@ -9,11 +10,17 @@ export function LoadingSequence({ onComplete }: { onComplete: () => void }) {
   const intervalRef = useRef<ReturnType<typeof setInterval>>(null)
   const onCompleteRef = useRef(onComplete)
   onCompleteRef.current = onComplete
+  const prefersReducedMotion = useReducedMotion()
 
   useEffect(() => {
+    if (prefersReducedMotion) {
+      setPhase('exit')
+      const t = setTimeout(() => onCompleteRef.current(), 100)
+      return () => clearTimeout(t)
+    }
     const t = setTimeout(() => setPhase('text'), 1200)
     return () => clearTimeout(t)
-  }, [])
+  }, [prefersReducedMotion])
 
   useEffect(() => {
     if (phase !== 'text') return

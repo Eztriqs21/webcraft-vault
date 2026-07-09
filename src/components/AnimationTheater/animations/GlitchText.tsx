@@ -1,10 +1,13 @@
 import { useRef, useEffect } from 'react'
+import { useReducedMotion } from '../../../hooks/useReducedMotion'
 
 export function GlitchText() {
   const ref = useRef<HTMLDivElement>(null)
   const tRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const prefersReducedMotion = useReducedMotion()
 
   useEffect(() => {
+    if (prefersReducedMotion) return
     const el = ref.current
     if (!el) return
 
@@ -21,7 +24,7 @@ export function GlitchText() {
       clearInterval(interval)
       if (tRef.current) clearTimeout(tRef.current)
     }
-  }, [])
+  }, [prefersReducedMotion])
 
   return (
     <div className="w-full h-full flex items-center justify-center">

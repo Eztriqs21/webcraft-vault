@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
+import { useReducedMotion } from '../../../hooks/useReducedMotion'
 
 const items = [
   { id: 0, color: '#6366f1', label: '01' },
@@ -13,6 +14,7 @@ const ITEM_WIDTH = 128
 
 export function SnapCarousel() {
   const [active, setActive] = useState(0)
+  const prefersReducedMotion = useReducedMotion()
 
   return (
     <div className="w-full h-full flex items-center justify-center">
@@ -28,7 +30,7 @@ export function SnapCarousel() {
             setActive(newActive)
           }}
           animate={{ x: -active * ITEM_WIDTH }}
-          transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+          transition={prefersReducedMotion ? { duration: 0 } : { type: 'spring', stiffness: 300, damping: 30 }}
         >
           {items.map((item) => (
             <div

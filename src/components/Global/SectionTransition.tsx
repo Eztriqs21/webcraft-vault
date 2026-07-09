@@ -1,5 +1,6 @@
 import { useRef, useLayoutEffect } from 'react'
 import { motion, useInView } from 'framer-motion'
+import { useReducedMotion } from '../../hooks/useReducedMotion'
 
 interface SectionTransitionProps {
   accent?: string
@@ -10,6 +11,7 @@ interface SectionTransitionProps {
 export function SectionTransition({ accent = '#6366f1', children, sectionKey }: SectionTransitionProps) {
   const ref = useRef<HTMLDivElement>(null)
   const isInView = useInView(ref, { once: true, margin: '-15% 0px' })
+  const prefersReducedMotion = useReducedMotion()
 
   useLayoutEffect(() => {
     const el = ref.current
@@ -35,8 +37,8 @@ export function SectionTransition({ accent = '#6366f1', children, sectionKey }: 
   return (
     <div ref={ref} data-section={sectionKey} className="relative">
       <motion.div
-        initial={{ opacity: 0, y: 40 }}
-        animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
+        initial={prefersReducedMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
+        animate={isInView ? { opacity: 1, y: 0 } : (prefersReducedMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 })}
         transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
       >
         {children}

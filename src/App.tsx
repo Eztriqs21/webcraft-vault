@@ -14,6 +14,7 @@ import { OrrerySection } from './components/ChromaticOrrery/OrrerySection'
 import { PatternSection } from './components/PatternArchive/PatternSection'
 import { ToolBeltSection } from './components/ToolBelt/ToolBeltSection'
 import { CreditsFooter } from './components/Footer/CreditsFooter'
+import { BackToTop } from './components/Global/BackToTop'
 
 export default function App() {
   const [isLoaded, setIsLoaded] = useState(false)
@@ -76,6 +77,7 @@ export default function App() {
           </main>
 
           <Navigation />
+          <BackToTop />
         </>
       )}
     </SmoothScroll>

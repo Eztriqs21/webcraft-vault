@@ -1,27 +1,30 @@
 import { useRef, useCallback } from 'react'
 import { motion, useMotionValue, useTransform, animate } from 'framer-motion'
+import { useReducedMotion } from '../../../hooks/useReducedMotion'
 
 export function MagneticButtons() {
   const ref = useRef<HTMLDivElement>(null)
   const x = useMotionValue(0)
   const y = useMotionValue(0)
+  const prefersReducedMotion = useReducedMotion()
 
   const rotateX = useTransform(y, [-100, 100], [5, -5])
   const rotateY = useTransform(x, [-100, 100], [-5, 5])
 
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
-    if (!ref.current) return
+    if (prefersReducedMotion || !ref.current) return
     const rect = ref.current.getBoundingClientRect()
     const centerX = rect.left + rect.width / 2
     const centerY = rect.top + rect.height / 2
     x.set(e.clientX - centerX)
     y.set(e.clientY - centerY)
-  }, [x, y])
+  }, [x, y, prefersReducedMotion])
 
   const handleMouseLeave = useCallback(() => {
+    if (prefersReducedMotion) return
     animate(x, 0, { type: 'spring', stiffness: 300, damping: 30 })
     animate(y, 0, { type: 'spring', stiffness: 300, damping: 30 })
-  }, [x, y])
+  }, [x, y, prefersReducedMotion])
 
   return (
     <div className="w-full h-full flex items-center justify-center">
@@ -51,23 +54,25 @@ function MagneticButton({ label, index }: { label: string; index: number }) {
       return dist > 0 ? 1.1 : 1
     }
   )
+  const prefersReducedMotion = useReducedMotion()
 
   const colors = ['#6366f1', '#f43f5e', '#10b981']
   const color = colors[index]
 
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
-    if (!ref.current) return
+    if (prefersReducedMotion || !ref.current) return
     const rect = ref.current.getBoundingClientRect()
     const centerX = rect.left + rect.width / 2
     const centerY = rect.top + rect.height / 2
     x.set((e.clientX - centerX) * 0.3)
     y.set((e.clientY - centerY) * 0.3)
-  }, [x, y])
+  }, [x, y, prefersReducedMotion])
 
   const handleMouseLeave = useCallback(() => {
+    if (prefersReducedMotion) return
     animate(x, 0, { type: 'spring', stiffness: 300, damping: 30 })
     animate(y, 0, { type: 'spring', stiffness: 300, damping: 30 })
-  }, [x, y])
+  }, [x, y, prefersReducedMotion])
 
   return (
     <motion.button
@@ -75,7 +80,7 @@ function MagneticButton({ label, index }: { label: string; index: number }) {
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       style={{ x, y, scale, background: color }}
-      whileTap={{ scale: 0.95 }}
+      whileTap={prefersReducedMotion ? {} : { scale: 0.95 }}
       className="px-6 py-3 rounded-lg font-bold text-white text-sm select-none"
       data-cursor="pointer"
     >

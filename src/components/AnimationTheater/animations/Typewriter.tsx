@@ -1,12 +1,18 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { useReducedMotion } from '../../../hooks/useReducedMotion'
 
 export function Typewriter() {
   const [text, setText] = useState('')
   const indexRef = useRef(0)
   const resetTimeoutRef = useRef<number>(0)
   const fullText = 'WebCraft Vault — Where animations come to life'
+  const prefersReducedMotion = useReducedMotion()
 
   const type = useCallback(() => {
+    if (prefersReducedMotion) {
+      setText(fullText)
+      return
+    }
     if (indexRef.current <= fullText.length) {
       setText(fullText.slice(0, indexRef.current))
       indexRef.current++
@@ -19,7 +25,7 @@ export function Typewriter() {
         }, 2000)
       }
     }
-  }, [fullText])
+  }, [fullText, prefersReducedMotion])
 
   useEffect(() => {
     const interval = setInterval(type, 80)

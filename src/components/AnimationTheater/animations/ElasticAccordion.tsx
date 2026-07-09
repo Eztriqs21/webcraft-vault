@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useReducedMotion } from '../../../hooks/useReducedMotion'
 
 const items = [
   { id: 1, label: 'Click to expand', content: 'This panel uses spring physics for a natural, bouncy feel.' },
@@ -9,6 +10,7 @@ const items = [
 
 export function ElasticAccordion() {
   const [openId, setOpenId] = useState<number | null>(null)
+  const prefersReducedMotion = useReducedMotion()
 
   const toggle = useCallback((id: number) => {
     setOpenId((prev) => (prev === id ? null : id))
@@ -47,7 +49,7 @@ export function ElasticAccordion() {
                   initial={{ height: 0, opacity: 0 }}
                   animate={{ height: 'auto', opacity: 1 }}
                   exit={{ height: 0, opacity: 0 }}
-                  transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+                  transition={prefersReducedMotion ? { duration: 0 } : { type: 'spring', stiffness: 300, damping: 25 }}
                   className="overflow-hidden"
                 >
                   <div className="px-4 pb-3 text-xs text-[#888]">

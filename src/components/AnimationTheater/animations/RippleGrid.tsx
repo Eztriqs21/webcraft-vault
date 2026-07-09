@@ -1,6 +1,7 @@
 import { useRef, useEffect } from 'react'
 import { useCanvasPause } from '../../../hooks/useCanvasPause'
 import { useDebouncedCallback } from '../../../utils/useDebouncedCallback'
+import { useReducedMotion } from '../../../hooks/useReducedMotion'
 
 export function RippleGrid() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -8,6 +9,7 @@ export function RippleGrid() {
   const ripplesRef = useRef<{ x: number; y: number; radius: number; maxRadius: number; alpha: number }[]>([])
   const animRef = useRef<number>(0)
   const { ref: wrapperRef, isVisible } = useCanvasPause(0)
+  const prefersReducedMotion = useReducedMotion()
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -45,7 +47,7 @@ export function RippleGrid() {
 
     let lastFrame = 0
     const animate = (now: number) => {
-      if (!isVisible) return
+      if (!isVisible || prefersReducedMotion) return
       if (now - lastFrame < 33) { animRef.current = requestAnimationFrame(animate); return }
       lastFrame = now
       if (!ctx || !canvas) return
@@ -103,7 +105,7 @@ export function RippleGrid() {
       canvas.removeEventListener('mousemove', onMouseMove)
       cancelAnimationFrame(animRef.current)
     }
-  }, [isVisible])
+  }, [isVisible, prefersReducedMotion])
 
   return (
     <div ref={wrapperRef} className="w-full h-full flex items-center justify-center">

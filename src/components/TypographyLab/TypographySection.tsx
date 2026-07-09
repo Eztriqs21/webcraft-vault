@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { FONT_PAIRINGS, loadFont } from '../../data/fonts'
+import { useReducedMotion } from '../../hooks/useReducedMotion'
 
 const CONTEXTS = ['hero', 'product', 'blog', 'dashboard'] as const
 
@@ -11,6 +12,7 @@ export function TypographySection() {
   const listRef = useRef<HTMLDivElement>(null)
   const copiedTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const activePairing = FONT_PAIRINGS[activeIndex]
+  const prefersReducedMotion = useReducedMotion()
 
   useEffect(() => {
     return () => {
@@ -69,7 +71,7 @@ export function TypographySection() {
     <section className="relative py-24 min-h-screen" id="typography-lab" aria-labelledby="typography-heading">
       <div className="max-w-7xl mx-auto px-4">
         <motion.div
-          initial={{ opacity: 0, y: 40 }}
+          initial={prefersReducedMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
@@ -80,13 +82,13 @@ export function TypographySection() {
               <h2 id="typography-heading" className="font-display text-4xl sm:text-5xl md:text-7xl font-bold text-vault-text-bright mb-4">
                 Typography Laboratory
               </h2>
-              <p className="text-[#888] text-lg max-w-xl">
+              <p className="text-[#999] text-lg max-w-xl">
                 20 curated font pairings. Live-updating editorial canvas. Find the perfect voice.
               </p>
             </div>
             <button
               onClick={handleShuffle}
-              className="self-start px-4 py-2 text-sm font-medium rounded-lg bg-[rgba(255,255,255,0.05)] text-[#999] hover:bg-[rgba(16,185,129,0.15)] hover:text-[#10b981] transition-all"
+              className="self-start px-4 py-2 text-sm font-medium rounded-lg bg-[rgba(255,255,255,0.05)] text-[#999] hover:bg-[rgba(16,185,129,0.15)] hover:text-[#10b981] focus-visible:ring-2 focus-visible:ring-[#818cf8] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0a0a] transition-all"
               data-cursor="pointer"
             >
               Shuffle
