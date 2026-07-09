@@ -21,7 +21,7 @@ export const FONT_PAIRINGS = [
   { heading: 'Clash Display', body: 'Satoshi', personality: 'Brutalist Geometric' },
 ] as const
 
-export const FONT_PAIRINGS_CSS: Record<string, string> = {
+const FONT_PAIRINGS_CSS: Record<string, string> = {
   'Playfair Display': 'Playfair+Display:wght@400;500;600;700',
   'Space Grotesk': 'Space+Grotesk:wght@400;500;600;700',
   'Cormorant': 'Cormorant:wght@400;500;600;700',

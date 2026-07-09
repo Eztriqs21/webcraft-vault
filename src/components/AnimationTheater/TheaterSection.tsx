@@ -66,7 +66,7 @@ export function TheaterSection() {
       })
     } catch {
       setViewingCode((current) => {
-        if (current === id) setHighlightedCode(`<pre>${anim.code}</pre>`)
+        if (current === id) setHighlightedCode('')
         return current
       })
     }
@@ -159,22 +159,25 @@ const TheaterFrame = React.memo(function TheaterFrame({
           className="mt-auto px-3 md:px-4 py-1.5 md:py-2 text-xs md:text-sm font-medium rounded-lg bg-[rgba(255,255,255,0.05)] text-[#999] hover:bg-[rgba(255,255,255,0.1)] hover:text-vault-text-bright transition-all self-start"
           data-cursor="pointer"
         >
-          {isViewingCode ? 'Hide Source' : 'View Source'}
+          {isViewingCode ? 'Close' : 'How It Works'}
         </button>
       </div>
 
       {isViewingCode && (
         <div className="absolute inset-x-0 bottom-0 h-[45%] md:h-[40%] border-t border-[rgba(255,255,255,0.06)] bg-[rgba(3,3,3,0.95)] overflow-auto z-10">
-          {highlightedCode ? (
-            <div
-              className="p-4 md:p-6 text-xs md:text-sm font-mono [&>pre]:bg-transparent [&>pre]:p-0"
-              dangerouslySetInnerHTML={{ __html: highlightedCode }}
-            />
-          ) : (
-            <pre className="p-4 md:p-6 text-xs md:text-sm font-mono text-[#888]">
-              {animation.code}
-            </pre>
-          )}
+          <div className="p-4 md:p-6">
+            <h4 className="text-xs font-medium text-[#888] uppercase tracking-wider mb-3">How It Works</h4>
+            {highlightedCode ? (
+              <div
+                className="text-sm leading-relaxed text-[#bbb] font-mono [&>pre]:bg-transparent [&>pre]:p-0"
+                dangerouslySetInnerHTML={{ __html: highlightedCode }}
+              />
+            ) : (
+              <p className="text-sm leading-relaxed text-[#bbb] font-sans whitespace-pre-line">
+                {animation.code}
+              </p>
+            )}
+          </div>
         </div>
       )}
     </div>

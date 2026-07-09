@@ -35,5 +35,3 @@ export const SECTION_MOODS = {
     cursorGlow: '0 0 20px rgba(99,102,241,0.5)',
   },
 } as const
-
-export type SectionKey = keyof typeof SECTION_MOODS

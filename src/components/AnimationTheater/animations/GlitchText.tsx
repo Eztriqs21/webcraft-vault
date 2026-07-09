@@ -49,16 +49,6 @@ export function GlitchText() {
         >
           GLITCH
         </span>
-        <style>{`
-          .glitching span:nth-child(2),
-          .glitching span:nth-child(3) {
-            animation: glitch-clip 0.2s steps(2) infinite alternate;
-          }
-          @keyframes glitch-clip {
-            0% { opacity: 0.8; transform: translate(-3px, 1px); }
-            100% { opacity: 0.6; transform: translate(3px, -1px); }
-          }
-        `}</style>
       </div>
     </div>
   )

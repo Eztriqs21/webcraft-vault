@@ -25,7 +25,7 @@ export const TOOLS = [
   },
   {
     name: 'Lenis',
-    description: ' buttery smooth scroll library.',
+    description: 'Buttery smooth scroll library.',
     url: 'https://lenis.darkroom.engineering',
     category: 'Utility',
     x: 0.65,
