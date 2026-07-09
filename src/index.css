@@ -134,6 +134,37 @@ body.custom-cursor-active * {
   }
 }
 
+/* ── Section scroll offset for fixed nav ── */
+[data-section] {
+  scroll-margin-top: 20px;
+}
+
+/* ── Hide scrollbar utility ── */
+.hide-scrollbar {
+  scrollbar-width: none;
+}
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* ── Skip to content (screen reader only until focused) ── */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  z-index: 10001;
+}
+.skip-link:focus {
+  left: 16px;
+  top: 16px;
+  padding: 8px 16px;
+  background: #030303;
+  color: #f3f4f6;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  font-size: 14px;
+  text-decoration: none;
+}
+
 /* ── Snap scroll for mobile carousel ── */
 .snap-x {
   scroll-snap-type: x mandatory;

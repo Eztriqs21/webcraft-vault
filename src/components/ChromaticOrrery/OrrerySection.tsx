@@ -11,7 +11,7 @@ export function OrrerySection() {
   }
 
   return (
-    <section className="relative py-24 min-h-screen overflow-hidden">
+    <section className="relative py-24 min-h-screen overflow-hidden" id="chromatic-orrery" aria-labelledby="orrery-heading">
       <div className="max-w-7xl mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 40 }}
@@ -20,7 +20,7 @@ export function OrrerySection() {
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
           className="mb-16"
         >
-          <h2 className="font-display text-4xl sm:text-5xl md:text-7xl font-bold text-vault-text-bright mb-4">
+          <h2 id="orrery-heading" className="font-display text-4xl sm:text-5xl md:text-7xl font-bold text-vault-text-bright mb-4">
             Chromatic Orrery
           </h2>
           <p className="text-[#888] text-lg max-w-xl">
@@ -84,16 +84,20 @@ export function OrrerySection() {
 
         {/* Mobile: swipeable carousel */}
         <div className="md:hidden">
-          <div className="flex overflow-x-auto snap-x snap-mandatory gap-6 pb-8 -mx-4 px-4" style={{ scrollbarWidth: 'none' }}>
+          <div className="flex overflow-x-auto snap-x snap-mandatory gap-6 pb-8 -mx-4 px-4 hide-scrollbar" aria-label="Color palettes carousel">
             {PALETTES.map((palette, i) => (
               <div
                 key={i}
                 className="flex-shrink-0 w-[75vw] snap-center"
               >
                 <motion.div
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`${palette.name} color palette`}
                   className="cursor-pointer rounded-2xl p-6 border border-[rgba(255,255,255,0.06)] bg-[rgba(10,10,10,0.6)]"
                   whileTap={{ scale: 0.97 }}
                   onClick={() => handlePlanetClick(i)}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handlePlanetClick(i) } }}
                 >
                   <div
                     className="w-full aspect-square rounded-xl mb-4 shadow-lg"
@@ -138,6 +142,7 @@ export function OrrerySection() {
                       copyToClipboard(color)
                       showToast(`Copied ${color}`)
                     }}
+                    aria-label={`Copy color ${color}`}
                     className="group"
                     data-cursor="pointer"
                   >

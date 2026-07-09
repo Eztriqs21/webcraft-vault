@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { SECTION_MOODS } from '../../data/sections'
+import { useLenis } from './SmoothScroll'
 
 const NAV_ITEMS = [
   { id: 'hero', label: 'Vault', icon: '◆' },
@@ -16,6 +17,7 @@ export function Navigation() {
   const [isVisible, setIsVisible] = useState(false)
   const [activeSection, setActiveSection] = useState('hero')
   const [hoveredItem, setHoveredItem] = useState<string | null>(null)
+  const lenis = useLenis()
 
   const activeAccentRgb = SECTION_MOODS[activeSection as keyof typeof SECTION_MOODS]?.accentRgb || '99,102,241'
 
@@ -46,10 +48,9 @@ export function Navigation() {
   }, [])
 
   const scrollTo = (id: string) => {
-    const el = document.querySelector(`[data-section="${id}"]`)
-    if (el) {
-      const y = el.getBoundingClientRect().top + window.scrollY
-      window.scrollTo({ top: y, behavior: 'auto' })
+    const el = document.querySelector(`[data-section="${id}"]`) as HTMLElement | null
+    if (el && lenis) {
+      lenis.scrollTo(el, { offset: -20 })
     }
   }
 
@@ -73,6 +74,7 @@ export function Navigation() {
                   onMouseEnter={() => setHoveredItem(item.id)}
                   onMouseLeave={() => setHoveredItem(null)}
                   aria-label={`Navigate to ${item.label}`}
+                  aria-current={isActive ? 'true' : undefined}
                   className={`relative flex items-center gap-2 px-3 py-2 rounded-full text-xs font-medium transition-all duration-300 ${
                     isActive
                       ? 'text-white'

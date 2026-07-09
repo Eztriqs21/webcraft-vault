@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useReducedMotion } from '../../hooks/useReducedMotion'
 
 const SHAPES = Array.from({ length: 32 }, (_, i) => ({
   id: i,
@@ -32,6 +33,7 @@ function ensureRiverStyle() {
 
 export function PreviewRiver() {
   const [hoveredId, setHoveredId] = useState<number | null>(null)
+  const prefersReducedMotion = useReducedMotion()
 
   useEffect(() => { ensureRiverStyle() }, [])
 
@@ -39,14 +41,13 @@ export function PreviewRiver() {
     <div className="w-full overflow-hidden py-8">
       <div
         className="relative h-16"
-        onMouseEnter={() => {}}
         onMouseLeave={() => setHoveredId(null)}
       >
         <div
           className="flex items-center gap-6"
           style={{
             width: 'fit-content',
-            animation: 'river-scroll 60s linear infinite',
+            animation: prefersReducedMotion ? 'none' : 'river-scroll 60s linear infinite',
           }}
         >
           {[...SHAPES, ...SHAPES].map((shape, i) => (
@@ -61,7 +62,7 @@ export function PreviewRiver() {
               onMouseLeave={() => setHoveredId(null)}
               data-cursor="pointer"
             >
-              <ShapePreview shape={shape} isHovered={hoveredId === shape.id} />
+              <ShapePreview shape={shape} isHovered={hoveredId === shape.id} animated={!prefersReducedMotion} />
             </div>
           ))}
         </div>
@@ -79,9 +80,11 @@ export function PreviewRiver() {
 function ShapePreview({
   shape,
   isHovered,
+  animated,
 }: {
   shape: (typeof SHAPES)[0]
   isHovered: boolean
+  animated: boolean
 }) {
   const size = isHovered ? 64 : 32
 
@@ -89,7 +92,7 @@ function ShapePreview({
     return (
       <svg width={size} height={size} viewBox="0 0 32 32">
         <circle cx="16" cy="16" r="12" fill={shape.color} opacity={0.6}>
-          <animate attributeName="r" values="10;14;10" dur="2s" repeatCount="indefinite" />
+          {animated && <animate attributeName="r" values="10;14;10" dur="2s" repeatCount="indefinite" />}
         </circle>
       </svg>
     )
@@ -103,12 +106,14 @@ function ShapePreview({
           fill={shape.color}
           opacity={0.6}
         >
-          <animate
-            attributeName="d"
-            values="M16 4C20 4 28 8 28 16C28 24 20 28 16 28C12 28 4 24 4 16C4 8 12 4 16 4Z;M16 6C22 6 26 10 26 16C26 22 22 26 16 26C10 26 6 22 6 16C6 10 10 6 16 6Z;M16 4C20 4 28 8 28 16C28 24 20 28 16 28C12 28 4 24 4 16C4 8 12 4 16 4Z"
-            dur="3s"
-            repeatCount="indefinite"
-          />
+          {animated && (
+            <animate
+              attributeName="d"
+              values="M16 4C20 4 28 8 28 16C28 24 20 28 16 28C12 28 4 24 4 16C4 8 12 4 16 4Z;M16 6C22 6 26 10 26 16C26 22 22 26 16 26C10 26 6 22 6 16C6 10 10 6 16 6Z;M16 4C20 4 28 8 28 16C28 24 20 28 16 28C12 28 4 24 4 16C4 8 12 4 16 4Z"
+              dur="3s"
+              repeatCount="indefinite"
+            />
+          )}
         </path>
       </svg>
     )
@@ -124,12 +129,14 @@ function ShapePreview({
           fill="none"
           opacity={0.6}
         >
-          <animate
-            attributeName="d"
-            values="M2 16C6 12 10 20 14 16C18 12 22 20 26 16C30 12 32 16 32 16;M2 16C6 20 10 12 14 16C18 20 22 12 26 16C30 20 32 16 32 16;M2 16C6 12 10 20 14 16C18 12 22 20 26 16C30 12 32 16 32 16"
-            dur="2s"
-            repeatCount="indefinite"
-          />
+          {animated && (
+            <animate
+              attributeName="d"
+              values="M2 16C6 12 10 20 14 16C18 12 22 20 26 16C30 12 32 16 32 16;M2 16C6 20 10 12 14 16C18 20 22 12 26 16C30 20 32 16 32 16;M2 16C6 12 10 20 14 16C18 12 22 20 26 16C30 12 32 16 32 16"
+              dur="2s"
+              repeatCount="indefinite"
+            />
+          )}
         </path>
       </svg>
     )
@@ -147,13 +154,15 @@ function ShapePreview({
           opacity={0.6}
           transform="rotate(45 16 16)"
         >
-          <animateTransform
-            attributeName="transform"
-            type="rotate"
-            values="45 16 16;225 16 16;45 16 16"
-            dur="4s"
-            repeatCount="indefinite"
-          />
+          {animated && (
+            <animateTransform
+              attributeName="transform"
+              type="rotate"
+              values="45 16 16;225 16 16;45 16 16"
+              dur="4s"
+              repeatCount="indefinite"
+            />
+          )}
         </rect>
       </svg>
     )
@@ -171,7 +180,7 @@ function ShapePreview({
           fill="none"
           opacity={0.6}
         >
-          <animate attributeName="r" values="10;13;10" dur="2s" repeatCount="indefinite" />
+          {animated && <animate attributeName="r" values="10;13;10" dur="2s" repeatCount="indefinite" />}
         </circle>
       </svg>
     )

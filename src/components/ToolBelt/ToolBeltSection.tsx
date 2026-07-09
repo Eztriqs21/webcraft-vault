@@ -190,7 +190,7 @@ export function ToolBeltSection() {
   }, [])
 
   return (
-    <section className="relative py-24 min-h-screen">
+    <section className="relative py-24 min-h-screen" id="tool-belt" aria-labelledby="tool-belt-heading">
       <div className="max-w-7xl mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 40 }}
@@ -199,7 +199,7 @@ export function ToolBeltSection() {
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
           className="mb-16"
         >
-          <h2 className="font-display text-4xl sm:text-5xl md:text-7xl font-bold text-vault-text-bright mb-4">
+          <h2 id="tool-belt-heading" className="font-display text-4xl sm:text-5xl md:text-7xl font-bold text-vault-text-bright mb-4">
             The Tool Belt
           </h2>
           <p className="text-[#888] text-lg max-w-xl">
@@ -224,6 +224,9 @@ export function ToolBeltSection() {
                 <div
                   key={i}
                   ref={(el) => { nodeRefs.current[i] = el }}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={tool.name}
                   className="absolute cursor-grab active:cursor-grabbing touch-none"
                   style={{
                     left: `${initX}%`,
@@ -233,9 +236,17 @@ export function ToolBeltSection() {
                   onPointerDown={(e) => handlePointerDown(i, e)}
                   onMouseEnter={() => setHoveredTool(i)}
                   onMouseLeave={() => setHoveredTool(null)}
+                  onFocus={() => setHoveredTool(i)}
+                  onBlur={() => setHoveredTool(null)}
                   onClick={() => {
                     if (!didDragRef.current) {
-                      window.open(tool.url, '_blank')
+                      window.open(tool.url, '_blank', 'noopener,noreferrer')
+                    }
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault()
+                      window.open(tool.url, '_blank', 'noopener,noreferrer')
                     }
                   }}
                   data-cursor="pointer"

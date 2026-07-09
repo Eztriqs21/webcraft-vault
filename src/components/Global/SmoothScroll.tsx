@@ -1,18 +1,26 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, createContext, useContext } from 'react'
 import Lenis from 'lenis'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { useReducedMotion } from '../../hooks/useReducedMotion'
 
 gsap.registerPlugin(ScrollTrigger)
 
+const LenisContext = createContext<Lenis | null>(null)
+
+export function useLenis() {
+  return useContext(LenisContext)
+}
+
 export function SmoothScroll({ children }: { children: React.ReactNode }) {
   const lenisRef = useRef<Lenis | null>(null)
+  const prefersReducedMotion = useReducedMotion()
 
   useEffect(() => {
     const lenis = new Lenis({
-      lerp: 0.1,
-      duration: 1.2,
-      smoothWheel: true,
+      lerp: prefersReducedMotion ? 1 : 0.1,
+      duration: prefersReducedMotion ? 0 : 1.2,
+      smoothWheel: !prefersReducedMotion,
     })
 
     lenisRef.current = lenis
@@ -28,8 +36,9 @@ export function SmoothScroll({ children }: { children: React.ReactNode }) {
     return () => {
       gsap.ticker.remove(rafCallback)
       lenis.destroy()
+      lenisRef.current = null
     }
-  }, [])
+  }, [prefersReducedMotion])
 
-  return <>{children}</>
+  return <LenisContext.Provider value={lenisRef.current}>{children}</LenisContext.Provider>
 }

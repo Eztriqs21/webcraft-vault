@@ -3,10 +3,12 @@ import { motion } from 'framer-motion'
 import { gsap } from 'gsap'
 import { ParallaxLetters } from './ParallaxLetters'
 import { PreviewRiver } from './PreviewRiver'
+import { useLenis } from '../Global/SmoothScroll'
 
 export function HeroEntrance() {
   const heroRef = useRef<HTMLElement>(null)
   const tlRef = useRef<gsap.core.Timeline | null>(null)
+  const lenis = useLenis()
 
   useEffect(() => {
     return () => {
@@ -31,13 +33,13 @@ export function HeroEntrance() {
     })
 
     tl.call(() => {
-      const target = document.querySelector('[data-section="theater"]')
-      if (target) {
-        window.scrollTo({ top: (target as HTMLElement).offsetTop || 0, behavior: 'auto' })
+      const target = document.querySelector('[data-section="theater"]') as HTMLElement | null
+      if (target && lenis) {
+        lenis.scrollTo(target, { offset: -20 })
       }
       gsap.set(hero, { scale: 1, filter: 'none', opacity: 1 })
     }, undefined, 0.9)
-  }, [])
+  }, [lenis])
 
   return (
     <section

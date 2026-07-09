@@ -44,6 +44,8 @@ export default function App() {
           <FilmGrain />
 
           <main className="relative z-10">
+            <a href="#theater" className="skip-link">Skip to content</a>
+
             <SectionTransition accent="#6366f1" sectionKey="hero">
               <HeroEntrance />
             </SectionTransition>

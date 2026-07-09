@@ -25,7 +25,12 @@ export function PageTransition() {
 
   return (
     <div className="w-full h-full flex items-center justify-center">
-      <div className="relative w-48 h-32 md:w-56 md:h-40 rounded-xl overflow-hidden cursor-pointer" onClick={switchPage} data-cursor="pointer">
+      <button
+        onClick={switchPage}
+        aria-label={`Switch to page ${page === 'a' ? 'B' : 'A'}`}
+        className="relative w-48 h-32 md:w-56 md:h-40 rounded-xl overflow-hidden cursor-pointer"
+        data-cursor="pointer"
+      >
         <AnimatePresence mode="wait">
           <motion.div
             key={page}
@@ -43,7 +48,7 @@ export function PageTransition() {
             Page {page === 'a' ? 'A' : 'B'}
           </motion.div>
         </AnimatePresence>
-      </div>
+      </button>
     </div>
   )
 }

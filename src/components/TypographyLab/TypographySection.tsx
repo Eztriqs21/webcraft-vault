@@ -66,7 +66,7 @@ export function TypographySection() {
   }, [])
 
   return (
-    <section className="relative py-24 min-h-screen">
+    <section className="relative py-24 min-h-screen" id="typography-lab" aria-labelledby="typography-heading">
       <div className="max-w-7xl mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 40 }}
@@ -77,7 +77,7 @@ export function TypographySection() {
         >
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h2 className="font-display text-4xl sm:text-5xl md:text-7xl font-bold text-vault-text-bright mb-4">
+              <h2 id="typography-heading" className="font-display text-4xl sm:text-5xl md:text-7xl font-bold text-vault-text-bright mb-4">
                 Typography Laboratory
               </h2>
               <p className="text-[#888] text-lg max-w-xl">

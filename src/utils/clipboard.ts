@@ -25,6 +25,8 @@ export function showToast(message: string) {
 
   const toast = document.createElement('div')
   toast.id = 'vault-toast'
+  toast.setAttribute('role', 'status')
+  toast.setAttribute('aria-live', 'polite')
   toast.style.cssText = `
     position: fixed;
     bottom: 24px;

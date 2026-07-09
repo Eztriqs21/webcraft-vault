@@ -27,7 +27,7 @@ export function PatternSection() {
   }, [expandedId])
 
   return (
-    <section className="relative py-16 md:py-24 min-h-screen">
+    <section className="relative py-16 md:py-24 min-h-screen" id="pattern-archive" aria-labelledby="patterns-heading">
       <div className="max-w-7xl mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 40 }}
@@ -36,11 +36,11 @@ export function PatternSection() {
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
           className="mb-12 md:mb-16"
         >
-          <h2 className="font-display text-4xl sm:text-5xl md:text-7xl font-bold text-vault-text-bright mb-4">
+          <h2 id="patterns-heading" className="font-display text-4xl sm:text-5xl md:text-7xl font-bold text-vault-text-bright mb-4">
             Pattern Archive
           </h2>
           <p className="text-[#888] text-lg max-w-xl">
-            10 essential UI patterns. Each one a live, interactive demo.
+            10 essential UI patterns. Visual layout demonstrations with interactive previews.
           </p>
         </motion.div>
 

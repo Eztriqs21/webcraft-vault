@@ -10,7 +10,7 @@ export function CardFan() {
   ]
 
   return (
-    <div className="w-full h-full flex items-center justify-center" style={{ perspective: 600 }}>
+    <div className="w-full h-full flex items-center justify-center" style={{ perspective: 600 }} aria-hidden="true">
       <div className="relative w-32 h-44">
         {cards.map((card, i) => (
           <motion.div
