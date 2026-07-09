@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, Suspense, lazy } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { SmoothScroll } from './components/Global/SmoothScroll'
 import { CustomCursor } from './components/Global/CustomCursor'
 import { AuroraBackground } from './components/Global/AuroraBackground'
@@ -8,14 +8,13 @@ import { LoadingSequence } from './components/Global/LoadingSequence'
 import { SectionTransition } from './components/Global/SectionTransition'
 import { MetaTags } from './components/Global/MetaTags'
 import { HeroEntrance } from './components/Hero/HeroEntrance'
+import { TheaterSection } from './components/AnimationTheater/TheaterSection'
+import { TypographySection } from './components/TypographyLab/TypographySection'
+import { OrrerySection } from './components/ChromaticOrrery/OrrerySection'
+import { PatternSection } from './components/PatternArchive/PatternSection'
+import { ToolBeltSection } from './components/ToolBelt/ToolBeltSection'
+import { CreditsFooter } from './components/Footer/CreditsFooter'
 import { BackToTop } from './components/Global/BackToTop'
-
-const TheaterSection = lazy(() => import('./components/AnimationTheater/TheaterSection').then(m => ({ default: m.TheaterSection })))
-const TypographySection = lazy(() => import('./components/TypographyLab/TypographySection').then(m => ({ default: m.TypographySection })))
-const OrrerySection = lazy(() => import('./components/ChromaticOrrery/OrrerySection').then(m => ({ default: m.OrrerySection })))
-const PatternSection = lazy(() => import('./components/PatternArchive/PatternSection').then(m => ({ default: m.PatternSection })))
-const ToolBeltSection = lazy(() => import('./components/ToolBelt/ToolBeltSection').then(m => ({ default: m.ToolBeltSection })))
-const CreditsFooter = lazy(() => import('./components/Footer/CreditsFooter').then(m => ({ default: m.CreditsFooter })))
 
 export default function App() {
   const [isLoaded, setIsLoaded] = useState(false)
@@ -52,31 +51,29 @@ export default function App() {
               <HeroEntrance />
             </SectionTransition>
 
-            <Suspense fallback={<div className="h-screen" />}>
-              <SectionTransition accent="#f43f5e" sectionKey="theater">
-                <TheaterSection />
-              </SectionTransition>
+            <SectionTransition accent="#f43f5e" sectionKey="theater">
+              <TheaterSection />
+            </SectionTransition>
 
-              <SectionTransition accent="#10b981" sectionKey="typography">
-                <TypographySection />
-              </SectionTransition>
+            <SectionTransition accent="#10b981" sectionKey="typography">
+              <TypographySection />
+            </SectionTransition>
 
-              <SectionTransition accent="#a855f7" sectionKey="orrery">
-                <OrrerySection />
-              </SectionTransition>
+            <SectionTransition accent="#a855f7" sectionKey="orrery">
+              <OrrerySection />
+            </SectionTransition>
 
-              <SectionTransition accent="#06b6d4" sectionKey="patterns">
-                <PatternSection />
-              </SectionTransition>
+            <SectionTransition accent="#06b6d4" sectionKey="patterns">
+              <PatternSection />
+            </SectionTransition>
 
-              <SectionTransition accent="#fbbf24" sectionKey="tools">
-                <ToolBeltSection />
-              </SectionTransition>
+            <SectionTransition accent="#fbbf24" sectionKey="tools">
+              <ToolBeltSection />
+            </SectionTransition>
 
-              <SectionTransition accent="#6366f1" sectionKey="footer">
-                <CreditsFooter />
-              </SectionTransition>
-            </Suspense>
+            <SectionTransition accent="#6366f1" sectionKey="footer">
+              <CreditsFooter />
+            </SectionTransition>
           </main>
 
           <Navigation />
