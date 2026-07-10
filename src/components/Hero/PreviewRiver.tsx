@@ -84,6 +84,10 @@ export function PreviewRiver() {
               onMouseEnter={() => setHoveredId(shape.id)}
               onMouseLeave={() => setHoveredId(null)}
               onClick={() => handleSelect(shape.id)}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleSelect(shape.id) } }}
+              role="button"
+              tabIndex={0}
+              aria-label={`Select ${shape.name}`}
               data-cursor="pointer"
             >
               <ShapePreview shape={shape} isHovered={hoveredId === shape.id} animated={!prefersReducedMotion} />

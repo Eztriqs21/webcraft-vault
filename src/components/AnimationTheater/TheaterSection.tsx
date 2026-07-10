@@ -15,6 +15,8 @@ export function TheaterSection() {
     const inner = innerRef.current
     if (!container || !inner) return
 
+    gsap.set(inner, { opacity: 0 })
+
     const ctx = gsap.context(() => {
       gsap.to(inner, {
         x: () => -(inner.scrollWidth - window.innerWidth),
@@ -32,10 +34,16 @@ export function TheaterSection() {
             setActiveIndex(Math.min(index, ANIMATIONS.length - 1))
           },
           onEnter: () => {
-            gsap.fromTo(inner, { opacity: 0 }, { opacity: 1, duration: 0.6, ease: 'power2.out' })
+            gsap.to(inner, { opacity: 1, duration: 0.5, ease: 'power2.out' })
+          },
+          onLeave: () => {
+            gsap.set(inner, { opacity: 0 })
+          },
+          onEnterBack: () => {
+            gsap.to(inner, { opacity: 1, duration: 0.3, ease: 'power2.out' })
           },
           onLeaveBack: () => {
-            gsap.to(inner, { opacity: 0, duration: 0.3, ease: 'power2.in' })
+            gsap.set(inner, { opacity: 0 })
           },
         },
       })

@@ -16,14 +16,15 @@ export function ScrollSkew() {
     }
 
     const decay = () => {
-      if (!isVisibleRef.current) return
-      currentSkew.current += (targetSkew.current - currentSkew.current) * 0.08
+      if (isVisibleRef.current) {
+        currentSkew.current += (targetSkew.current - currentSkew.current) * 0.08
 
-      if (containerRef.current) {
-        containerRef.current.style.transform = `skewY(${currentSkew.current}deg)`
-      }
-      if (innerRef.current) {
-        innerRef.current.style.transform = `skewY(${-currentSkew.current}deg)`
+        if (containerRef.current) {
+          containerRef.current.style.transform = `skewY(${currentSkew.current}deg)`
+        }
+        if (innerRef.current) {
+          innerRef.current.style.transform = `skewY(${-currentSkew.current}deg)`
+        }
       }
 
       rafRef.current = requestAnimationFrame(decay)
