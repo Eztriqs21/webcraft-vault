@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { FONT_PAIRINGS, loadFont } from '../../data/fonts'
 import { useReducedMotion } from '../../hooks/useReducedMotion'
 
-const CONTEXTS = ['hero', 'product', 'blog', 'dashboard'] as const
+const CONTEXTS = ['hero', 'product', 'blog', 'dashboard', 'landing', 'testimonial', 'email', 'resume'] as const
 
 export function TypographySection() {
   const [activeIndex, setActiveIndex] = useState(0)
@@ -20,6 +20,28 @@ export function TypographySection() {
       if (copiedTimeoutRef.current) clearTimeout(copiedTimeoutRef.current)
     }
   }, [])
+
+  useEffect(() => {
+    const el = listRef.current
+    if (!el) return
+    const handler = (e: WheelEvent) => {
+      e.preventDefault()
+      el.scrollLeft += e.deltaY
+    }
+    el.addEventListener('wheel', handler, { passive: false })
+    return () => el.removeEventListener('wheel', handler)
+  }, [])
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        const activeEl = listRef.current?.querySelector(`[data-index="${activeIndex}"]`)
+        activeEl?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' })
+      }
+    }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [activeIndex])
 
   useEffect(() => {
     loadFont(activePairing.heading)
@@ -95,7 +117,7 @@ export function TypographySection() {
                 Typography Laboratory
               </h2>
               <p className="text-[#999] text-lg max-w-xl">
-                20 curated font pairings. Live-updating editorial canvas. Find the perfect voice.
+                50 curated font pairings. Live-updating editorial canvas. Find the perfect voice.
               </p>
             </div>
             <button
@@ -190,7 +212,7 @@ export function TypographySection() {
 
           <div
             ref={listRef}
-            className="w-full md:w-1/2 flex overflow-x-auto md:overflow-y-auto md:max-h-[70vh] gap-4 md:gap-5 snap-x snap-mandatory snap-always pb-4 md:pb-0 md:pr-4 custom-scrollbar scroll-smooth"
+            className="w-full md:w-1/2 flex overflow-x-auto overflow-y-hidden max-h-[70vh] gap-4 md:gap-5 snap-x snap-mandatory snap-always pb-4 hide-scrollbar scroll-smooth"
           >
             {FONT_PAIRINGS.map((pairing, i) => (
               <div
@@ -200,7 +222,7 @@ export function TypographySection() {
                 tabIndex={0}
                 onClick={() => setActiveIndex(i)}
                 onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setActiveIndex(i) } }}
-                className={`group relative flex-shrink-0 w-[260px] md:w-full snap-center p-4 md:p-6 rounded-xl border cursor-pointer transition-all ${
+                className={`group relative flex-shrink-0 w-[260px] md:w-[280px] snap-center p-4 md:p-6 rounded-xl border cursor-pointer transition-all ${
                   i === activeIndex
                     ? 'border-[rgba(16,185,129,0.3)] bg-[rgba(16,185,129,0.05)] scale-[1.02]'
                     : 'border-[rgba(255,255,255,0.06)] bg-[rgba(10,10,10,0.4)] hover:border-[rgba(255,255,255,0.12)]'
@@ -356,6 +378,112 @@ function ContextCanvas({
           </span>
         </div>
         <div className="text-[10px] md:text-sm text-[#888]" style={{ fontFamily: body }}>5 min read</div>
+      </div>
+    )
+  }
+
+  if (context === 'landing') {
+    return (
+      <div className="space-y-4 md:space-y-6">
+        <div className="text-[10px] md:text-xs text-[#888] font-mono">PRICING</div>
+        <div className="text-xl md:text-3xl font-bold text-vault-text-bright leading-tight" style={{ fontFamily: heading }}>
+          <span
+            contentEditable
+            suppressContentEditableWarning
+            className={editableClass}
+            onBlur={(e) => onTextChange('landing', 'heading', e.currentTarget.textContent || '')}
+          >
+            {getText('landing', 'heading', 'Simple, transparent pricing')}
+          </span>
+        </div>
+        <div className="grid grid-cols-3 gap-2 md:gap-3">
+          {['Free', 'Pro', 'Team'].map((tier, i) => (
+            <div key={tier} className={`p-3 md:p-4 rounded-xl ${i === 1 ? 'bg-[rgba(16,185,129,0.1)] border border-[rgba(16,185,129,0.2)]' : 'bg-[rgba(255,255,255,0.03)]'}`}>
+              <div className="text-xs text-[#888] mb-1" style={{ fontFamily: body }}>{tier}</div>
+              <div className="text-lg md:text-xl font-bold text-vault-text-bright" style={{ fontFamily: heading }}>${[0, 29, 99][i]}/mo</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
+  if (context === 'testimonial') {
+    return (
+      <div className="space-y-3 md:space-y-4">
+        <div className="text-3xl md:text-5xl text-[#666] leading-none" style={{ fontFamily: heading }}>&ldquo;</div>
+        <div className="text-base md:text-xl text-vault-text-bright leading-relaxed italic" style={{ fontFamily: body }}>
+          <span
+            contentEditable
+            suppressContentEditableWarning
+            className={editableClass}
+            onBlur={(e) => onTextChange('testimonial', 'heading', e.currentTarget.textContent || '')}
+          >
+            {getText('testimonial', 'heading', 'This font pairing completely transformed how our brand is perceived. The results speak for themselves.')}
+          </span>
+        </div>
+        <div className="flex items-center gap-3 pt-2">
+          <div className="w-8 h-8 rounded-full bg-[rgba(255,255,255,0.1)]" />
+          <div>
+            <div className="text-xs font-bold text-vault-text-bright" style={{ fontFamily: heading }}>Sarah Chen</div>
+            <div className="text-[10px] text-[#888]" style={{ fontFamily: body }}>Design Director, Acme</div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (context === 'email') {
+    return (
+      <div className="space-y-3 md:space-y-4">
+        <div className="text-xs text-[#888] font-mono">FROM:hello@acme.com</div>
+        <div className="text-lg md:text-2xl font-bold text-vault-text-bright" style={{ fontFamily: heading }}>
+          <span
+            contentEditable
+            suppressContentEditableWarning
+            className={editableClass}
+            onBlur={(e) => onTextChange('email', 'heading', e.currentTarget.textContent || '')}
+          >
+            {getText('email', 'heading', 'Your weekly design digest')}
+          </span>
+        </div>
+        <div className="text-xs md:text-sm text-[#888] leading-relaxed" style={{ fontFamily: body }}>
+          <span
+            contentEditable
+            suppressContentEditableWarning
+            className={editableClass}
+            onBlur={(e) => onTextChange('email', 'body', e.currentTarget.textContent || '')}
+          >
+            {getText('email', 'body', 'Hi there, here are this week\'s top design trends and resources curated just for you.')}
+          </span>
+        </div>
+        <div className="inline-block px-4 py-2 rounded-lg bg-[#10b981] text-white text-xs" style={{ fontFamily: body }}>Read More</div>
+      </div>
+    )
+  }
+
+  if (context === 'resume') {
+    return (
+      <div className="space-y-3 md:space-y-4">
+        <div className="text-lg md:text-2xl font-bold text-vault-text-bright" style={{ fontFamily: heading }}>
+          <span
+            contentEditable
+            suppressContentEditableWarning
+            className={editableClass}
+            onBlur={(e) => onTextChange('resume', 'heading', e.currentTarget.textContent || '')}
+          >
+            {getText('resume', 'heading', 'Alex Rivera')}
+          </span>
+        </div>
+        <div className="text-[10px] md:text-xs text-[#888] font-mono">SENIOR PRODUCT DESIGNER</div>
+        <div className="space-y-2">
+          {['Lead redesign of SaaS dashboard — 40% increase in engagement', 'Built and mentored a team of 5 designers', 'Shipped 12 major features in 18 months'].map((item, i) => (
+            <div key={i} className="flex items-start gap-2 text-[10px] md:text-xs text-[#888]" style={{ fontFamily: body }}>
+              <span className="text-[#10b981] mt-0.5">&#x2022;</span>
+              {item}
+            </div>
+          ))}
+        </div>
       </div>
     )
   }

@@ -3,7 +3,7 @@ import { motion } from 'framer-motion'
 import { TOOLS, TOOL_CONNECTIONS } from '../../data/tools'
 import { useReducedMotion } from '../../hooks/useReducedMotion'
 
-const MAX_VELOCITY = 0.003
+const MAX_VELOCITY = 0.01
 const REPULSION = 0.0005
 const CENTER_GRAVITY = 0.0005
 const DAMPING = 0.92
@@ -41,6 +41,9 @@ export function ToolBeltSection() {
     return new Set(TOOLS.map((t, i) => ({ t, i })).filter(({ t }) => t.category === activeCategory).map(({ i }) => i))
   }, [activeCategory])
 
+  const filteredIndicesRef = useRef(filteredIndices)
+  useEffect(() => { filteredIndicesRef.current = filteredIndices }, [filteredIndices])
+
   useEffect(() => {
     const mql = window.matchMedia('(min-width: 768px)')
     const check = (e: MediaQueryListEvent | MediaQueryList) => setIsMobile(!e.matches)
@@ -68,95 +71,98 @@ export function ToolBeltSection() {
     if (containerRef.current) observer.observe(containerRef.current)
 
     const animate = (now: number) => {
-      if (!isVisibleRef.current || prefersReducedMotion) return
-      if (now - lastFrame < 33) { rafId = requestAnimationFrame(animate); return }
-      lastFrame = now
+      if (isVisibleRef.current && !prefersReducedMotion) {
+        if (now - lastFrame >= 16) {
+          lastFrame = now
 
-      const canvas = canvasRef.current
-      if (!canvas) { rafId = requestAnimationFrame(animate); return }
-      const ctx = canvas.getContext('2d')
-      if (!ctx) { rafId = requestAnimationFrame(animate); return }
+          const canvas = canvasRef.current
+          if (canvas) {
+            const ctx = canvas.getContext('2d')
+            if (ctx) {
+              const container = containerRef.current
+              if (container) {
+                const w = container.offsetWidth
+                const h = container.offsetHeight
+                if (w !== cachedW || h !== cachedH) {
+                  cachedW = w
+                  cachedH = h
+                  canvas.width = w
+                  canvas.height = h
+                }
 
-      const container = containerRef.current
-      if (!container) { rafId = requestAnimationFrame(animate); return }
+                ctx.clearRect(0, 0, w, h)
 
-      const w = container.offsetWidth
-      const h = container.offsetHeight
-      if (w !== cachedW || h !== cachedH) {
-        cachedW = w
-        cachedH = h
-        canvas.width = w
-        canvas.height = h
-      }
+                const nodes = nodesRef.current
 
-      ctx.clearRect(0, 0, w, h)
+                for (let i = 0; i < nodes.length; i++) {
+                  if (draggingRef.current === i) continue
 
-      const nodes = nodesRef.current
+                  let fx = (0.5 - nodes[i].x) * CENTER_GRAVITY
+                  let fy = (0.5 - nodes[i].y) * CENTER_GRAVITY
 
-      for (let i = 0; i < nodes.length; i++) {
-        if (draggingRef.current === i) continue
+                  for (let j = 0; j < nodes.length; j++) {
+                    if (i === j) continue
+                    const dx = nodes[i].x - nodes[j].x
+                    const dy = nodes[i].y - nodes[j].y
+                    const distSq = dx * dx + dy * dy + 0.001
+                    const dist = Math.sqrt(distSq)
+                    const force = REPULSION / (dist + 0.01)
+                    fx += (dx / dist) * force
+                    fy += (dy / dist) * force
+                  }
 
-        let fx = (0.5 - nodes[i].x) * CENTER_GRAVITY
-        let fy = (0.5 - nodes[i].y) * CENTER_GRAVITY
+                  for (const [a, b] of TOOL_CONNECTIONS) {
+                    if (a === i || b === i) {
+                      const other = a === i ? b : a
+                      const dx = nodes[other].x - nodes[i].x
+                      const dy = nodes[other].y - nodes[i].y
+                      fx += dx * 0.02
+                      fy += dy * 0.02
+                    }
+                  }
 
-        for (let j = 0; j < nodes.length; j++) {
-          if (i === j) continue
-          const dx = nodes[i].x - nodes[j].x
-          const dy = nodes[i].y - nodes[j].y
-          const distSq = dx * dx + dy * dy + 0.001
-          const dist = Math.sqrt(distSq)
-          const force = REPULSION / (dist + 0.01)
-          fx += (dx / dist) * force
-          fy += (dy / dist) * force
-        }
+                  nodes[i].vx = (nodes[i].vx + fx) * DAMPING
+                  nodes[i].vy = (nodes[i].vy + fy) * DAMPING
 
-        for (const [a, b] of TOOL_CONNECTIONS) {
-          if (a === i || b === i) {
-            const other = a === i ? b : a
-            const dx = nodes[other].x - nodes[i].x
-            const dy = nodes[other].y - nodes[i].y
-            fx += dx * 0.02
-            fy += dy * 0.02
+                  const speed = Math.hypot(nodes[i].vx, nodes[i].vy)
+                  if (speed > MAX_VELOCITY) {
+                    nodes[i].vx = (nodes[i].vx / speed) * MAX_VELOCITY
+                    nodes[i].vy = (nodes[i].vy / speed) * MAX_VELOCITY
+                  }
+
+                  nodes[i].x += nodes[i].vx
+                  nodes[i].y += nodes[i].vy
+                  nodes[i].x = Math.max(0.05, Math.min(0.95, nodes[i].x))
+                  nodes[i].y = Math.max(0.05, Math.min(0.95, nodes[i].y))
+                }
+
+                const hv = hoveredRef.current
+                const fi = filteredIndicesRef.current
+                TOOL_CONNECTIONS.forEach(([a, b]) => {
+                  const pa = nodes[a]
+                  const pb = nodes[b]
+                  const isDimmed = fi !== null && (!fi.has(a) || !fi.has(b))
+                  ctx.beginPath()
+                  ctx.moveTo(pa.x * w, pa.y * h)
+                  ctx.lineTo(pb.x * w, pb.y * h)
+                  ctx.strokeStyle = isDimmed ? 'rgba(255, 255, 255, 0.01)'
+                    : hv === a || hv === b
+                      ? 'rgba(251, 191, 36, 0.3)'
+                      : 'rgba(255, 255, 255, 0.05)'
+                  ctx.lineWidth = 1
+                  ctx.stroke()
+                })
+
+                for (let i = 0; i < nodes.length; i++) {
+                  const el = nodeRefs.current[i]
+                  if (el) {
+                    el.style.left = `${nodes[i].x * 100}%`
+                    el.style.top = `${nodes[i].y * 100}%`
+                  }
+                }
+              }
+            }
           }
-        }
-
-        nodes[i].vx = (nodes[i].vx + fx) * DAMPING
-        nodes[i].vy = (nodes[i].vy + fy) * DAMPING
-
-        const speed = Math.hypot(nodes[i].vx, nodes[i].vy)
-        if (speed > MAX_VELOCITY) {
-          nodes[i].vx = (nodes[i].vx / speed) * MAX_VELOCITY
-          nodes[i].vy = (nodes[i].vy / speed) * MAX_VELOCITY
-        }
-
-        nodes[i].x += nodes[i].vx
-        nodes[i].y += nodes[i].vy
-        nodes[i].x = Math.max(0.05, Math.min(0.95, nodes[i].x))
-        nodes[i].y = Math.max(0.05, Math.min(0.95, nodes[i].y))
-      }
-
-      const hv = hoveredRef.current
-      const fi = filteredIndices
-      TOOL_CONNECTIONS.forEach(([a, b]) => {
-        const pa = nodes[a]
-        const pb = nodes[b]
-        const isDimmed = fi !== null && (!fi.has(a) || !fi.has(b))
-        ctx.beginPath()
-        ctx.moveTo(pa.x * w, pa.y * h)
-        ctx.lineTo(pb.x * w, pb.y * h)
-        ctx.strokeStyle = isDimmed ? 'rgba(255, 255, 255, 0.01)'
-          : hv === a || hv === b
-            ? 'rgba(251, 191, 36, 0.3)'
-            : 'rgba(255, 255, 255, 0.05)'
-        ctx.lineWidth = 1
-        ctx.stroke()
-      })
-
-      for (let i = 0; i < nodes.length; i++) {
-        const el = nodeRefs.current[i]
-        if (el) {
-          el.style.left = `${nodes[i].x * 100}%`
-          el.style.top = `${nodes[i].y * 100}%`
         }
       }
 
@@ -213,7 +219,7 @@ export function ToolBeltSection() {
 
   const handlePointerUp = useCallback(() => {
     if (draggingRef.current !== null) {
-      const dt = performance.now() - prevDragPos.current.t
+      const dt = lastDragPos.current.t - prevDragPos.current.t
       if (dt > 0 && dt < 200) {
         const container = containerRef.current
         if (container) {
@@ -272,7 +278,7 @@ export function ToolBeltSection() {
             className="relative w-full aspect-[2/1] min-h-[500px]"
             onPointerMove={handlePointerMove}
             onPointerUp={handlePointerUp}
-            onPointerLeave={handlePointerUp}
+            onPointerCancel={handlePointerUp}
           >
             <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" />
 

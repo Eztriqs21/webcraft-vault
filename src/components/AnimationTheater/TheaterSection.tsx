@@ -15,11 +15,12 @@ export function TheaterSection() {
     const inner = innerRef.current
     if (!container || !inner) return
 
-    gsap.set(inner, { opacity: 0 })
-
     const ctx = gsap.context(() => {
+      gsap.set(inner, { opacity: 0 })
+
       gsap.to(inner, {
         x: () => -(inner.scrollWidth - window.innerWidth),
+        opacity: 1,
         ease: 'none',
         scrollTrigger: {
           trigger: container,
@@ -32,18 +33,6 @@ export function TheaterSection() {
             const progress = self.progress
             const index = Math.round(progress * (ANIMATIONS.length - 1))
             setActiveIndex(Math.min(index, ANIMATIONS.length - 1))
-          },
-          onEnter: () => {
-            gsap.to(inner, { opacity: 1, duration: 0.5, ease: 'power2.out' })
-          },
-          onLeave: () => {
-            gsap.set(inner, { opacity: 0 })
-          },
-          onEnterBack: () => {
-            gsap.to(inner, { opacity: 1, duration: 0.3, ease: 'power2.out' })
-          },
-          onLeaveBack: () => {
-            gsap.set(inner, { opacity: 0 })
           },
         },
       })
@@ -66,7 +55,7 @@ export function TheaterSection() {
         </p>
       </div>
 
-      <div ref={containerRef} className="relative overflow-hidden" style={{ height: '400vh' }}>
+      <div ref={containerRef} className="relative overflow-hidden" style={{ height: '100vh' }}>
         <div
           ref={innerRef}
           className="flex items-center h-screen gap-6 px-4 md:px-8"

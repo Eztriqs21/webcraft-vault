@@ -1,5 +1,5 @@
-import { useRef, useLayoutEffect } from 'react'
-import { motion, useInView } from 'framer-motion'
+import { useRef, useState, useEffect, useLayoutEffect } from 'react'
+import { motion } from 'framer-motion'
 import { useReducedMotion } from '../../hooks/useReducedMotion'
 
 interface SectionTransitionProps {
@@ -10,8 +10,19 @@ interface SectionTransitionProps {
 
 export function SectionTransition({ accent = '#6366f1', children, sectionKey }: SectionTransitionProps) {
   const ref = useRef<HTMLDivElement>(null)
-  const isInView = useInView(ref, { once: true, margin: '-10% 0px' })
+  const [isInView, setIsInView] = useState(false)
   const prefersReducedMotion = useReducedMotion()
+
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) setIsInView(true) },
+      { threshold: 0.1, rootMargin: '-5% 0px' }
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
 
   useLayoutEffect(() => {
     const el = ref.current
