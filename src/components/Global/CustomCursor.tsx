@@ -1,6 +1,5 @@
 import { useEffect, useRef, useCallback } from 'react'
 import { useReducedMotion } from '../../hooks/useReducedMotion'
-import { useDebouncedCallback } from '../../utils/useDebouncedCallback'
 
 export function CustomCursor() {
   const ringRef = useRef<HTMLDivElement>(null)
@@ -14,6 +13,7 @@ export function CustomCursor() {
   const accentColor = useRef('#6366f1')
   const cachedBoxShadow = useRef('')
   const currentScale = useRef(1)
+  const resizeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const lerp = useCallback((a: number, b: number, t: number) => a + (b - a) * t, [])
 
@@ -79,14 +79,17 @@ export function CustomCursor() {
     const dpr = Math.min(window.devicePixelRatio, 1.5)
     let raf: number
 
-    const resize = useDebouncedCallback(() => {
-      if (!canvas) return
-      canvas.width = window.innerWidth * dpr
-      canvas.height = window.innerHeight * dpr
-      canvas.style.width = window.innerWidth + 'px'
-      canvas.style.height = window.innerHeight + 'px'
-      if (ctx) ctx.scale(dpr, dpr)
-    }, 100)
+    const resize = () => {
+      if (resizeTimeoutRef.current) clearTimeout(resizeTimeoutRef.current)
+      resizeTimeoutRef.current = setTimeout(() => {
+        if (!canvas) return
+        canvas.width = window.innerWidth * dpr
+        canvas.height = window.innerHeight * dpr
+        canvas.style.width = window.innerWidth + 'px'
+        canvas.style.height = window.innerHeight + 'px'
+        if (ctx) ctx.scale(dpr, dpr)
+      }, 100)
+    }
     resize()
     window.addEventListener('resize', resize)
 
@@ -133,6 +136,7 @@ export function CustomCursor() {
     raf = requestAnimationFrame(animate)
 
     return () => {
+      if (resizeTimeoutRef.current) clearTimeout(resizeTimeoutRef.current)
       document.body.classList.remove('custom-cursor-active')
       window.removeEventListener('mousemove', handleMouseMove)
       document.removeEventListener('mouseenter', handleMouseEnter)

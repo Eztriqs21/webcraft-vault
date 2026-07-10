@@ -1,6 +1,5 @@
 import { useRef, useEffect } from 'react'
 import { useCanvasPause } from '../../../hooks/useCanvasPause'
-import { useDebouncedCallback } from '../../../utils/useDebouncedCallback'
 import { useReducedMotion } from '../../../hooks/useReducedMotion'
 
 export function MorphingBlob() {
@@ -9,18 +8,22 @@ export function MorphingBlob() {
   const animRef = useRef<number>(0)
   const { ref: wrapperRef, isVisible } = useCanvasPause(0)
   const prefersReducedMotion = useReducedMotion()
+  const resizeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
 
-    const resize = useDebouncedCallback(() => {
-      const rect = canvas.parentElement?.getBoundingClientRect()
-      if (rect) {
-        canvas.width = rect.width * 0.8
-        canvas.height = rect.height * 0.8
-      }
-    }, 100)
+    const resize = () => {
+      if (resizeTimeoutRef.current) clearTimeout(resizeTimeoutRef.current)
+      resizeTimeoutRef.current = setTimeout(() => {
+        const rect = canvas.parentElement?.getBoundingClientRect()
+        if (rect) {
+          canvas.width = rect.width * 0.8
+          canvas.height = rect.height * 0.8
+        }
+      }, 100)
+    }
     resize()
     window.addEventListener('resize', resize)
 
@@ -72,6 +75,7 @@ export function MorphingBlob() {
     animRef.current = requestAnimationFrame(draw)
 
     return () => {
+      if (resizeTimeoutRef.current) clearTimeout(resizeTimeoutRef.current)
       window.removeEventListener('resize', resize)
       cancelAnimationFrame(animRef.current)
     }

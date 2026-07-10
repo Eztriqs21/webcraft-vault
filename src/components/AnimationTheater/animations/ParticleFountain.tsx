@@ -1,6 +1,5 @@
 import { useRef, useEffect, useCallback } from 'react'
 import { useCanvasPause } from '../../../hooks/useCanvasPause'
-import { useDebouncedCallback } from '../../../utils/useDebouncedCallback'
 import { useReducedMotion } from '../../../hooks/useReducedMotion'
 
 interface Particle {
@@ -22,6 +21,7 @@ export function ParticleFountain() {
   const lastSpawnRef = useRef({ x: 0, y: 0 })
   const { ref: wrapperRef, isVisible } = useCanvasPause(0)
   const prefersReducedMotion = useReducedMotion()
+  const resizeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const spawn = useCallback((x: number, y: number) => {
     const count = 5
@@ -45,13 +45,16 @@ export function ParticleFountain() {
     const ctx = canvas.getContext('2d')
     if (!ctx) return
 
-    const resize = useDebouncedCallback(() => {
-      const rect = canvas.parentElement?.getBoundingClientRect()
-      if (rect) {
-        canvas.width = rect.width * 0.8
-        canvas.height = rect.height * 0.8
-      }
-    }, 100)
+    const resize = () => {
+      if (resizeTimeoutRef.current) clearTimeout(resizeTimeoutRef.current)
+      resizeTimeoutRef.current = setTimeout(() => {
+        const rect = canvas.parentElement?.getBoundingClientRect()
+        if (rect) {
+          canvas.width = rect.width * 0.8
+          canvas.height = rect.height * 0.8
+        }
+      }, 100)
+    }
     resize()
     window.addEventListener('resize', resize)
 
@@ -129,6 +132,7 @@ export function ParticleFountain() {
     requestAnimationFrame(animate)
 
     return () => {
+      if (resizeTimeoutRef.current) clearTimeout(resizeTimeoutRef.current)
       window.removeEventListener('resize', resize)
       canvas.removeEventListener('mousemove', onMouseMove)
       canvas.removeEventListener('mouseleave', onMouseLeave)
