@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useReducedMotion } from '../../hooks/useReducedMotion'
 
 const SHAPES = Array.from({ length: 32 }, (_, i) => ({
@@ -15,6 +16,19 @@ const SHAPES = Array.from({ length: 32 }, (_, i) => ({
   ][i],
   type: ['circle', 'blob', 'wave', 'diamond', 'ring', 'cross'][i % 6],
   color: ['#6366f1', '#f43f5e', '#10b981', '#a855f7', '#06b6d4', '#fbbf24'][i % 6],
+  tags: [
+    ['SVG', 'Path Morph'], ['Canvas', 'Particles'], ['DOM', 'Typography'],
+    ['Framer Motion', 'Physics'], ['Canvas', 'Grid'], ['CSS 3D', 'Transform'],
+    ['Canvas', 'Math'], ['Framer Motion', 'Gesture'], ['SVG', 'Animation'],
+    ['CSS 3D', 'Transform'], ['CSS', 'Clip-path'], ['Canvas', 'Algorithm'],
+    ['GSAP', 'ScrollTrigger'], ['DOM', 'Interval'], ['Canvas', 'Algorithm'],
+    ['Framer Motion', 'Drag'], ['GSAP', 'ScrollTrigger'], ['Framer Motion', 'Layout'],
+    ['Canvas', 'Gradient'], ['GSAP', 'Flip'], ['Framer Motion', 'Stagger'],
+    ['CSS 3D', 'Rotate'], ['Canvas', 'Physics'], ['Canvas', 'Mouse'],
+    ['CSS', 'Keyframes'], ['Framer Motion', 'Drag'], ['Framer Motion', 'Stagger'],
+    ['Three.js', 'WebGL'], ['GSAP', 'Velocity'], ['GSAP', 'Clip-path'],
+    ['CSS 3D', 'Mouse'], ['GSAP', 'ScrollTrigger'],
+  ][i],
 }))
 
 const riverStyleId = 'preview-river-shared-style'
@@ -25,17 +39,22 @@ function ensureRiverStyle() {
   style.id = riverStyleId
   style.textContent = `
     @keyframes river-scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
-    @keyframes fade-in { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-    .animate-fade-in { animation: fade-in 0.3s ease-out; }
   `
   document.head.appendChild(style)
 }
 
 export function PreviewRiver() {
   const [hoveredId, setHoveredId] = useState<number | null>(null)
+  const [selectedId, setSelectedId] = useState<number | null>(null)
   const prefersReducedMotion = useReducedMotion()
 
   useEffect(() => { ensureRiverStyle() }, [])
+
+  const handleSelect = (id: number) => {
+    setSelectedId((prev) => (prev === id ? null : id))
+  }
+
+  const selectedShape = selectedId !== null ? SHAPES[selectedId] : null
 
   return (
     <div className="w-full overflow-hidden py-8">
@@ -53,13 +72,18 @@ export function PreviewRiver() {
           {[...SHAPES, ...SHAPES].map((shape, i) => (
             <div
               key={`${shape.id}-${i}`}
-              className="flex-shrink-0 cursor-pointer transition-all duration-300 ease-out"
+              className={`flex-shrink-0 cursor-pointer transition-all duration-300 ease-out ${
+                selectedId === shape.id ? 'scale-150' : ''
+              }`}
               style={{
-                transform: hoveredId === shape.id ? 'scale(2.5)' : 'scale(1)',
-                filter: hoveredId === shape.id ? 'drop-shadow(0 0 12px rgba(99,102,241,0.4))' : 'none',
+                transform: hoveredId === shape.id ? 'scale(2.5)' : selectedId === shape.id ? 'scale(1.5)' : 'scale(1)',
+                filter: hoveredId === shape.id || selectedId === shape.id
+                  ? 'drop-shadow(0 0 12px rgba(99,102,241,0.4))'
+                  : 'none',
               }}
               onMouseEnter={() => setHoveredId(shape.id)}
               onMouseLeave={() => setHoveredId(null)}
+              onClick={() => handleSelect(shape.id)}
               data-cursor="pointer"
             >
               <ShapePreview shape={shape} isHovered={hoveredId === shape.id} animated={!prefersReducedMotion} />
@@ -68,11 +92,39 @@ export function PreviewRiver() {
         </div>
       </div>
 
-      {hoveredId !== null && (
-        <div className="text-center mt-4 text-sm text-[#999] font-mono animate-fade-in">
-          {SHAPES[hoveredId]?.name}
-        </div>
-      )}
+      <AnimatePresence mode="wait">
+        {selectedShape ? (
+          <motion.div
+            key={selectedShape.id}
+            initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: -10 }}
+            transition={{ duration: 0.3 }}
+            className="text-center mt-4"
+          >
+            <div className="text-base font-display font-bold text-vault-text-bright mb-1">
+              {selectedShape.name}
+            </div>
+            <div className="flex justify-center gap-1.5">
+              {selectedShape.tags.map((tag) => (
+                <span key={tag} className="px-2 py-0.5 text-[10px] font-mono rounded-full bg-[rgba(99,102,241,0.1)] text-[#818cf8] border border-[rgba(99,102,241,0.2)]">
+                  {tag}
+                </span>
+              ))}
+            </div>
+          </motion.div>
+        ) : hoveredId !== null ? (
+          <motion.div
+            key="hover"
+            initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0 }}
+            className="text-center mt-4 text-sm text-[#999] font-mono"
+          >
+            {SHAPES[hoveredId]?.name}
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
     </div>
   )
 }

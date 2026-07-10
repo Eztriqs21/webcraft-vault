@@ -1,4 +1,4 @@
-import React, { useRef, useState, useLayoutEffect, useCallback } from 'react'
+import React, { useRef, useState, useLayoutEffect } from 'react'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { ANIMATIONS } from '../../data/animations'
@@ -9,9 +9,6 @@ export function TheaterSection() {
   const containerRef = useRef<HTMLDivElement>(null)
   const innerRef = useRef<HTMLDivElement>(null)
   const [activeIndex, setActiveIndex] = useState(0)
-  const viewingCodeRef = useRef<number | null>(null)
-  const [viewingCode, setViewingCode] = useState<number | null>(null)
-  const [highlightedCode, setHighlightedCode] = useState<string>('')
 
   useLayoutEffect(() => {
     const container = containerRef.current
@@ -34,42 +31,17 @@ export function TheaterSection() {
             const index = Math.round(progress * (ANIMATIONS.length - 1))
             setActiveIndex(Math.min(index, ANIMATIONS.length - 1))
           },
+          onEnter: () => {
+            gsap.fromTo(inner, { opacity: 0 }, { opacity: 1, duration: 0.6, ease: 'power2.out' })
+          },
+          onLeaveBack: () => {
+            gsap.to(inner, { opacity: 0, duration: 0.3, ease: 'power2.in' })
+          },
         },
       })
     }, container)
 
     return () => ctx.revert()
-  }, [])
-
-  const handleViewCode = useCallback(async (id: number) => {
-    if (viewingCodeRef.current === id) {
-      viewingCodeRef.current = null
-      setViewingCode(null)
-      return
-    }
-
-    const anim = ANIMATIONS.find((a) => a.id === id)
-    if (!anim) return
-
-    viewingCodeRef.current = id
-    setViewingCode(id)
-    try {
-      const { getHighlighter } = await import('../../lib/shiki')
-      const highlighter = await getHighlighter()
-      const html = highlighter.codeToHtml(anim.code, {
-        lang: 'typescript',
-        theme: 'dark-plus',
-      })
-      setViewingCode((current) => {
-        if (current === id) setHighlightedCode(html)
-        return current
-      })
-    } catch {
-      setViewingCode((current) => {
-        if (current === id) setHighlightedCode('')
-        return current
-      })
-    }
   }, [])
 
   return (
@@ -96,11 +68,7 @@ export function TheaterSection() {
             <TheaterFrame
               key={anim.id}
               animation={anim}
-              animationId={anim.id}
               isActive={index === activeIndex}
-              isViewingCode={viewingCode === anim.id}
-              highlightedCode={highlightedCode}
-              onViewCode={handleViewCode}
             />
           ))}
         </div>
@@ -111,20 +79,24 @@ export function TheaterSection() {
 
 const TheaterFrame = React.memo(function TheaterFrame({
   animation,
-  animationId,
   isActive,
-  isViewingCode,
-  highlightedCode,
-  onViewCode,
 }: {
   animation: (typeof ANIMATIONS)[0]
-  animationId: number
   isActive: boolean
-  isViewingCode: boolean
-  highlightedCode: string
-  onViewCode: (id: number) => void
 }) {
   const AnimComponent = animation.component
+  const [copyLabel, setCopyLabel] = useState<'code' | 'prompt' | null>(null)
+
+  const handleCopy = async (type: 'code' | 'prompt') => {
+    const text = type === 'code' ? animation.code : animation.prompt
+    try {
+      await navigator.clipboard.writeText(text)
+      setCopyLabel(type)
+      setTimeout(() => setCopyLabel(null), 2000)
+    } catch {
+      // fallback
+    }
+  }
 
   return (
     <div
@@ -154,32 +126,23 @@ const TheaterFrame = React.memo(function TheaterFrame({
             </span>
           ))}
         </div>
-        <button
-          onClick={() => onViewCode(animationId)}
-          className="mt-auto px-3 md:px-4 py-1.5 md:py-2 text-xs md:text-sm font-medium rounded-lg bg-[rgba(255,255,255,0.05)] text-[#999] hover:bg-[rgba(255,255,255,0.1)] hover:text-vault-text-bright transition-all self-start"
-          data-cursor="pointer"
-        >
-          {isViewingCode ? 'Close' : 'How It Works'}
-        </button>
-      </div>
-
-      {isViewingCode && (
-        <div className="absolute inset-x-0 bottom-0 h-[45%] md:h-[40%] border-t border-[rgba(255,255,255,0.06)] bg-[rgba(3,3,3,0.95)] overflow-auto z-10">
-          <div className="p-4 md:p-6">
-            <h4 className="text-xs font-medium text-[#888] uppercase tracking-wider mb-3">How It Works</h4>
-            {highlightedCode ? (
-              <div
-                className="text-sm leading-relaxed text-[#bbb] font-mono [&>pre]:bg-transparent [&>pre]:p-0"
-                dangerouslySetInnerHTML={{ __html: highlightedCode }}
-              />
-            ) : (
-              <p className="text-sm leading-relaxed text-[#bbb] font-sans whitespace-pre-line">
-                {animation.code}
-              </p>
-            )}
-          </div>
+        <div className="mt-auto flex gap-2">
+          <button
+            onClick={() => handleCopy('code')}
+            className="px-3 md:px-4 py-1.5 md:py-2 text-xs md:text-sm font-medium rounded-lg bg-[rgba(255,255,255,0.05)] text-[#999] hover:bg-[rgba(255,255,255,0.1)] hover:text-vault-text-bright transition-all"
+            data-cursor="pointer"
+          >
+            {copyLabel === 'code' ? 'Copied!' : 'Copy Code'}
+          </button>
+          <button
+            onClick={() => handleCopy('prompt')}
+            className="px-3 md:px-4 py-1.5 md:py-2 text-xs md:text-sm font-medium rounded-lg bg-[rgba(99,102,241,0.1)] text-[#818cf8] hover:bg-[rgba(99,102,241,0.2)] hover:text-vault-text-bright transition-all"
+            data-cursor="pointer"
+          >
+            {copyLabel === 'prompt' ? 'Copied!' : 'Copy Prompt'}
+          </button>
         </div>
-      )}
+      </div>
     </div>
   )
 })

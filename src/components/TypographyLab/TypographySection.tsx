@@ -190,7 +190,7 @@ export function TypographySection() {
 
           <div
             ref={listRef}
-            className="w-full md:w-1/2 space-y-3 md:space-y-4 overflow-y-auto md:max-h-[70vh] md:pr-4 custom-scrollbar"
+            className="w-full md:w-1/2 flex overflow-x-auto md:overflow-y-auto md:max-h-[70vh] gap-4 md:gap-5 snap-x snap-mandatory snap-always pb-4 md:pb-0 md:pr-4 custom-scrollbar scroll-smooth"
           >
             {FONT_PAIRINGS.map((pairing, i) => (
               <div
@@ -200,9 +200,9 @@ export function TypographySection() {
                 tabIndex={0}
                 onClick={() => setActiveIndex(i)}
                 onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setActiveIndex(i) } }}
-                className={`group relative p-4 md:p-6 rounded-xl border cursor-pointer transition-all ${
+                className={`group relative flex-shrink-0 w-[260px] md:w-full snap-center p-4 md:p-6 rounded-xl border cursor-pointer transition-all ${
                   i === activeIndex
-                    ? 'border-[rgba(16,185,129,0.3)] bg-[rgba(16,185,129,0.05)]'
+                    ? 'border-[rgba(16,185,129,0.3)] bg-[rgba(16,185,129,0.05)] scale-[1.02]'
                     : 'border-[rgba(255,255,255,0.06)] bg-[rgba(10,10,10,0.4)] hover:border-[rgba(255,255,255,0.12)]'
                 }`}
                 data-cursor="pointer"

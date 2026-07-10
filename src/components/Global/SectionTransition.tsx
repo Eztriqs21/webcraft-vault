@@ -10,7 +10,7 @@ interface SectionTransitionProps {
 
 export function SectionTransition({ accent = '#6366f1', children, sectionKey }: SectionTransitionProps) {
   const ref = useRef<HTMLDivElement>(null)
-  const isInView = useInView(ref, { once: true, margin: '-15% 0px' })
+  const isInView = useInView(ref, { once: true, margin: '-10% 0px' })
   const prefersReducedMotion = useReducedMotion()
 
   useLayoutEffect(() => {
@@ -37,17 +37,27 @@ export function SectionTransition({ accent = '#6366f1', children, sectionKey }: 
   return (
     <div ref={ref} data-section={sectionKey} className="relative">
       <motion.div
-        initial={prefersReducedMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
-        animate={isInView ? { opacity: 1, y: 0 } : (prefersReducedMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 })}
-        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+        initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, y: 60, scale: 0.98, filter: 'blur(8px)' }}
+        animate={isInView
+          ? { opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }
+          : prefersReducedMotion ? { opacity: 1 } : { opacity: 0, y: 60, scale: 0.98, filter: 'blur(8px)' }
+        }
+        transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
       >
         {children}
       </motion.div>
 
-      <div
-        className="absolute bottom-0 left-0 right-0 h-px pointer-events-none"
+      {/* Gradient divider line */}
+      <motion.div
+        initial={prefersReducedMotion ? { opacity: 1, scaleX: 1 } : { opacity: 0, scaleX: 0 }}
+        animate={isInView
+          ? { opacity: 1, scaleX: 1 }
+          : prefersReducedMotion ? { opacity: 1, scaleX: 1 } : { opacity: 0, scaleX: 0 }
+        }
+        transition={{ duration: 1.2, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+        className="absolute bottom-0 left-[10%] right-[10%] h-px pointer-events-none origin-center"
         style={{
-          background: `linear-gradient(90deg, transparent, ${accent}33, transparent)`,
+          background: `linear-gradient(90deg, transparent, ${accent}40, transparent)`,
         }}
       />
     </div>

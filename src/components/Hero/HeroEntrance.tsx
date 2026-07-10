@@ -41,15 +41,15 @@ export function HeroEntrance() {
       opacity: 0,
       duration: 0.8,
       ease: 'power2.in',
+      onComplete: () => {
+        gsap.set(hero, { scale: 1, filter: 'none', opacity: 1 })
+      },
     })
 
-    tl.call(() => {
-      const target = document.querySelector('[data-section="theater"]') as HTMLElement | null
-      if (target && lenis) {
-        lenis.scrollTo(target, { offset: -20 })
-      }
-      gsap.set(hero, { scale: 1, filter: 'none', opacity: 1 })
-    }, undefined, 0.9)
+    const target = document.querySelector('[data-section="theater"]') as HTMLElement | null
+    if (target && lenis) {
+      lenis.scrollTo(target, { offset: -20 })
+    }
   }, [lenis, prefersReducedMotion])
 
   return (

@@ -78,12 +78,16 @@ function Starfield() {
     const ctx = canvas.getContext('2d')
     if (!ctx) return
 
-    const stars = Array.from({ length: 200 }, () => ({
+    const stars = Array.from({ length: 180 }, () => ({
       x: Math.random(),
       y: Math.random(),
-      size: Math.random() * 1.5 + 0.5,
-      speed: Math.random() * 0.0005 + 0.0002,
-      brightness: Math.random(),
+      size: Math.random() * 2 + 0.5,
+      vx: (Math.random() - 0.5) * 0.0003,
+      vy: (Math.random() - 0.5) * 0.0003,
+      brightness: Math.random() * 0.5 + 0.5,
+      twinkleSpeed: Math.random() * 0.02 + 0.005,
+      twinklePhase: Math.random() * Math.PI * 2,
+      depth: Math.random() * 0.5 + 0.5,
     }))
 
     let raf: number
@@ -114,25 +118,27 @@ function Starfield() {
       ctx.fillStyle = '#030303'
       ctx.fillRect(0, 0, canvas.width, canvas.height)
 
+      const time = now * 0.001
       stars.forEach((star) => {
-        star.y -= star.speed
-        if (star.y < 0) {
-          star.y = 1
-          star.x = Math.random()
-        }
+        star.x += star.vx
+        star.y += star.vy
+        if (star.x < -0.05) star.x = 1.05
+        if (star.x > 1.05) star.x = -0.05
+        if (star.y < -0.05) star.y = 1.05
+        if (star.y > 1.05) star.y = -0.05
 
-        star.brightness += (Math.random() - 0.5) * 0.02
-        star.brightness = Math.max(0.3, Math.min(1, star.brightness))
+        const twinkle = Math.sin(time * star.twinkleSpeed * 60 + star.twinklePhase) * 0.3 + 0.7
+        const alpha = star.brightness * twinkle * 0.7
 
         ctx.beginPath()
         ctx.arc(
           star.x * canvas.width,
           star.y * canvas.height,
-          star.size,
+          star.size * star.depth,
           0,
           Math.PI * 2
         )
-        ctx.fillStyle = `rgba(255, 255, 255, ${star.brightness * 0.5})`
+        ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`
         ctx.fill()
       })
 
@@ -150,7 +156,7 @@ function Starfield() {
     <canvas
       ref={canvasRef}
       className="absolute inset-0 w-full h-full pointer-events-none"
-      style={{ opacity: 0.6 }}
+      style={{ opacity: 0.8 }}
     />
   )
 }

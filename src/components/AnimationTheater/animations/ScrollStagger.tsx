@@ -5,35 +5,27 @@ export function ScrollStagger() {
   const itemsRef = useRef<(HTMLDivElement | null)[]>([])
 
   useEffect(() => {
-    const container = containerRef.current
-    if (!container) return
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const el = entry.target as HTMLElement
+            const index = parseInt(el.dataset.index || '0')
+            setTimeout(() => {
+              el.style.opacity = '1'
+              el.style.transform = 'translateY(0)'
+            }, index * 80)
+          }
+        })
+      },
+      { threshold: 0.3 }
+    )
 
-    const handleScroll = () => {
-      const containerRect = container.getBoundingClientRect()
-      const containerTop = containerRect.top
-      const containerHeight = containerRect.height
-      const viewportHeight = window.innerHeight
+    itemsRef.current.forEach((el) => {
+      if (el) observer.observe(el)
+    })
 
-      const progress = Math.max(0, Math.min(1,
-        (viewportHeight - containerTop) / (containerHeight + viewportHeight)
-      ))
-
-      itemsRef.current.forEach((el, i) => {
-        if (!el) return
-        const itemThreshold = (i + 1) / itemsRef.current.length
-        const itemProgress = Math.max(0, Math.min(1,
-          (progress - itemThreshold + 0.3) / 0.3
-        ))
-
-        el.style.opacity = String(itemProgress)
-        el.style.transform = `translateY(${(1 - itemProgress) * 20}px)`
-      })
-    }
-
-    window.addEventListener('scroll', handleScroll, { passive: true })
-    handleScroll()
-
-    return () => window.removeEventListener('scroll', handleScroll)
+    return () => observer.disconnect()
   }, [])
 
   const items = Array.from({ length: 8 }, (_, i) => i)
@@ -45,7 +37,8 @@ export function ScrollStagger() {
           <div
             key={i}
             ref={(el) => { itemsRef.current[i] = el }}
-            className="w-14 h-14 md:w-16 md:h-16 rounded-lg"
+            data-index={i}
+            className="w-14 h-14 md:w-16 md:h-16 rounded-lg transition-all duration-500 ease-out"
             style={{
               background: `hsl(${i * 45}, 70%, 50%)`,
               opacity: 0,

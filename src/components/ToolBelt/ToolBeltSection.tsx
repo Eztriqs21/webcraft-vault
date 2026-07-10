@@ -29,6 +29,7 @@ export function ToolBeltSection() {
   const draggingRef = useRef<number | null>(null)
   const didDragRef = useRef(false)
   const dragOffset = useRef({ x: 0, y: 0 })
+  const lastDragPos = useRef({ x: 0, y: 0, t: 0 })
   const isVisibleRef = useRef(true)
   const [isMobile, setIsMobile] = useState(false)
   const prefersReducedMotion = useReducedMotion()
@@ -186,6 +187,7 @@ export function ToolBeltSection() {
         x: (e.clientX - rect.left) / rect.width - nodes[i].x,
         y: (e.clientY - rect.top) / rect.height - nodes[i].y,
       }
+      lastDragPos.current = { x: e.clientX, y: e.clientY, t: performance.now() }
     }
     ;(e.target as HTMLElement).setPointerCapture(e.pointerId)
   }, [])
@@ -203,9 +205,24 @@ export function ToolBeltSection() {
     node.y = Math.max(0.05, Math.min(0.95, y - dragOffset.current.y))
     node.vx = 0
     node.vy = 0
+    lastDragPos.current = { x: e.clientX, y: e.clientY, t: performance.now() }
   }, [])
 
   const handlePointerUp = useCallback(() => {
+    if (draggingRef.current !== null) {
+      const dt = performance.now() - lastDragPos.current.t
+      if (dt > 0 && dt < 200) {
+        const container = containerRef.current
+        if (container) {
+          const rect = container.getBoundingClientRect()
+          const vx = ((lastDragPos.current.x - (rect.left + rect.width * nodesRef.current[draggingRef.current].x)) / rect.width) * 0.003
+          const vy = ((lastDragPos.current.y - (rect.top + rect.height * nodesRef.current[draggingRef.current].y)) / rect.height) * 0.003
+          const clamp = (v: number) => Math.max(-MAX_VELOCITY, Math.min(MAX_VELOCITY, v))
+          nodesRef.current[draggingRef.current].vx = clamp(vx)
+          nodesRef.current[draggingRef.current].vy = clamp(vy)
+        }
+      }
+    }
     draggingRef.current = null
   }, [])
 
