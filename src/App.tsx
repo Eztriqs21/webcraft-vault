@@ -52,9 +52,9 @@ export default function App() {
               <HeroEntrance />
             </SectionTransition>
 
-            <SectionTransition accent="#f43f5e" sectionKey="theater">
+            <div data-section="theater">
               <TheaterSection />
-            </SectionTransition>
+            </div>
 
             <SectionTransition accent="#10b981" sectionKey="typography">
               <TypographySection />

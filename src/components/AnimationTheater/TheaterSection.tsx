@@ -15,6 +15,12 @@ export function TheaterSection() {
   const prefersReducedMotion = useReducedMotion()
 
   useLayoutEffect(() => {
+    window.dispatchEvent(
+      new CustomEvent('section-accent-change', { detail: { accent: '#f43f5e' } })
+    )
+  }, [])
+
+  useLayoutEffect(() => {
     if (prefersReducedMotion) return
 
     const container = containerRef.current

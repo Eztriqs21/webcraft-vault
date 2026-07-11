@@ -82,8 +82,8 @@ function Starfield() {
       x: Math.random(),
       y: Math.random(),
       size: Math.random() * 2 + 0.5,
-      vx: (Math.random() - 0.5) * 0.003,
-      vy: (Math.random() - 0.5) * 0.003,
+      vx: (Math.random() - 0.5) * 0.0006,
+      vy: (Math.random() - 0.5) * 0.0006,
       brightness: Math.random() * 0.5 + 0.5,
       twinkleSpeed: Math.random() * 0.02 + 0.005,
       twinklePhase: Math.random() * Math.PI * 2,
@@ -114,6 +114,8 @@ function Starfield() {
 
         if (!prefersReducedMotion && now - lastFrame >= 16) {
           lastFrame = now
+          ctx.fillStyle = '#030303'
+          ctx.fillRect(0, 0, canvas.width, canvas.height)
           const time = now * 0.001
           stars.forEach((star) => {
             star.x += star.vx
