@@ -15,16 +15,45 @@ function rgbToHex(r: number, g: number, b: number) {
   return '#' + [r, g, b].map((c) => Math.round(c).toString(16).padStart(2, '0')).join('')
 }
 
-function blendColors(colors: string[]): string {
+function blendColors(colors: string[], mode: 'normal' | 'multiply' | 'screen' = 'normal'): string {
   if (colors.length === 0) return '#000000'
-  const avg = colors.reduce(
+  if (mode === 'normal') {
+    const avg = colors.reduce(
+      (acc, hex) => {
+        const { r, g, b } = hexToRgb(hex)
+        return { r: acc.r + r / colors.length, g: acc.g + g / colors.length, b: acc.b + b / colors.length }
+      },
+      { r: 0, g: 0, b: 0 }
+    )
+    return rgbToHex(avg.r, avg.g, avg.b)
+  }
+  if (mode === 'multiply') {
+    const mul = colors.reduce(
+      (acc, hex) => {
+        const { r, g, b } = hexToRgb(hex)
+        return {
+          r: (acc.r * r) / 255,
+          g: (acc.g * g) / 255,
+          b: (acc.b * b) / 255,
+        }
+      },
+      { r: 255, g: 255, b: 255 }
+    )
+    return rgbToHex(mul.r, mul.g, mul.b)
+  }
+  // screen
+  const scr = colors.reduce(
     (acc, hex) => {
       const { r, g, b } = hexToRgb(hex)
-      return { r: acc.r + r / colors.length, g: acc.g + g / colors.length, b: acc.b + b / colors.length }
+      return {
+        r: 255 - ((255 - acc.r) * (255 - r)) / 255,
+        g: 255 - ((255 - acc.g) * (255 - g)) / 255,
+        b: 255 - ((255 - acc.b) * (255 - b)) / 255,
+      }
     },
     { r: 0, g: 0, b: 0 }
   )
-  return rgbToHex(avg.r, avg.g, avg.b)
+  return rgbToHex(scr.r, scr.g, scr.b)
 }
 
 function getLuminance(hex: string): number {
@@ -53,6 +82,7 @@ function getWCAGRating(ratio: number): string {
 export function OrrerySection() {
   const [activePalette, setActivePalette] = useState<number | null>(null)
   const [selectedColors, setSelectedColors] = useState<string[]>([])
+  const [blendMode, setBlendMode] = useState<'normal' | 'multiply' | 'screen'>('normal')
   const prefersReducedMotion = useReducedMotion()
 
   const handlePlanetClick = (index: number) => {
@@ -67,7 +97,7 @@ export function OrrerySection() {
 
   const clearSelection = useCallback(() => setSelectedColors([]), [])
 
-  const blendedColor = selectedColors.length >= 2 ? blendColors(selectedColors) : null
+  const blendedColor = selectedColors.length >= 2 ? blendColors(selectedColors, blendMode) : null
 
   const handleCopyCSS = useCallback((palette: { name: string; colors: readonly string[] }) => {
     const css = `:root {\n${palette.colors.map((c, i) => `  --color-${i + 1}: ${c};`).join('\n')}\n}`
@@ -286,7 +316,7 @@ export function OrrerySection() {
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: 'auto' }}
                     exit={{ opacity: 0, height: 0 }}
-                    className="mt-4 p-4 md:p-6 rounded-xl border border-[rgba(16,185,129,0.2)] bg-[rgba(16,185,129,0.03)]"
+                    className="mt-4 p-4 md:p-6 rounded-xl border border-accent-orrery/20 bg-accent-orrery/5"
                   >
                     <div className="flex items-center justify-between mb-3">
                       <h4 className="text-sm font-medium text-vault-text-bright">
@@ -294,22 +324,24 @@ export function OrrerySection() {
                       </h4>
                       <button
                         onClick={clearSelection}
-                        className="text-xs text-[#888] hover:text-[#ef4444] transition-colors"
+                        className="text-xs text-vault-text hover:text-red-400 transition-colors"
                         data-cursor="pointer"
                       >
                         Clear
                       </button>
                     </div>
-                    <div className="flex items-center gap-3 flex-wrap">
+
+                    {/* Selected colors row */}
+                    <div className="flex items-center gap-2 flex-wrap mb-4">
                       {selectedColors.map((c, i) => (
-                        <div key={i} className="flex items-center gap-2">
-                          <div className="w-6 h-6 rounded-md" style={{ backgroundColor: c }} />
-                          {i < selectedColors.length - 1 && <span className="text-[#666] text-xs">+</span>}
+                        <div key={i} className="flex items-center gap-1.5">
+                          <div className="w-7 h-7 rounded-lg ring-1 ring-white/10" style={{ backgroundColor: c }} />
+                          {i < selectedColors.length - 1 && <span className="text-vault-text text-xs">+</span>}
                         </div>
                       ))}
                       {blendedColor && (
                         <>
-                          <span className="text-[#666] text-xs">=</span>
+                          <span className="text-vault-text text-xs">=</span>
                           <button
                             onClick={() => {
                               copyToClipboard(blendedColor)
@@ -318,11 +350,47 @@ export function OrrerySection() {
                             className="flex items-center gap-2 group"
                             data-cursor="pointer"
                           >
-                            <div className="w-10 h-10 rounded-lg shadow-lg group-hover:scale-110 transition-transform" style={{ backgroundColor: blendedColor }} />
-                            <span className="text-xs font-mono text-[#888] group-hover:text-[#10b981]">{blendedColor}</span>
+                            <div className="w-12 h-12 rounded-xl shadow-lg group-hover:scale-110 transition-transform ring-1 ring-white/10" style={{ backgroundColor: blendedColor }} />
+                            <span className="text-xs font-mono text-vault-text group-hover:text-accent-orrery">{blendedColor}</span>
                           </button>
                         </>
                       )}
+                    </div>
+
+                    {/* Gradient strip */}
+                    {selectedColors.length >= 2 && (
+                      <div
+                        className="h-6 rounded-lg mb-4 ring-1 ring-white/10 cursor-pointer"
+                        style={{
+                          background: `linear-gradient(90deg, ${selectedColors.join(', ')})`,
+                        }}
+                        onClick={() => {
+                          const gradient = `linear-gradient(90deg, ${selectedColors.join(', ')})`
+                          copyToClipboard(gradient)
+                          showToast('Copied gradient CSS')
+                        }}
+                        data-cursor="pointer"
+                        title="Click to copy gradient CSS"
+                      />
+                    )}
+
+                    {/* Blend mode buttons */}
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] text-vault-text font-mono mr-1">Blend:</span>
+                      {(['normal', 'multiply', 'screen'] as const).map((mode) => (
+                        <button
+                          key={mode}
+                          onClick={() => setBlendMode(mode)}
+                          className={`px-2 py-1 text-[10px] font-mono rounded transition-all capitalize ${
+                            blendMode === mode
+                              ? 'bg-accent-orrery/20 text-accent-orrery'
+                              : 'bg-vault-surface text-vault-text hover:text-vault-text-bright'
+                          }`}
+                          data-cursor="pointer"
+                        >
+                          {mode}
+                        </button>
+                      ))}
                     </div>
                   </motion.div>
                 )}

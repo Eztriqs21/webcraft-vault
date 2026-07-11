@@ -5,11 +5,19 @@ import { useReducedMotion } from '../../hooks/useReducedMotion'
 
 const CONTEXTS = ['hero', 'product', 'blog', 'dashboard', 'landing', 'testimonial', 'email', 'resume'] as const
 
+const cardVariants = {
+  hidden: { opacity: 0, y: 16 },
+  visible: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: { delay: i * 0.03, duration: 0.5, ease: [0.16, 1, 0.3, 1] as const },
+  }),
+}
+
 export function TypographySection() {
   const [activeIndex, setActiveIndex] = useState(0)
   const [context, setContext] = useState<(typeof CONTEXTS)[number]>('hero')
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null)
-  const listRef = useRef<HTMLDivElement>(null)
   const copiedTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const activePairing = FONT_PAIRINGS[activeIndex]
   const prefersReducedMotion = useReducedMotion()
@@ -22,61 +30,9 @@ export function TypographySection() {
   }, [])
 
   useEffect(() => {
-    const el = listRef.current
-    if (!el) return
-    const handler = (e: WheelEvent) => {
-      e.preventDefault()
-      el.scrollLeft += e.deltaY
-    }
-    el.addEventListener('wheel', handler, { passive: false })
-    return () => el.removeEventListener('wheel', handler)
-  }, [])
-
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        const activeEl = listRef.current?.querySelector(`[data-index="${activeIndex}"]`)
-        activeEl?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' })
-      }
-    }
-    window.addEventListener('keydown', handler)
-    return () => window.removeEventListener('keydown', handler)
-  }, [activeIndex])
-
-  useEffect(() => {
     loadFont(activePairing.heading)
     loadFont(activePairing.body)
   }, [activeIndex, activePairing.heading, activePairing.body])
-
-  useEffect(() => {
-    const ratios = new Map<Element, number>()
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          ratios.set(entry.target, entry.intersectionRatio)
-        })
-
-        let maxRatio = 0
-        let maxIdx = 0
-        ratios.forEach((ratio, el) => {
-          if (ratio > maxRatio) {
-            maxRatio = ratio
-            maxIdx = parseInt((el as HTMLElement).getAttribute('data-index') || '0')
-          }
-        })
-        if (maxRatio > 0) {
-          setActiveIndex(maxIdx)
-        }
-      },
-      { root: listRef.current, threshold: [0, 0.25, 0.5, 0.75, 1.0] }
-    )
-
-    const items = listRef.current?.querySelectorAll('[data-index]')
-    items?.forEach((item) => observer.observe(item))
-
-    return () => observer.disconnect()
-  }, [])
 
   const handleShuffle = useCallback(() => {
     setActiveIndex(Math.floor(Math.random() * FONT_PAIRINGS.length))
@@ -116,13 +72,13 @@ export function TypographySection() {
               <h2 id="typography-heading" className="font-display text-4xl sm:text-5xl md:text-7xl font-bold text-vault-text-bright mb-4">
                 Typography Laboratory
               </h2>
-              <p className="text-[#999] text-lg max-w-xl">
+              <p className="text-vault-text text-lg max-w-xl">
                 50 curated font pairings. Live-updating editorial canvas. Find the perfect voice.
               </p>
             </div>
             <button
               onClick={handleShuffle}
-              className="self-start px-4 py-2 text-sm font-medium rounded-lg bg-[rgba(255,255,255,0.05)] text-[#999] hover:bg-[rgba(16,185,129,0.15)] hover:text-[#10b981] focus-visible:ring-2 focus-visible:ring-[#818cf8] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0a0a] transition-all"
+              className="self-start px-4 py-2 text-sm font-medium rounded-lg bg-vault-surface text-vault-text hover:bg-accent-typography/15 hover:text-accent-typography focus-visible:ring-2 focus-visible:ring-accent-typography focus-visible:ring-offset-2 focus-visible:ring-offset-vault-bg transition-all"
               data-cursor="pointer"
             >
               Shuffle
@@ -130,11 +86,9 @@ export function TypographySection() {
           </div>
         </motion.div>
 
-        {/* Mobile: sticky preview + scrollable list */}
-        {/* Desktop: side-by-side split */}
         <div className="flex flex-col md:flex-row gap-8 min-h-[70vh]">
           {/* Mobile: sticky top preview */}
-          <div className="md:hidden sticky top-0 z-10 bg-vault-bg/80 backdrop-blur-xl -mx-4 px-4 py-4 border-b border-[rgba(255,255,255,0.06)]">
+          <div className="md:hidden sticky top-0 z-10 bg-vault-bg/80 backdrop-blur-xl -mx-4 px-4 py-4 border-b border-vault-border">
             <AnimatePresence mode="wait">
               <motion.div
                 key={`${activeIndex}-${context}`}
@@ -142,7 +96,7 @@ export function TypographySection() {
                 animate={{ opacity: 1, filter: 'blur(0px)' }}
                 exit={{ opacity: 0, filter: 'blur(4px)' }}
                 transition={{ duration: 0.3 }}
-                className="rounded-xl border border-[rgba(255,255,255,0.06)] bg-[rgba(10,10,10,0.6)] p-4 overflow-hidden"
+                className="rounded-xl border border-vault-border bg-vault-surface/60 p-4 overflow-hidden"
                 style={{ maxHeight: '200px' }}
               >
                 <ContextCanvas
@@ -161,8 +115,8 @@ export function TypographySection() {
                   onClick={() => setContext(c)}
                   className={`px-3 py-1 text-xs font-medium rounded-full transition-all capitalize whitespace-nowrap ${
                     context === c
-                      ? 'bg-[rgba(16,185,129,0.15)] text-[#10b981]'
-                      : 'bg-[rgba(255,255,255,0.05)] text-[#888]'
+                      ? 'bg-accent-typography/15 text-accent-typography'
+                      : 'bg-vault-surface text-vault-text'
                   }`}
                 >
                   {c}
@@ -180,7 +134,7 @@ export function TypographySection() {
                 animate={{ opacity: 1, filter: 'blur(0px)' }}
                 exit={{ opacity: 0, filter: 'blur(4px)' }}
                 transition={{ duration: 0.4 }}
-                className="rounded-2xl border border-[rgba(255,255,255,0.06)] bg-[rgba(10,10,10,0.6)] backdrop-blur-sm p-8 overflow-hidden min-h-[500px]"
+                className="rounded-2xl border border-vault-border bg-vault-surface/60 backdrop-blur-sm p-8 overflow-hidden min-h-[500px]"
               >
                 <ContextCanvas
                   heading={activePairing.heading}
@@ -199,8 +153,8 @@ export function TypographySection() {
                   onClick={() => setContext(c)}
                   className={`px-3 py-1 text-xs font-medium rounded-full transition-all capitalize ${
                     context === c
-                      ? 'bg-[rgba(16,185,129,0.15)] text-[#10b981]'
-                      : 'bg-[rgba(255,255,255,0.05)] text-[#888] hover:text-[#999]'
+                      ? 'bg-accent-typography/15 text-accent-typography'
+                      : 'bg-vault-surface text-vault-text hover:text-vault-text-bright'
                   }`}
                   data-cursor="pointer"
                 >
@@ -210,55 +164,62 @@ export function TypographySection() {
             </div>
           </div>
 
-          <div
-            ref={listRef}
-            className="w-full md:w-1/2 flex overflow-x-auto overflow-y-hidden max-h-[70vh] gap-4 md:gap-5 snap-x snap-mandatory snap-always pb-4 hide-scrollbar scroll-smooth"
-          >
-            {FONT_PAIRINGS.map((pairing, i) => (
-              <div
-                key={i}
-                data-index={i}
-                role="button"
-                tabIndex={0}
-                onClick={() => setActiveIndex(i)}
-                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setActiveIndex(i) } }}
-                className={`group relative flex-shrink-0 w-[260px] md:w-[280px] snap-center p-4 md:p-6 rounded-xl border cursor-pointer transition-all ${
-                  i === activeIndex
-                    ? 'border-[rgba(16,185,129,0.3)] bg-[rgba(16,185,129,0.05)] scale-[1.02]'
-                    : 'border-[rgba(255,255,255,0.06)] bg-[rgba(10,10,10,0.4)] hover:border-[rgba(255,255,255,0.12)]'
-                }`}
-                data-cursor="pointer"
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <span
-                    className="text-vault-text-bright font-medium text-sm md:text-base"
-                    style={{ fontFamily: pairing.heading }}
-                  >
-                    {pairing.heading}
-                  </span>
-                  <span className="text-[#888] mx-2">+</span>
-                  <span
-                    className="text-vault-text-bright font-medium text-sm md:text-base"
-                    style={{ fontFamily: pairing.body }}
-                  >
-                    {pairing.body}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-[#888] font-mono">{pairing.personality}</span>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      handleCopyCSS(pairing, i)
-                    }}
-                    className="opacity-0 group-hover:opacity-100 transition-opacity px-2 py-1 text-[10px] font-mono rounded bg-[rgba(255,255,255,0.05)] text-[#888] hover:text-[#10b981]"
-                    data-cursor="pointer"
-                  >
-                    {copiedIndex === i ? 'Copied!' : 'Copy CSS'}
-                  </button>
-                </div>
-              </div>
-            ))}
+          {/* Font pairing cards — vertical grid */}
+          <div className="w-full md:w-1/2 max-h-[70vh] overflow-y-auto pr-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
+              {FONT_PAIRINGS.map((pairing, i) => (
+                <motion.button
+                  key={i}
+                  custom={prefersReducedMotion ? 0 : i}
+                  variants={prefersReducedMotion ? undefined : cardVariants}
+                  initial={prefersReducedMotion ? 'visible' : 'hidden'}
+                  whileInView="visible"
+                  viewport={{ once: true, margin: '-50px' }}
+                  onClick={() => {
+                    setActiveIndex(i)
+                    loadFont(pairing.heading)
+                    loadFont(pairing.body)
+                  }}
+                  className={`group relative text-left p-4 md:p-5 rounded-xl border cursor-pointer transition-all duration-200 ${
+                    i === activeIndex
+                      ? 'border-accent-typography/30 bg-accent-typography/5'
+                      : 'border-vault-border bg-vault-surface/40 hover:border-vault-border hover:bg-vault-surface/70'
+                  }`}
+                  data-cursor="pointer"
+                >
+                  <div className="space-y-2">
+                    <div
+                      className="text-vault-text-bright font-semibold text-base md:text-lg leading-tight truncate"
+                      style={{ fontFamily: pairing.heading }}
+                    >
+                      {pairing.heading}
+                    </div>
+                    <div
+                      className="text-vault-text text-sm truncate"
+                      style={{ fontFamily: pairing.body }}
+                    >
+                      {pairing.body}
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between mt-3 pt-3 border-t border-vault-border">
+                    <span className="text-[11px] text-vault-text font-mono">{pairing.personality}</span>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleCopyCSS(pairing, i)
+                      }}
+                      className="opacity-0 group-hover:opacity-100 transition-opacity px-2 py-1 text-[10px] font-mono rounded bg-vault-surface text-vault-text hover:text-accent-typography"
+                      data-cursor="pointer"
+                    >
+                      {copiedIndex === i ? 'Copied!' : 'Copy CSS'}
+                    </button>
+                  </div>
+                  {i === activeIndex && (
+                    <div className="absolute inset-0 rounded-xl border-2 border-accent-typography/20 pointer-events-none" />
+                  )}
+                </motion.button>
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -279,7 +240,7 @@ function ContextCanvas({
   getText: (ctx: string, key: string, fallback: string) => string
   onTextChange: (ctx: string, key: string, value: string) => void
 }) {
-  const editableClass = 'outline-none rounded px-1 -mx-1 transition-colors hover:bg-[rgba(255,255,255,0.05)] focus:bg-[rgba(255,255,255,0.08)] cursor-text'
+  const editableClass = 'outline-none rounded px-1 -mx-1 transition-colors hover:bg-vault-surface focus:bg-vault-surface cursor-text'
 
   if (context === 'hero') {
     return (
@@ -297,7 +258,7 @@ function ContextCanvas({
             {getText('hero', 'heading', 'Design is not just what it looks like.')}
           </span>
         </div>
-        <div className="text-sm md:text-lg text-[#888]" style={{ fontFamily: body }}>
+        <div className="text-sm md:text-lg text-vault-text" style={{ fontFamily: body }}>
           <span
             contentEditable
             suppressContentEditableWarning
@@ -308,10 +269,10 @@ function ContextCanvas({
           </span>
         </div>
         <div className="flex gap-3 pt-2 md:pt-4">
-          <div className="px-4 md:px-6 py-2 md:py-3 rounded-full bg-[#10b981] text-white text-xs md:text-sm font-medium" style={{ fontFamily: body }}>
+          <div className="px-4 md:px-6 py-2 md:py-3 rounded-full bg-accent-typography text-white text-xs md:text-sm font-medium" style={{ fontFamily: body }}>
             Get Started
           </div>
-          <div className="px-4 md:px-6 py-2 md:py-3 rounded-full border border-[rgba(255,255,255,0.1)] text-[#999] text-xs md:text-sm" style={{ fontFamily: body }}>
+          <div className="px-4 md:px-6 py-2 md:py-3 rounded-full border border-vault-border text-vault-text text-xs md:text-sm" style={{ fontFamily: body }}>
             Learn More
           </div>
         </div>
@@ -322,7 +283,7 @@ function ContextCanvas({
   if (context === 'product') {
     return (
       <div className="space-y-3 md:space-y-4">
-        <div className="w-full h-24 md:h-40 rounded-xl bg-[rgba(255,255,255,0.03)]" />
+        <div className="w-full h-24 md:h-40 rounded-xl bg-vault-surface" />
         <div className="text-lg md:text-2xl font-bold text-vault-text-bright" style={{ fontFamily: heading }}>
           <span
             contentEditable
@@ -333,7 +294,7 @@ function ContextCanvas({
             {getText('product', 'heading', 'Premium Headphones')}
           </span>
         </div>
-        <div className="text-xs md:text-base text-[#888]" style={{ fontFamily: body }}>
+        <div className="text-xs md:text-base text-vault-text" style={{ fontFamily: body }}>
           <span
             contentEditable
             suppressContentEditableWarning
@@ -345,7 +306,7 @@ function ContextCanvas({
         </div>
         <div className="flex items-center gap-4">
           <span className="text-lg md:text-xl font-bold text-vault-text-bright" style={{ fontFamily: heading }}>$299</span>
-          <div className="px-3 md:px-4 py-1.5 md:py-2 rounded-lg bg-[#10b981] text-white text-xs md:text-sm" style={{ fontFamily: body }}>
+          <div className="px-3 md:px-4 py-1.5 md:py-2 rounded-lg bg-accent-typography text-white text-xs md:text-sm" style={{ fontFamily: body }}>
             Add to Cart
           </div>
         </div>
@@ -356,7 +317,7 @@ function ContextCanvas({
   if (context === 'blog') {
     return (
       <div className="space-y-3 md:space-y-4">
-        <div className="text-[10px] md:text-xs text-[#888] font-mono">JULY 5, 2026</div>
+        <div className="text-[10px] md:text-xs text-vault-text font-mono">JULY 5, 2026</div>
         <div className="text-xl md:text-3xl font-bold text-vault-text-bright leading-tight" style={{ fontFamily: heading }}>
           <span
             contentEditable
@@ -367,7 +328,7 @@ function ContextCanvas({
             {getText('blog', 'heading', 'The Future of Design Systems')}
           </span>
         </div>
-        <div className="text-xs md:text-base text-[#888] leading-relaxed" style={{ fontFamily: body }}>
+        <div className="text-xs md:text-base text-vault-text leading-relaxed" style={{ fontFamily: body }}>
           <span
             contentEditable
             suppressContentEditableWarning
@@ -377,7 +338,7 @@ function ContextCanvas({
             {getText('blog', 'body', 'As design tools evolve, so must our approach to building scalable, maintainable systems. The intersection of code and creativity is where the magic happens.')}
           </span>
         </div>
-        <div className="text-[10px] md:text-sm text-[#888]" style={{ fontFamily: body }}>5 min read</div>
+        <div className="text-[10px] md:text-sm text-vault-text" style={{ fontFamily: body }}>5 min read</div>
       </div>
     )
   }
@@ -385,7 +346,7 @@ function ContextCanvas({
   if (context === 'landing') {
     return (
       <div className="space-y-4 md:space-y-6">
-        <div className="text-[10px] md:text-xs text-[#888] font-mono">PRICING</div>
+        <div className="text-[10px] md:text-xs text-vault-text font-mono">PRICING</div>
         <div className="text-xl md:text-3xl font-bold text-vault-text-bright leading-tight" style={{ fontFamily: heading }}>
           <span
             contentEditable
@@ -398,8 +359,8 @@ function ContextCanvas({
         </div>
         <div className="grid grid-cols-3 gap-2 md:gap-3">
           {['Free', 'Pro', 'Team'].map((tier, i) => (
-            <div key={tier} className={`p-3 md:p-4 rounded-xl ${i === 1 ? 'bg-[rgba(16,185,129,0.1)] border border-[rgba(16,185,129,0.2)]' : 'bg-[rgba(255,255,255,0.03)]'}`}>
-              <div className="text-xs text-[#888] mb-1" style={{ fontFamily: body }}>{tier}</div>
+            <div key={tier} className={`p-3 md:p-4 rounded-xl ${i === 1 ? 'bg-accent-typography/10 border border-accent-typography/20' : 'bg-vault-surface'}`}>
+              <div className="text-xs text-vault-text mb-1" style={{ fontFamily: body }}>{tier}</div>
               <div className="text-lg md:text-xl font-bold text-vault-text-bright" style={{ fontFamily: heading }}>${[0, 29, 99][i]}/mo</div>
             </div>
           ))}
@@ -411,7 +372,7 @@ function ContextCanvas({
   if (context === 'testimonial') {
     return (
       <div className="space-y-3 md:space-y-4">
-        <div className="text-3xl md:text-5xl text-[#666] leading-none" style={{ fontFamily: heading }}>&ldquo;</div>
+        <div className="text-3xl md:text-5xl text-vault-border leading-none" style={{ fontFamily: heading }}>&ldquo;</div>
         <div className="text-base md:text-xl text-vault-text-bright leading-relaxed italic" style={{ fontFamily: body }}>
           <span
             contentEditable
@@ -423,10 +384,10 @@ function ContextCanvas({
           </span>
         </div>
         <div className="flex items-center gap-3 pt-2">
-          <div className="w-8 h-8 rounded-full bg-[rgba(255,255,255,0.1)]" />
+          <div className="w-8 h-8 rounded-full bg-vault-surface" />
           <div>
             <div className="text-xs font-bold text-vault-text-bright" style={{ fontFamily: heading }}>Sarah Chen</div>
-            <div className="text-[10px] text-[#888]" style={{ fontFamily: body }}>Design Director, Acme</div>
+            <div className="text-[10px] text-vault-text" style={{ fontFamily: body }}>Design Director, Acme</div>
           </div>
         </div>
       </div>
@@ -436,7 +397,7 @@ function ContextCanvas({
   if (context === 'email') {
     return (
       <div className="space-y-3 md:space-y-4">
-        <div className="text-xs text-[#888] font-mono">FROM:hello@acme.com</div>
+        <div className="text-xs text-vault-text font-mono">FROM:hello@acme.com</div>
         <div className="text-lg md:text-2xl font-bold text-vault-text-bright" style={{ fontFamily: heading }}>
           <span
             contentEditable
@@ -447,7 +408,7 @@ function ContextCanvas({
             {getText('email', 'heading', 'Your weekly design digest')}
           </span>
         </div>
-        <div className="text-xs md:text-sm text-[#888] leading-relaxed" style={{ fontFamily: body }}>
+        <div className="text-xs md:text-sm text-vault-text leading-relaxed" style={{ fontFamily: body }}>
           <span
             contentEditable
             suppressContentEditableWarning
@@ -457,7 +418,7 @@ function ContextCanvas({
             {getText('email', 'body', 'Hi there, here are this week\'s top design trends and resources curated just for you.')}
           </span>
         </div>
-        <div className="inline-block px-4 py-2 rounded-lg bg-[#10b981] text-white text-xs" style={{ fontFamily: body }}>Read More</div>
+        <div className="inline-block px-4 py-2 rounded-lg bg-accent-typography text-white text-xs" style={{ fontFamily: body }}>Read More</div>
       </div>
     )
   }
@@ -475,11 +436,11 @@ function ContextCanvas({
             {getText('resume', 'heading', 'Alex Rivera')}
           </span>
         </div>
-        <div className="text-[10px] md:text-xs text-[#888] font-mono">SENIOR PRODUCT DESIGNER</div>
+        <div className="text-[10px] md:text-xs text-vault-text font-mono">SENIOR PRODUCT DESIGNER</div>
         <div className="space-y-2">
           {['Lead redesign of SaaS dashboard — 40% increase in engagement', 'Built and mentored a team of 5 designers', 'Shipped 12 major features in 18 months'].map((item, i) => (
-            <div key={i} className="flex items-start gap-2 text-[10px] md:text-xs text-[#888]" style={{ fontFamily: body }}>
-              <span className="text-[#10b981] mt-0.5">&#x2022;</span>
+            <div key={i} className="flex items-start gap-2 text-[10px] md:text-xs text-vault-text" style={{ fontFamily: body }}>
+              <span className="text-accent-typography mt-0.5">&#x2022;</span>
               {item}
             </div>
           ))}
@@ -502,8 +463,8 @@ function ContextCanvas({
       </div>
       <div className="grid grid-cols-2 gap-2 md:gap-3">
         {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="p-3 md:p-4 rounded-xl bg-[rgba(255,255,255,0.03)]">
-            <div className="text-[10px] md:text-xs text-[#888]" style={{ fontFamily: body }}>Revenue</div>
+          <div key={i} className="p-3 md:p-4 rounded-xl bg-vault-surface">
+            <div className="text-[10px] md:text-xs text-vault-text" style={{ fontFamily: body }}>Revenue</div>
             <div className="text-base md:text-xl font-bold text-vault-text-bright mt-1" style={{ fontFamily: heading }}>
               ${(i * 1234).toLocaleString()}
             </div>

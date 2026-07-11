@@ -36,11 +36,12 @@ export default function App() {
     <SmoothScroll>
       <MetaTags />
 
+      <CustomCursor />
+
       {!isLoaded && <LoadingSequence onComplete={handleLoadComplete} />}
 
       {isLoaded && (
         <>
-          <CustomCursor />
           <AuroraBackground />
           <FilmGrain />
 

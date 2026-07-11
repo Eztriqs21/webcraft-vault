@@ -5,8 +5,8 @@ export function CustomCursor() {
   const ringRef = useRef<HTMLDivElement>(null)
   const dotRef = useRef<HTMLDivElement>(null)
   const trailRef = useRef<HTMLCanvasElement>(null)
-  const mouse = useRef({ x: 0, y: 0 })
-  const ringPos = useRef({ x: 0, y: 0 })
+  const mouse = useRef({ x: typeof window !== 'undefined' ? window.innerWidth / 2 : 0, y: typeof window !== 'undefined' ? window.innerHeight / 2 : 0 })
+  const ringPos = useRef({ x: typeof window !== 'undefined' ? window.innerWidth / 2 : 0, y: typeof window !== 'undefined' ? window.innerHeight / 2 : 0 })
   const magneticTarget = useRef<{ x: number; y: number } | null>(null)
   const trail = useRef<Array<{ x: number; y: number; life: number }>>([])
   const prefersReducedMotion = useReducedMotion()
@@ -163,7 +163,6 @@ export function CustomCursor() {
         className="fixed top-0 left-0 w-[60px] h-[60px] rounded-full pointer-events-none"
         style={{
           border: '1.5px solid #6366f1',
-          opacity: 0,
           zIndex: 10000,
           willChange: 'transform',
         }}
@@ -173,8 +172,6 @@ export function CustomCursor() {
         className="fixed top-0 left-0 w-[8px] h-[8px] rounded-full pointer-events-none"
         style={{
           backgroundColor: '#6366f1',
-          opacity: 0,
-          transition: 'opacity 0.3s',
           zIndex: 10001,
           willChange: 'transform',
         }}

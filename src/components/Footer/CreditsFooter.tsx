@@ -82,8 +82,8 @@ function Starfield() {
       x: Math.random(),
       y: Math.random(),
       size: Math.random() * 2 + 0.5,
-      vx: (Math.random() - 0.5) * 0.0003,
-      vy: (Math.random() - 0.5) * 0.0003,
+      vx: (Math.random() - 0.5) * 0.003,
+      vy: (Math.random() - 0.5) * 0.003,
       brightness: Math.random() * 0.5 + 0.5,
       twinkleSpeed: Math.random() * 0.02 + 0.005,
       twinklePhase: Math.random() * Math.PI * 2,
@@ -102,22 +102,18 @@ function Starfield() {
     observer.observe(canvas)
 
     const animate = (now: number) => {
-      if (isVisibleRef.current && !prefersReducedMotion) {
-        if (now - lastFrame >= 33) {
+      if (isVisibleRef.current) {
+        const newW = canvas.offsetWidth
+        const newH = canvas.offsetHeight
+        if (newW !== cachedW || newH !== cachedH) {
+          cachedW = newW
+          cachedH = newH
+          canvas.width = newW
+          canvas.height = newH
+        }
+
+        if (!prefersReducedMotion && now - lastFrame >= 16) {
           lastFrame = now
-
-          const newW = canvas.offsetWidth
-          const newH = canvas.offsetHeight
-          if (newW !== cachedW || newH !== cachedH) {
-            cachedW = newW
-            cachedH = newH
-            canvas.width = newW
-            canvas.height = newH
-          }
-
-          ctx.fillStyle = '#030303'
-          ctx.fillRect(0, 0, canvas.width, canvas.height)
-
           const time = now * 0.001
           stars.forEach((star) => {
             star.x += star.vx
@@ -126,18 +122,20 @@ function Starfield() {
             if (star.x > 1.05) star.x = -0.05
             if (star.y < -0.05) star.y = 1.05
             if (star.y > 1.05) star.y = -0.05
-
             const twinkle = Math.sin(time * star.twinkleSpeed * 60 + star.twinklePhase) * 0.3 + 0.7
             const alpha = star.brightness * twinkle * 0.7
-
             ctx.beginPath()
-            ctx.arc(
-              star.x * canvas.width,
-              star.y * canvas.height,
-              star.size * star.depth,
-              0,
-              Math.PI * 2
-            )
+            ctx.arc(star.x * canvas.width, star.y * canvas.height, star.size * star.depth, 0, Math.PI * 2)
+            ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`
+            ctx.fill()
+          })
+        } else if (prefersReducedMotion && now - lastFrame === 0) {
+          ctx.fillStyle = '#030303'
+          ctx.fillRect(0, 0, canvas.width, canvas.height)
+          stars.forEach((star) => {
+            const alpha = star.brightness * 0.7
+            ctx.beginPath()
+            ctx.arc(star.x * canvas.width, star.y * canvas.height, star.size * star.depth, 0, Math.PI * 2)
             ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`
             ctx.fill()
           })
